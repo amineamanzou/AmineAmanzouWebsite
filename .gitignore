@@ -1,0 +1,22 @@
+.DS_Store
+
+# Local runtime material.
+.env
+.env.*
+!.env.example
+
+# WordPress mutable state must never be versioned here.
+wp-content/
+**/wp-content/
+*.sql
+*.sql.gz
+*.dump
+*.tar
+*.tar.gz
+*.tgz
+exports/
+backups/
+
+# Local tooling output.
+.cache/
+tmp/

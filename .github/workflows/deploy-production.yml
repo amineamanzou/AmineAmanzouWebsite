@@ -1,0 +1,186 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: amineamanzou-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/amineamanzou-website
+  LOCAL_IMAGE_TAG: amineamanzou-website:${{ github.sha }}
+
+jobs:
+  build:
+    name: Build and publish WordPress runtime
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      security-events: write
+      attestations: write
+      artifact-metadata: write
+    outputs:
+      image: ${{ steps.release.outputs.image }}
+      digest: ${{ steps.push.outputs.digest }}
+      image_ref: ${{ steps.release.outputs.image_ref }}
+    steps:
+      - name: Checkout app
+        uses: actions/checkout@v7
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+
+      - name: Docker image metadata
+        id: docker_meta
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=main
+            type=raw,value=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.title=Amine Amanzou Website
+            org.opencontainers.image.description=WordPress runtime for amineamanzou.fr
+            org.opencontainers.image.url=https://amineamanzou.fr
+
+      - name: Build local image for advisory scan
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
+        with:
+          context: .
+          load: true
+          tags: ${{ env.LOCAL_IMAGE_TAG }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          build-args: |
+            VCS_REF=${{ github.sha }}
+
+      - name: Trivy SARIF advisory scan
+        id: trivy_sarif
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.LOCAL_IMAGE_TAG }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: MEDIUM,HIGH,CRITICAL
+          vuln-type: os,library
+          exit-code: "0"
+
+      - name: Upload Trivy SARIF to code scanning
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: Upload Trivy SARIF artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: trivy-results
+          path: trivy-results.sarif
+          if-no-files-found: error
+
+      - name: Generate image SBOM
+        id: image_sbom
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.LOCAL_IMAGE_TAG }}
+          format: cyclonedx
+          output: image-sbom.cdx.json
+          severity: MEDIUM,HIGH,CRITICAL
+          vuln-type: os,library
+          exit-code: "0"
+
+      - name: Upload image SBOM artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: image-sbom-cyclonedx
+          path: image-sbom.cdx.json
+          if-no-files-found: error
+
+      - name: Login to GHCR
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push release candidate
+        id: push
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          provenance: true
+          sbom: true
+          build-args: |
+            VCS_REF=${{ github.sha }}
+
+      - name: Trivy pushed digest advisory scan
+        id: trivy_pushed_digest
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        continue-on-error: true
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+          format: table
+          severity: MEDIUM,HIGH,CRITICAL
+          vuln-type: os,library
+          exit-code: "1"
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
+
+      - name: Sign pushed digest
+        id: cosign_sign
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+          IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+        run: |
+          test -n "${{ steps.push.outputs.digest }}"
+          cosign sign --yes "$IMAGE_REF"
+
+      - name: Verify pushed digest signature
+        id: cosign_verify
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+          IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+        run: |
+          cosign verify "$IMAGE_REF" \
+            --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp="^https://github.com/${{ github.repository }}/\\.github/workflows/deploy-production\\.yml@refs/.+$"
+
+      - name: Attest image provenance
+        id: attest_provenance
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-name: ${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
+      - name: Attest image SBOM
+        id: attest_sbom
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-name: ${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          sbom-path: image-sbom.cdx.json
+          push-to-registry: true
+
+      - name: Release digest
+        id: release
+        run: |
+          test -n "${{ steps.push.outputs.digest }}"
+          echo "image=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "image_ref=${IMAGE_NAME}@${{ steps.push.outputs.digest }}" >> "$GITHUB_OUTPUT"
+          echo "Published signed digest ${IMAGE_NAME}@${{ steps.push.outputs.digest }}"
