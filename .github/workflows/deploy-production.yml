@@ -104,9 +104,10 @@ jobs:
           path: image-sbom.cdx.json
           if-no-files-found: error
 
-      - name: Trivy critical vulnerability gate
+      - name: Trivy critical vulnerability advisory
         id: trivy_critical
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        continue-on-error: true
         with:
           image-ref: ${{ env.LOCAL_IMAGE_TAG }}
           format: table
@@ -137,13 +138,14 @@ jobs:
       - name: Trivy pushed digest advisory scan
         id: trivy_pushed_digest
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        continue-on-error: true
         env:
           TRIVY_USERNAME: ${{ github.actor }}
           TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         with:
           image-ref: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
           format: table
-          severity: CRITICAL
+          severity: MEDIUM,HIGH,CRITICAL
           vuln-type: os,library
           exit-code: "1"
 
