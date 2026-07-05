@@ -1,6 +1,7 @@
 name: Deploy Production
 
 on:
+  pull_request:
   push:
     branches: [main]
   workflow_dispatch:
@@ -20,7 +21,7 @@ jobs:
   build:
     name: Build and publish Astro runtime
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     permissions:
       contents: read
       packages: write
@@ -136,6 +137,7 @@ jobs:
           exit-code: "1"
 
       - name: Login to GHCR
+        if: github.ref == 'refs/heads/main'
         uses: docker/login-action@c99871dec2022cc055c062a10cc1a1310835ceb4 # v4.3.0
         with:
           registry: ghcr.io
@@ -143,6 +145,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push release candidate
+        if: github.ref == 'refs/heads/main'
         id: push
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
@@ -158,6 +161,7 @@ jobs:
             VCS_REF=${{ github.sha }}
 
       - name: Trivy pushed digest advisory scan
+        if: github.ref == 'refs/heads/main'
         id: trivy_pushed_digest
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         continue-on-error: true
@@ -172,9 +176,11 @@ jobs:
           exit-code: "1"
 
       - name: Install Cosign
+        if: github.ref == 'refs/heads/main'
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Sign pushed digest
+        if: github.ref == 'refs/heads/main'
         id: cosign_sign
         env:
           COSIGN_EXPERIMENTAL: "1"
@@ -184,6 +190,7 @@ jobs:
           cosign sign --yes "$IMAGE_REF"
 
       - name: Verify pushed digest signature
+        if: github.ref == 'refs/heads/main'
         id: cosign_verify
         env:
           COSIGN_EXPERIMENTAL: "1"
@@ -194,6 +201,7 @@ jobs:
             --certificate-identity-regexp="^https://github.com/${{ github.repository }}/\\.github/workflows/deploy-production\\.yml@refs/.+$"
 
       - name: Attest image provenance
+        if: github.ref == 'refs/heads/main'
         id: attest_provenance
         uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
@@ -202,6 +210,7 @@ jobs:
           push-to-registry: true
 
       - name: Attest image SBOM
+        if: github.ref == 'refs/heads/main'
         id: attest_sbom
         uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
@@ -211,6 +220,7 @@ jobs:
           push-to-registry: true
 
       - name: Verify image provenance attestation
+        if: github.ref == 'refs/heads/main'
         id: verify_attestation
         env:
           GH_TOKEN: ${{ github.token }}
@@ -224,9 +234,39 @@ jobs:
             --predicate-type "https://slsa.dev/provenance/v1"
 
       - name: Release digest
+        if: github.ref == 'refs/heads/main'
         id: release
         run: |
           test -n "${{ steps.push.outputs.digest }}"
           echo "image=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
           echo "image_ref=${IMAGE_NAME}@${{ steps.push.outputs.digest }}" >> "$GITHUB_OUTPUT"
           echo "Published signed digest ${IMAGE_NAME}@${{ steps.push.outputs.digest }}"
+
+      - name: Emit production CI/CD event
+        if: always() && github.ref == 'refs/heads/main'
+        env:
+          IMAGE_DIGEST: ${{ steps.push.outputs.digest }}
+          IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+          TRIVY_STATUS: ${{ steps.trivy_pushed_digest.outcome || steps.trivy_critical.outcome || 'unknown' }}
+          COSIGN_STATUS: ${{ steps.cosign_verify.outcome || steps.cosign_sign.outcome || 'unknown' }}
+          ATTESTATION_STATUS: ${{ steps.verify_attestation.outcome || steps.attest_provenance.outcome || 'unknown' }}
+        run: |
+          node scripts/qa/emit-cicd-event.mjs \
+            --kind production-deploy \
+            --status completed \
+            --conclusion "${{ job.status }}" \
+            --image-name "${IMAGE_NAME}" \
+            --image-digest "${IMAGE_DIGEST}" \
+            --image-ref "${IMAGE_REF}" \
+            --check trivy="${TRIVY_STATUS}" \
+            --check cosign="${COSIGN_STATUS}" \
+            --check attestation="${ATTESTATION_STATUS}" \
+            --out cicd-event-production.json
+
+      - name: Upload production CI/CD event
+        if: always() && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v7
+        with:
+          name: cicd-event-production
+          path: cicd-event-production.json
+          if-no-files-found: error

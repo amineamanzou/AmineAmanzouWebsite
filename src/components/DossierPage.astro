@@ -1,0 +1,112 @@
+---
+import SiteFooter from "./SiteFooter.astro";
+import Topbar from "./Topbar.astro";
+import {
+  downloads,
+  education,
+  experiences,
+  experiencesEn,
+  localized,
+  type Locale,
+} from "../data/site";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+type Props = {
+  locale?: Locale;
+};
+
+const { locale = "fr" } = Astro.props;
+const copy = localized[locale];
+const download = downloads[locale];
+const pagePath = locale === "fr" ? "/dossier/" : "/en/dossier/";
+const pageExperiences = locale === "fr" ? experiences : experiencesEn;
+---
+
+<BaseLayout
+  title={copy.dossier.title}
+  description={copy.dossier.description}
+  canonicalPath={pagePath}
+  alternates={[
+    { locale: "fr", path: "/dossier/" },
+    { locale: "en", path: "/en/dossier/" },
+  ]}
+  bodyClass="cv-page"
+  locale={locale}
+>
+  <Topbar currentPath={pagePath} locale={locale} />
+
+  <main class="page-main">
+    <section class="page-hero section-shell">
+      <div data-reveal>
+        <p class="role-line">{copy.role}</p>
+        <h1>{copy.dossier.heading}</h1>
+        <p>{copy.dossier.intro}</p>
+      </div>
+      <div class="download-actions compact" data-reveal>
+        <a class="download-link" href={download.href} target="_blank" rel="noreferrer">
+          <strong>{download.label}</strong>
+          <span>{download.meta}</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section-shell timeline-section" aria-labelledby="experience-title">
+      <div class="section-heading" data-reveal>
+        <h2 id="experience-title">{copy.dossier.experienceTitle}</h2>
+        <p>{copy.dossier.experienceBody}</p>
+      </div>
+      <div class="timeline">
+        {pageExperiences.map((experience, index) => (
+          <article class="timeline-entry" data-reveal style={`--i: ${index}`}>
+            <div class="timeline-meta">
+              <span>{experience.period}</span>
+              <strong>{experience.company}</strong>
+            </div>
+            <div class="timeline-content">
+              <h3>{experience.role}</h3>
+              <p>{experience.summary}</p>
+              <div class="highlight-grid">
+                {experience.highlights.map((highlight) => (
+                  <section>
+                    <h4>{highlight.title}</h4>
+                    <p>{highlight.body}</p>
+                  </section>
+                ))}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section-shell education-section" aria-labelledby="education-title">
+      <div class="section-heading" data-reveal>
+        <h2 id="education-title">{copy.dossier.educationTitle}</h2>
+        <p>{copy.dossier.educationBody}</p>
+      </div>
+      <div class="education-grid">
+        {education.map((item, index) => (
+          item.href ? (
+            <a class="education-card is-clickable" href={item.href} target="_blank" rel="noreferrer" data-reveal style={`--i: ${index}`}>
+              <img src={item.icon} alt="" loading="lazy" decoding="async" />
+              <span>{item.period}</span>
+              <h3>{item.title}</h3>
+              <strong>{item.issuer}</strong>
+              {item.body && <p>{item.body}</p>}
+            </a>
+          ) : (
+            <article class="education-card" data-reveal style={`--i: ${index}`}>
+              <img src={item.icon} alt="" loading="lazy" decoding="async" />
+              <span>{item.period}</span>
+              <h3>{item.title}</h3>
+              <strong>{item.issuer}</strong>
+              {item.body && <p>{item.body}</p>}
+            </article>
+          )
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <SiteFooter locale={locale} />
+</BaseLayout>

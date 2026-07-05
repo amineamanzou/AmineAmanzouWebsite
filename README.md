@@ -5,7 +5,7 @@ Static Astro portfolio for `amineamanzou.fr`.
 This public repository contains the complete public website surface:
 
 - Astro source code and typed portfolio content
-- public profile image and PDF CV downloads
+- public profile images and PDF capability statement downloads
 - Caddy static runtime packaged as a Docker image
 - GitHub Actions workflows that check, scan, sign and publish the image
 
@@ -51,3 +51,8 @@ ghcr.io/amineamanzou/amineamanzou-website:main
 
 Runtime promotion, routing and host-level deployment are managed by private
 infrastructure outside this repository.
+
+The production and security workflows also publish neutral JSON CI/CD event
+artifacts (`cicd-event-production` and `cicd-event-security`). These artifacts
+describe the public delivery contract, such as commit, workflow run, image
+digest and check conclusions, without embedding private runtime topology.

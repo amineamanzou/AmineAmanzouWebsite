@@ -1,0 +1,36 @@
+---
+import { getCollection } from "astro:content";
+import ArticlePage from "../../components/ArticlePage.astro";
+
+export async function getStaticPaths() {
+  const articles = await getCollection("articles");
+  const frenchArticles = articles.filter((article) => article.data.locale === "fr");
+
+  return frenchArticles.map((article) => {
+    const englishPeer = articles.find(
+      (candidate) =>
+        candidate.data.locale === "en" &&
+        candidate.data.translationKey === article.data.translationKey,
+    );
+
+    return {
+      params: { slug: article.data.articleSlug },
+      props: {
+        article,
+        alternates: [
+          { locale: "fr", path: `/blog/${article.data.articleSlug}/` },
+          ...(englishPeer
+            ? [{ locale: "en" as const, path: `/en/blog/${englishPeer.data.articleSlug}/` }]
+            : []),
+        ],
+        alternateHref: englishPeer ? `/en/blog/${englishPeer.data.articleSlug}/` : "/en/blog/",
+      },
+    };
+  });
+}
+
+const { article, alternateHref, alternates } = Astro.props;
+const articleAlternates = alternates as Array<{ locale: "fr" | "en"; path: string }>;
+---
+
+<ArticlePage article={article} alternateHref={alternateHref} alternates={articleAlternates} />
