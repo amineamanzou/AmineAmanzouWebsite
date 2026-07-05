@@ -18,6 +18,7 @@ const locale = article.data.locale;
 const copy = localized[locale];
 const pagePath = getArticlePath(article);
 const { Content } = await render(article);
+const hasSource = Boolean(article.data.sourceUrl);
 ---
 
 <BaseLayout
@@ -48,9 +49,6 @@ const { Content } = await render(article);
         <div class="article-meta">
           <span>{formatArticleDate(article.data.publishedAt, locale)}</span>
           <span>{article.data.readTime}</span>
-          {article.data.sourceUrl && (
-            <a href={article.data.sourceUrl} target="_blank" rel="noreferrer">{copy.blog.sourceLabel}</a>
-          )}
         </div>
       </header>
 
@@ -65,7 +63,22 @@ const { Content } = await render(article);
         />
       )}
 
-      <div class="article-content" data-reveal>
+      {hasSource && article.data.sourceUrl && (
+        <aside class="article-source">
+          <div class="article-source-label" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+            <strong>{article.data.articleSlug}.linkedin</strong>
+          </div>
+          <p>{copy.blog.sourceText}</p>
+          <a class="button button-primary" href={article.data.sourceUrl} target="_blank" rel="noreferrer">
+            {copy.blog.sourceCta}
+          </a>
+        </aside>
+      )}
+
+      <div class="article-content">
         <Content />
       </div>
     </article>

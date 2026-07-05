@@ -44,8 +44,8 @@ const articleCards = getArticleCards(await getCollection("articles"), locale).sl
           <a class="button button-secondary" href={`mailto:${profile.email}`}>{copy.hero.secondaryCta}</a>
         </div>
       </div>
-      <aside class="portrait-card" aria-label="Profil d'Amine Amanzou" data-reveal>
-        <img src={profile.portrait} alt="Portrait d'Amine Amanzou" loading="eager" decoding="async" />
+      <aside class="portrait-card" aria-label={locale === "fr" ? "Profil d'Amine Amanzou" : "Amine Amanzou profile"} data-reveal>
+        <img src={profile.portrait} alt={locale === "fr" ? "Portrait d'Amine Amanzou" : "Portrait of Amine Amanzou"} loading="eager" decoding="async" />
         <div>
           <strong>{profile.name}</strong>
           <span>{profile.location}</span>
