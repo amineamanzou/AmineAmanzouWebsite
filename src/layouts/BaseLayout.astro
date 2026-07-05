@@ -1,0 +1,36 @@
+---
+import "../styles/global.css";
+import { canonical } from "../data/seo";
+
+type Props = {
+  title: string;
+  description: string;
+  path: string;
+  bodyClass?: string;
+  noindex?: boolean;
+};
+
+const { title, description, path, bodyClass, noindex = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <link rel="canonical" href={canonical(path)} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical(path)} />
+    <meta property="og:image" content={canonical("/images/amine-amanzou-profile.jpeg")} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <slot />
+  </body>
+</html>

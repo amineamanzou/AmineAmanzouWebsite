@@ -1,0 +1,27 @@
+---
+import { navigation, profile } from "../data/site";
+
+type Props = {
+  currentPath: string;
+};
+
+const { currentPath } = Astro.props;
+---
+
+<header class="topbar">
+  <a class="brand" href="/" aria-label="Retour à l'accueil">
+    <span class="brand-mark" aria-hidden="true">AA</span>
+    <span>
+      <strong>{profile.name}</strong>
+      <small>SRE · Observabilité</small>
+    </span>
+  </a>
+  <nav class="nav" aria-label="Navigation principale">
+    {navigation.map((item) => (
+      <a href={item.href} aria-current={currentPath === item.href ? "page" : undefined}>
+        {item.label}
+      </a>
+    ))}
+  </nav>
+  <a class="topbar-cta" href="mailto:amineamanzou@gmail.com">Me contacter</a>
+</header>

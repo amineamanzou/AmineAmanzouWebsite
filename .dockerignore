@@ -5,12 +5,19 @@
 .env
 .env.*
 
+node_modules
+dist
+.astro
+.cache
+tmp
+artifacts
+coverage
+
 wp-content
 **/wp-content
+wordpress
 exports
 backups
-tmp
-.cache
 
 *.sql
 *.sql.gz
