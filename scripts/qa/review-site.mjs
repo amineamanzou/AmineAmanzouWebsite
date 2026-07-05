@@ -32,7 +32,6 @@ const requiredHomeText = [
   "Ylio",
   "Orange",
   "Voir le dossier",
-  "Me contacter",
   "Télécharger le dossier de compétence",
 ];
 
@@ -115,6 +114,8 @@ assert(home.includes('rel="canonical" href="https://amineamanzou.fr/"'), "Home m
 assert(home.includes('hreflang="fr" href="https://amineamanzou.fr/"'), "Home missing FR hreflang");
 assert(home.includes('hreflang="en" href="https://amineamanzou.fr/en/"'), "Home missing EN hreflang");
 assert(home.includes('hreflang="x-default" href="https://amineamanzou.fr/"'), "Home missing x-default hreflang");
+assert(home.includes("theme-toggle"), "Home missing theme toggle");
+assert(!home.includes("topbar-cta"), "Home should not render the legacy topbar CTA");
 assert(blogArticle.includes('property="og:type" content="article"'), "Article missing OG article type");
 assert(blogArticle.includes('property="article:published_time"'), "Article missing published time metadata");
 assert(robots.includes("Sitemap: https://amineamanzou.fr/sitemap.xml"), "Robots missing sitemap");

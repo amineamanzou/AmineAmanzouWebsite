@@ -169,7 +169,6 @@ export const localized = {
     meta: home.meta,
     role: profile.role,
     brandSubtitle: "SRE · Observabilité",
-    topbarCta: "Me contacter",
     hero: {
       title: home.hero.title,
       body:
@@ -252,7 +251,6 @@ export const localized = {
     },
     role: profile.roleEn,
     brandSubtitle: "SRE · Observability",
-    topbarCta: "Contact me",
     hero: {
       title: "Actionable observability for critical systems.",
       body:
