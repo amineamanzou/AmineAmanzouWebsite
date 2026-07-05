@@ -4,6 +4,7 @@ import Topbar from "./Topbar.astro";
 import {
   downloads,
   education,
+  educationEn,
   experiences,
   experiencesEn,
   localized,
@@ -20,6 +21,7 @@ const copy = localized[locale];
 const download = downloads[locale];
 const pagePath = locale === "fr" ? "/dossier/" : "/en/dossier/";
 const pageExperiences = locale === "fr" ? experiences : experiencesEn;
+const pageEducation = locale === "fr" ? education : educationEn;
 ---
 
 <BaseLayout
@@ -85,7 +87,7 @@ const pageExperiences = locale === "fr" ? experiences : experiencesEn;
         <p>{copy.dossier.educationBody}</p>
       </div>
       <div class="education-grid">
-        {education.map((item, index) => (
+        {pageEducation.map((item, index) => (
           item.href ? (
             <a class="education-card is-clickable" href={item.href} target="_blank" rel="noreferrer" data-reveal style={`--i: ${index}`}>
               <img src={item.icon} alt="" loading="lazy" decoding="async" />

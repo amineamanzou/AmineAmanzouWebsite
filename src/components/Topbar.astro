@@ -11,7 +11,12 @@ const { currentPath, locale = "fr", alternateHref } = Astro.props;
 const switchTarget = alternateHref ?? alternatePath(currentPath, locale);
 const switchCopy = languageSwitch[locale];
 const copy = localized[locale];
-const isContact = currentPath.endsWith("/contact/");
+const menuId = `site-menu-${locale}`;
+const menuLabel = locale === "fr" ? "Menu" : "Menu";
+const menuOpenLabel = locale === "fr" ? "Ouvrir le menu" : "Open menu";
+const themeToggleLabel = locale === "fr" ? "Changer de thème" : "Toggle color theme";
+const localeTarget = locale === "fr" ? "en" : "fr";
+const localePersistScript = `try{localStorage.setItem('amineamanzou-locale','${localeTarget}')}catch(e){}`;
 ---
 
 <header class="topbar">
@@ -21,28 +26,127 @@ const isContact = currentPath.endsWith("/contact/");
     </span>
     <span>
       <strong>{profile.name}</strong>
-      <small>SRE · Observabilité</small>
+      <small>{copy.brandSubtitle}</small>
     </span>
   </a>
-  <nav class="nav" aria-label={locale === "fr" ? "Navigation principale" : "Primary navigation"}>
-    {navigation[locale].map((item) => (
-      <a href={item.href} aria-current={currentPath === item.href ? "page" : undefined}>
-        {item.label}
-      </a>
-    ))}
-  </nav>
   <div class="topbar-actions">
-    <a class="language-toggle" href={switchTarget} aria-label={switchCopy.aria}>
+    <a class="language-toggle" href={switchTarget} aria-label={switchCopy.aria} data-locale-target={localeTarget} onclick={localePersistScript}>
       <span aria-hidden="true">{switchCopy.flag}</span>
       <strong>{switchCopy.label}</strong>
     </a>
-    <a
-      class:list={["topbar-cta", isContact && "is-placeholder"]}
-      href="mailto:amineamanzou@gmail.com"
-      aria-hidden={isContact ? "true" : undefined}
-      tabindex={isContact ? -1 : undefined}
-    >
-      {copy.topbarCta}
-    </a>
+    <button class="theme-toggle" type="button" aria-label={themeToggleLabel} aria-pressed="false">
+      <span class="theme-icon theme-icon-sun" aria-hidden="true">☀</span>
+      <span class="theme-icon theme-icon-moon" aria-hidden="true">☾</span>
+    </button>
+    <button class="menu-toggle" type="button" aria-label={menuOpenLabel} aria-expanded="false" aria-controls={menuId}>
+      <span>{menuLabel}</span>
+      <i aria-hidden="true"></i>
+    </button>
+  </div>
+  <div class="nav-panel" id={menuId}>
+    <nav class="nav" aria-label={locale === "fr" ? "Navigation principale" : "Primary navigation"}>
+      {navigation[locale].map((item) => (
+        <a href={item.href} aria-current={currentPath === item.href ? "page" : undefined}>
+          {item.label}
+        </a>
+      ))}
+    </nav>
   </div>
 </header>
+
+<script is:inline>
+  (() => {
+    const topbar = document.currentScript?.previousElementSibling;
+    if (!(topbar instanceof HTMLElement)) return;
+
+    const button = topbar.querySelector(".menu-toggle");
+    const panel = topbar.querySelector(".nav-panel");
+    const themeButton = topbar.querySelector(".theme-toggle");
+    const languageToggle = topbar.querySelector(".language-toggle");
+    if (!(button instanceof HTMLButtonElement) || !(panel instanceof HTMLElement)) return;
+
+    const compactQuery = window.matchMedia("(max-width: 920px)");
+    const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+    const themeStorageKey = "amineamanzou-theme";
+    const localeStorageKey = "amineamanzou-locale";
+    const readStorage = (key) => {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    };
+    const writeStorage = (key, value) => {
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        return;
+      }
+    };
+
+    const getTheme = () => {
+      const storedTheme = readStorage(themeStorageKey);
+      if (storedTheme === "light" || storedTheme === "dark") return storedTheme;
+      return systemDark.matches ? "dark" : "light";
+    };
+
+    const syncThemeButton = () => {
+      if (!(themeButton instanceof HTMLButtonElement)) return;
+      const theme = document.documentElement.dataset.theme || getTheme();
+      themeButton.setAttribute("aria-pressed", String(theme === "dark"));
+    };
+
+    const setTheme = (theme, persist) => {
+      document.documentElement.dataset.theme = theme;
+      if (persist) writeStorage(themeStorageKey, theme);
+      syncThemeButton();
+    };
+
+    const syncMenu = (isOpen) => {
+      const isCompact = compactQuery.matches;
+      topbar.classList.toggle("is-menu-open", isOpen && isCompact);
+      button.setAttribute("aria-expanded", String(isOpen && isCompact));
+      panel.toggleAttribute("inert", isCompact && !isOpen);
+      panel.setAttribute("aria-hidden", String(isCompact && !isOpen));
+    };
+
+    button.addEventListener("click", () => {
+      const isOpen = button.getAttribute("aria-expanded") === "true";
+      syncMenu(!isOpen);
+    });
+
+    panel.addEventListener("click", (event) => {
+      if (event.target instanceof HTMLAnchorElement) syncMenu(false);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") syncMenu(false);
+    });
+
+    compactQuery.addEventListener("change", () => syncMenu(false));
+    syncMenu(false);
+
+    if (themeButton instanceof HTMLButtonElement) {
+      syncThemeButton();
+      themeButton.addEventListener("click", () => {
+        const nextTheme = (document.documentElement.dataset.theme || getTheme()) === "dark" ? "light" : "dark";
+        setTheme(nextTheme, true);
+      });
+    }
+
+    systemDark.addEventListener("change", () => {
+      const storedTheme = readStorage(themeStorageKey);
+      if (storedTheme === "light" || storedTheme === "dark") return;
+      setTheme(systemDark.matches ? "dark" : "light", false);
+    });
+
+    if (languageToggle instanceof HTMLAnchorElement) {
+      languageToggle.addEventListener("click", () => {
+        const targetLocale = languageToggle.dataset.localeTarget;
+        if (targetLocale === "fr" || targetLocale === "en") {
+          writeStorage(localeStorageKey, targetLocale);
+        }
+      });
+    }
+  })();
+</script>

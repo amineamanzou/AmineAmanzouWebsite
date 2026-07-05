@@ -168,6 +168,7 @@ export const localized = {
   fr: {
     meta: home.meta,
     role: profile.role,
+    brandSubtitle: "SRE · Observabilité",
     topbarCta: "Me contacter",
     hero: {
       title: home.hero.title,
@@ -238,6 +239,9 @@ export const localized = {
       listLabel: "Liste des articles",
       backLabel: "Retour aux articles",
       sourceLabel: "Source LinkedIn",
+      sourceText:
+        "Commentaires, réactions et discussion restent ouverts sur le post LinkedIn d'origine.",
+      sourceCta: "Réagir sur LinkedIn",
     },
   },
   en: {
@@ -247,6 +251,7 @@ export const localized = {
         "Portfolio of Amine Amanzou, freelance Site Reliability Engineer specialized in observability, reliability, DevOps, cloud and production platforms.",
     },
     role: profile.roleEn,
+    brandSubtitle: "SRE · Observability",
     topbarCta: "Contact me",
     hero: {
       title: "Actionable observability for critical systems.",
@@ -317,6 +322,9 @@ export const localized = {
       listLabel: "Article list",
       backLabel: "Back to articles",
       sourceLabel: "LinkedIn source",
+      sourceText:
+        "Comments, reactions and discussion remain open on the original LinkedIn post.",
+      sourceCta: "React on LinkedIn",
     },
   },
 } satisfies Record<Locale, Record<string, unknown>>;
@@ -641,5 +649,70 @@ export const education: Education[] = [
     issuer: "Comptabilité et finance des entreprises",
     icon: "/images/certifications/diploma.svg",
     body: "Mention Bien.",
+  },
+];
+
+export const educationEn: Education[] = [
+  {
+    title: "ClickHouse Observability Professional Certification",
+    period: "December 2025",
+    issuer: "ClickHouse",
+    icon: "/images/certifications/clickhouse.svg",
+  },
+  {
+    title: "Kubernetes Administration Course - CKA",
+    period: "January 2024",
+    issuer: "Mumshad Mannambeth, KodeKloud",
+    icon: "/images/certifications/kubernetes.svg",
+    href: "https://training.linuxfoundation.org/certification/certified-kubernetes-administrator-cka/",
+  },
+  {
+    title: "HashiCorp Terraform Associate Course - 003",
+    period: "November 2023",
+    issuer: "Andrew Brown, ExamPro",
+    icon: "/images/certifications/terraform.svg",
+    href: "https://developer.hashicorp.com/certifications/infrastructure-automation",
+  },
+  {
+    title: "AWS Cloud Practitioner Course CLF-C02",
+    period: "September 2023",
+    issuer: "Stephane Maarek, Udemy",
+    icon: "/images/certifications/aws.svg",
+    href: "https://aws.amazon.com/certification/certified-cloud-practitioner/",
+  },
+  {
+    title: "Introduction to machine learning",
+    period: "June 2021",
+    issuer: "Camille Van Hofflen - Jungle Program",
+    icon: "/images/certifications/machine-learning.svg",
+    body:
+      "Six-week training on machine learning theory, data manipulation and model evaluation.",
+  },
+  {
+    title: "Master 2 - Information and Knowledge Systems",
+    period: "2014 - 2016",
+    issuer: "MIAGE Sorbonne - Paris 1 Panthéon-Sorbonne University",
+    icon: "/images/certifications/miage.svg",
+    body:
+      "Work-study program covering software development, architecture, information-system project management and business analysis.",
+  },
+  {
+    title: "Bachelor's degree - Information Systems Engineering",
+    period: "2013 - 2014",
+    issuer: "MIAGE Sorbonne - Paris 1 Panthéon-Sorbonne University",
+    icon: "/images/certifications/miage.svg",
+  },
+  {
+    title: "DUT Computer Science",
+    period: "2011 - 2013",
+    issuer: "IUT Fontainebleau, Paris-Est Créteil University",
+    icon: "/images/certifications/informatique.svg",
+  },
+  {
+    title: "French baccalaureate - STG",
+    period: "2007 - 2011",
+    issuer: "Accounting and corporate finance",
+    icon: "/images/certifications/diploma.svg",
+    body: "Graduated with honors.",
   },
 ];
