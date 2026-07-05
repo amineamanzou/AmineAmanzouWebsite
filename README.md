@@ -1,25 +1,39 @@
 # AmineAmanzouWebsite
 
-WordPress runtime image for `amineamanzou.fr`.
+Static Astro portfolio for `amineamanzou.fr`.
 
-This public repository contains only the application build surface:
+This public repository contains the complete public website surface:
 
-- the WordPress image definition
-- app-owned PHP and Apache config
-- app-owned WordPress mu-plugin code
-- the GitHub Actions workflow that builds, scans, signs, and publishes the image
+- Astro source code and typed portfolio content
+- public profile image and PDF CV downloads
+- Caddy static runtime packaged as a Docker image
+- GitHub Actions workflows that check, scan, sign and publish the image
 
-Runtime promotion is handled by private infrastructure outside this repository.
+The site replaces the legacy WordPress runtime. It does not contain WordPress
+state, SQL dumps, runtime secrets, private infrastructure topology or historical
+mutable uploads.
 
-Persistent WordPress state and runtime credentials are intentionally absent:
+## Local Development
 
-- MariaDB data
-- `wp-content`
-- uploads
-- SQL dumps
-- SMTP/API credentials
+Install dependencies:
 
-## Local Validation
+```bash
+npm ci
+```
+
+Run checks:
+
+```bash
+npm run check
+npm run build
+npm run review:site
+```
+
+Start a local dev server:
+
+```bash
+npm run dev
+```
 
 Build the release image:
 
@@ -29,6 +43,11 @@ docker build -t ghcr.io/amineamanzou/amineamanzou-website:local .
 
 ## Production Flow
 
-GitHub Actions builds and publishes a signed image. Runtime promotion,
-environment wiring, persistence, and host-level deployment are managed by
-private infrastructure outside this repository.
+GitHub Actions builds and publishes a signed image:
+
+```text
+ghcr.io/amineamanzou/amineamanzou-website:main
+```
+
+Runtime promotion, routing and host-level deployment are managed by private
+infrastructure outside this repository.

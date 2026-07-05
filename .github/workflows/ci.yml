@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   verify:
-    name: Verify WordPress image
+    name: Verify Astro site
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,11 +26,30 @@ jobs:
           if grep -RInE \
             --exclude-dir=.git \
             --exclude=ci.yml \
-            '(10\.42\.|178\.104\.|37\.187\.|/opt/|/Users/|ops-gw|bastion|k3s|Argo|argo|kubectl|KUBECONFIG|ssh |known_hosts|SOPS|Kopia|WEB_PROD|GHCR_READ|MARIADB_ROOT_PASSWORD|DB_PASSWORD|preprod|cluster|gateway|CIDR|route|the-unreliable-deploy|TheUnreliableInfrastructure)' \
+            --exclude=package-lock.json \
+            '(10\.42\.|178\.104\.|37\.187\.|/opt/|/Users/|ops-gw|bastion|k3s|Argo|argo|kubectl|KUBECONFIG|ssh |known_hosts|SOPS|Kopia|WEB_PROD|GHCR_READ|MARIADB_ROOT_PASSWORD|DB_PASSWORD|preprod|cluster|gateway|CIDR|the-unreliable-deploy|TheUnreliableInfrastructure)' \
             .; then
             echo "Private infrastructure marker found in public repository content" >&2
             exit 1
           fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Astro check
+        run: npm run check
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Review static site
+        run: npm run review:site
 
       - name: Build image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
@@ -40,4 +59,6 @@ jobs:
           push: false
           tags: amineamanzou-website:ci
           build-args: |
+            SITE_URL=https://amineamanzou.fr
+            BASE_PATH=/
             VCS_REF=${{ github.sha }}

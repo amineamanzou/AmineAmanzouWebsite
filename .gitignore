@@ -5,9 +5,15 @@
 .env.*
 !.env.example
 
+# Astro / Node output.
+node_modules/
+dist/
+.astro/
+
 # WordPress mutable state must never be versioned here.
 wp-content/
 **/wp-content/
+wordpress/
 *.sql
 *.sql.gz
 *.dump

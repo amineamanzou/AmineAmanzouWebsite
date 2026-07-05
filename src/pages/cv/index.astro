@@ -1,0 +1,85 @@
+---
+import SiteFooter from "../../components/SiteFooter.astro";
+import Topbar from "../../components/Topbar.astro";
+import { education, experiences, profile } from "../../data/site";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="CV | Amine Amanzou"
+  description="CV d'Amine Amanzou: SRE, observabilité, cloud, DevOps, production, formations et certifications."
+  path="/cv/"
+  bodyClass="cv-page"
+>
+  <Topbar currentPath="/cv/" />
+
+  <main class="page-main">
+    <section class="page-hero section-shell">
+      <div>
+        <p class="role-line">{profile.role}</p>
+        <h1>CV orienté production, observabilité et fiabilité.</h1>
+        <p>
+          Un parcours construit sur l'exploitation de systèmes critiques,
+          l'industrialisation cloud, la gouvernance observabilité et la réduction
+          concrète des incidents.
+        </p>
+      </div>
+      <div class="download-actions compact">
+        {profile.downloads.map((download) => (
+          <a class="download-link" href={download.href} target="_blank" rel="noreferrer">
+            <strong>{download.label}</strong>
+            <span>{download.meta}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="section-shell timeline-section" aria-labelledby="experience-title">
+      <div class="section-heading">
+        <h2 id="experience-title">Expérience professionnelle</h2>
+        <p>Les missions sont réécrites pour mettre en avant impact, responsabilité et contexte technique.</p>
+      </div>
+      <div class="timeline">
+        {experiences.map((experience) => (
+          <article class="timeline-entry">
+            <div class="timeline-meta">
+              <span>{experience.period}</span>
+              <strong>{experience.company}</strong>
+            </div>
+            <div class="timeline-content">
+              <h3>{experience.role}</h3>
+              <p>{experience.summary}</p>
+              <div class="highlight-grid">
+                {experience.highlights.map((highlight) => (
+                  <section>
+                    <h4>{highlight.title}</h4>
+                    <p>{highlight.body}</p>
+                  </section>
+                ))}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section-shell education-section" aria-labelledby="education-title">
+      <div class="section-heading">
+        <h2 id="education-title">Formation et certifications</h2>
+        <p>Socle académique MIAGE, pratique infrastructure et formation continue observabilité/cloud.</p>
+      </div>
+      <div class="education-grid">
+        {education.map((item) => (
+          <article>
+            <span>{item.period}</span>
+            <h3>{item.title}</h3>
+            <strong>{item.issuer}</strong>
+            {item.body && <p>{item.body}</p>}
+          </article>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <SiteFooter />
+</BaseLayout>

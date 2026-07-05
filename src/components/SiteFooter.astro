@@ -1,0 +1,15 @@
+---
+import { profile } from "../data/site";
+---
+
+<footer class="site-footer">
+  <div>
+    <strong>{profile.name}</strong>
+    <span>{profile.role}</span>
+  </div>
+  <nav aria-label="Liens sociaux">
+    {profile.links.map((link) => (
+      <a href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
+    ))}
+  </nav>
+</footer>

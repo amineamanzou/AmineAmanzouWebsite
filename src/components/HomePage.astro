@@ -1,0 +1,117 @@
+---
+import SiteFooter from "./SiteFooter.astro";
+import Topbar from "./Topbar.astro";
+import { home, profile, experiences } from "../data/site";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title={home.meta.title} description={home.meta.description} path="/" bodyClass="home-page">
+  <Topbar currentPath="/" />
+
+  <main>
+    <section class="hero section-shell">
+      <div class="hero-copy">
+        <p class="role-line">{profile.role}</p>
+        <h1>{home.hero.title}</h1>
+        <p class="hero-lede">{home.hero.body}</p>
+        <p class="hero-proof">{home.hero.proofLine}</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="/cv/">Voir le CV</a>
+          <a class="button button-secondary" href="mailto:amineamanzou@gmail.com">Me contacter</a>
+        </div>
+      </div>
+      <aside class="portrait-card" aria-label="Profil d'Amine Amanzou">
+        <img src={profile.portrait} alt="Portrait d'Amine Amanzou" loading="eager" decoding="async" />
+        <div>
+          <strong>{profile.name}</strong>
+          <span>{profile.location}</span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="proof-band" aria-labelledby="proof-title">
+      <div class="section-shell">
+        <div class="section-heading">
+          <h2 id="proof-title">Des systèmes critiques, des résultats mesurables.</h2>
+          <p>
+            Les preuves viennent de contextes réels: production, énergie, télécom,
+            SaaS, e-commerce et migration cloud.
+          </p>
+        </div>
+        <div class="metric-grid">
+          {home.metrics.map((metric) => (
+            <article class="metric-card">
+              <span>{metric.label}</span>
+              <strong>{metric.value}</strong>
+              <p>{metric.detail}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="section-shell split-section">
+      <div class="section-heading sticky-heading">
+        <h2>Transformer l'observabilité en fiabilité opérationnelle.</h2>
+        <p>
+          Je ne me contente pas d'installer des outils. Je relie instrumentation,
+          pratiques d'équipe et décisions d'exploitation pour rendre le signal
+          actionnable.
+        </p>
+      </div>
+      <div class="expertise-list">
+        {home.expertise.map((item) => (
+          <article class="expertise-card">
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+            <ul>
+              {item.items.map((skill) => <li>{skill}</li>)}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section-shell work-preview">
+      <div class="section-heading">
+        <h2>Expérience récente</h2>
+        <p>Un aperçu des missions; la page CV détaille les responsabilités et résultats.</p>
+      </div>
+      <div class="preview-timeline">
+        {experiences.slice(0, 3).map((experience) => (
+          <article>
+            <span>{experience.period}</span>
+            <h3>{experience.role}</h3>
+            <strong>{experience.company}</strong>
+            <p>{experience.summary}</p>
+          </article>
+        ))}
+      </div>
+      <div class="center-actions">
+        <a class="button button-primary" href="/cv/">Lire le CV complet</a>
+      </div>
+    </section>
+
+    <section class="download-band">
+      <div class="section-shell download-layout">
+        <div>
+          <h2>Dossier de compétence et resume</h2>
+          <p>
+            Deux versions PDF restent disponibles pour les échanges mission,
+            recrutement ou qualification rapide.
+          </p>
+        </div>
+        <div class="download-actions">
+          {profile.downloads.map((download) => (
+            <a class="download-link" href={download.href} target="_blank" rel="noreferrer">
+              <strong>{download.label}</strong>
+              <span>{download.meta}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <SiteFooter />
+</BaseLayout>
