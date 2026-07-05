@@ -1,27 +1,48 @@
 ---
-import { navigation, profile } from "../data/site";
+import { alternatePath, languageSwitch, navigation, profile, localized, type Locale } from "../data/site";
 
 type Props = {
   currentPath: string;
+  locale?: Locale;
+  alternateHref?: string;
 };
 
-const { currentPath } = Astro.props;
+const { currentPath, locale = "fr", alternateHref } = Astro.props;
+const switchTarget = alternateHref ?? alternatePath(currentPath, locale);
+const switchCopy = languageSwitch[locale];
+const copy = localized[locale];
+const isContact = currentPath.endsWith("/contact/");
 ---
 
 <header class="topbar">
-  <a class="brand" href="/" aria-label="Retour à l'accueil">
-    <span class="brand-mark" aria-hidden="true">AA</span>
+  <a class="brand" href={locale === "fr" ? "/" : "/en/"} aria-label={locale === "fr" ? "Retour à l'accueil" : "Back to home"}>
+    <span class="brand-mark" aria-hidden="true">
+      <img src={profile.brandMark} alt="" loading="eager" decoding="async" />
+    </span>
     <span>
       <strong>{profile.name}</strong>
       <small>SRE · Observabilité</small>
     </span>
   </a>
-  <nav class="nav" aria-label="Navigation principale">
-    {navigation.map((item) => (
+  <nav class="nav" aria-label={locale === "fr" ? "Navigation principale" : "Primary navigation"}>
+    {navigation[locale].map((item) => (
       <a href={item.href} aria-current={currentPath === item.href ? "page" : undefined}>
         {item.label}
       </a>
     ))}
   </nav>
-  <a class="topbar-cta" href="mailto:amineamanzou@gmail.com">Me contacter</a>
+  <div class="topbar-actions">
+    <a class="language-toggle" href={switchTarget} aria-label={switchCopy.aria}>
+      <span aria-hidden="true">{switchCopy.flag}</span>
+      <strong>{switchCopy.label}</strong>
+    </a>
+    <a
+      class:list={["topbar-cta", isContact && "is-placeholder"]}
+      href="mailto:amineamanzou@gmail.com"
+      aria-hidden={isContact ? "true" : undefined}
+      tabindex={isContact ? -1 : undefined}
+    >
+      {copy.topbarCta}
+    </a>
+  </div>
 </header>

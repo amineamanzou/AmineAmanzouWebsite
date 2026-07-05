@@ -122,3 +122,48 @@ jobs:
           name: openssf-scorecard-results
           path: scorecard-results.json
           if-no-files-found: warn
+
+  emit_cicd_event:
+    name: Emit CI/CD security event
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - dependency_review
+      - gitleaks
+      - trivy_filesystem
+      - actionlint
+      - openssf_scorecard
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Emit security CI/CD event
+        env:
+          SECURITY_CONCLUSION: ${{ contains(needs.*.result, 'failure') && 'failure' || contains(needs.*.result, 'cancelled') && 'cancelled' || 'success' }}
+          DEPENDENCY_REVIEW_RESULT: ${{ needs.dependency_review.result }}
+          GITLEAKS_RESULT: ${{ needs.gitleaks.result }}
+          TRIVY_RESULT: ${{ needs.trivy_filesystem.result }}
+          ACTIONLINT_RESULT: ${{ needs.actionlint.result }}
+          SCORECARD_RESULT: ${{ needs.openssf_scorecard.result }}
+        run: |
+          node scripts/qa/emit-cicd-event.mjs \
+            --kind security \
+            --status completed \
+            --conclusion "${SECURITY_CONCLUSION}" \
+            --check dependency-review="${DEPENDENCY_REVIEW_RESULT}" \
+            --check gitleaks="${GITLEAKS_RESULT}" \
+            --check trivy="${TRIVY_RESULT}" \
+            --check actionlint="${ACTIONLINT_RESULT}" \
+            --check scorecard="${SCORECARD_RESULT}" \
+            --check codeql="separate-workflow" \
+            --out cicd-event-security.json
+
+      - name: Upload security CI/CD event
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cicd-event-security
+          path: cicd-event-security.json
+          if-no-files-found: error

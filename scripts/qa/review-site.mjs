@@ -6,27 +6,39 @@ const dist = join(root, "dist");
 
 const requiredFiles = [
   "index.html",
+  "dossier/index.html",
   "cv/index.html",
   "contact/index.html",
+  "en/index.html",
+  "en/dossier/index.html",
+  "en/contact/index.html",
   "blog/index.html",
+  "blog/opamp-fleet-management-governance/index.html",
+  "blog/opamp-fleet-management-agents/index.html",
+  "en/blog/index.html",
+  "en/blog/opamp-fleet-management-governance/index.html",
   "articles/index.html",
+  "robots.txt",
+  "sitemap.xml",
   "downloads/amine-amanzou-dossier-competence-fr.pdf",
   "downloads/amine-amanzou-resume-en.pdf",
   "images/amine-amanzou-profile.jpeg",
 ];
 
 const requiredHomeText = [
-  "systèmes critiques observables",
+  "Freelance SRE",
   "Enedis",
   "Odigo",
   "Ylio",
   "Orange",
-  "Voir le CV",
+  "Voir le dossier",
   "Me contacter",
+  "Télécharger le dossier de compétence",
 ];
 
-const requiredCvText = [
-  "Expérience professionnelle",
+const requiredDossierText = [
+  "Dossier de compétence freelance",
+  "Missions et expériences",
   "Expert Observabilité",
   "Lead SRE Data",
   "Formation et certifications",
@@ -36,8 +48,14 @@ const requiredContactText = [
   "amineamanzou@gmail.com",
   "LinkedIn",
   "GitHub",
-  "X / Twitter",
-  "Portfolio photo",
+  "Adresse email cliquable",
+];
+
+const requiredEnglishText = [
+  "Freelance SRE",
+  "Download the capability statement",
+  "Missions and experience",
+  "Clickable email address",
 ];
 
 function assert(condition, message) {
@@ -55,24 +73,55 @@ for (const file of requiredFiles) {
 }
 
 const home = html("index.html");
-const cv = html("cv/index.html");
+const dossier = html("dossier/index.html");
+const legacyCv = html("cv/index.html");
 const contact = html("contact/index.html");
+const homeEn = html("en/index.html");
+const dossierEn = html("en/dossier/index.html");
+const contactEn = html("en/contact/index.html");
 const blog = html("blog/index.html");
+const blogArticle = html("blog/opamp-fleet-management-governance/index.html");
+const blogEn = html("en/blog/index.html");
 const articles = html("articles/index.html");
+const robots = html("robots.txt");
+const sitemap = html("sitemap.xml");
 
 for (const text of requiredHomeText) {
   assert(home.includes(text), `Home missing expected text: ${text}`);
 }
 
-for (const text of requiredCvText) {
-  assert(cv.includes(text), `CV missing expected text: ${text}`);
+for (const text of requiredDossierText) {
+  assert(dossier.includes(text), `Dossier missing expected text: ${text}`);
 }
 
 for (const text of requiredContactText) {
   assert(contact.includes(text), `Contact missing expected text: ${text}`);
 }
 
-assert(blog.includes("url=/") || blog.includes("url=/"), "Blog redirect page missing refresh target");
-assert(articles.includes("url=/") || articles.includes("url=/"), "Articles redirect page missing refresh target");
+for (const text of requiredEnglishText) {
+  assert(
+    homeEn.includes(text) || dossierEn.includes(text) || contactEn.includes(text),
+    `English pages missing expected text: ${text}`,
+  );
+}
+
+assert(legacyCv.includes("url=/dossier/"), "Legacy CV route missing dossier redirect");
+assert(blog.includes("Observabilité, SRE et Fleet Management"), "Blog index missing heading");
+assert(blog.includes("Qui utilise vraiment OpAMP"), "Blog index missing imported articles");
+assert(blogArticle.includes("Quand un client dit"), "Blog article route missing rendered article");
+assert(blogEn.includes("Observability, SRE and Fleet Management"), "English blog index missing heading");
+assert(articles.includes("url=/blog/"), "Legacy articles route missing blog redirect");
+assert(home.includes('rel="canonical" href="https://amineamanzou.fr/"'), "Home missing canonical URL");
+assert(home.includes('hreflang="fr" href="https://amineamanzou.fr/"'), "Home missing FR hreflang");
+assert(home.includes('hreflang="en" href="https://amineamanzou.fr/en/"'), "Home missing EN hreflang");
+assert(home.includes('hreflang="x-default" href="https://amineamanzou.fr/"'), "Home missing x-default hreflang");
+assert(blogArticle.includes('property="og:type" content="article"'), "Article missing OG article type");
+assert(blogArticle.includes('property="article:published_time"'), "Article missing published time metadata");
+assert(robots.includes("Sitemap: https://amineamanzou.fr/sitemap.xml"), "Robots missing sitemap");
+assert(sitemap.includes("<loc>https://amineamanzou.fr/</loc>"), "Sitemap missing home URL");
+assert(
+  sitemap.includes("<loc>https://amineamanzou.fr/blog/opamp-fleet-management-governance/</loc>"),
+  "Sitemap missing article URL",
+);
 
 console.log("Static site review passed");

@@ -1,0 +1,17 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Redirect | Amine Amanzou"
+  description="This legacy route redirects to the freelance capability statement."
+  path="/en/cv/"
+  noindex
+>
+  <Fragment slot="head">
+    <meta http-equiv="refresh" content="0; url=/en/dossier/" />
+  </Fragment>
+  <main class="redirect-page">
+    <a href="/en/dossier/">View the capability statement</a>
+  </main>
+</BaseLayout>

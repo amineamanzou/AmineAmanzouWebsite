@@ -1,17 +1,8 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import BlogIndexPage from "../../components/BlogIndexPage.astro";
+
+const articles = await getCollection("articles");
 ---
 
-<BaseLayout
-  title="Redirection | Amine Amanzou"
-  description="Cette route historique redirige vers l'accueil du portfolio."
-  path="/blog/"
-  noindex
->
-  <Fragment slot="head">
-    <meta http-equiv="refresh" content="0; url=/" />
-  </Fragment>
-  <main class="redirect-page">
-    <a href="/">Retour au portfolio d'Amine Amanzou</a>
-  </main>
-</BaseLayout>
+<BlogIndexPage articles={articles} />

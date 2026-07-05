@@ -1,14 +1,22 @@
 ---
-import { profile } from "../data/site";
+import { profile, type Locale } from "../data/site";
+
+const featuredLinks = profile.links.filter((link) => ["LinkedIn", "GitHub"].includes(link.label));
+
+type Props = {
+  locale?: Locale;
+};
+
+const { locale = "fr" } = Astro.props;
 ---
 
 <footer class="site-footer">
   <div>
     <strong>{profile.name}</strong>
-    <span>{profile.role}</span>
+    <span>{locale === "fr" ? profile.role : profile.roleEn}</span>
   </div>
   <nav aria-label="Liens sociaux">
-    {profile.links.map((link) => (
+    {featuredLinks.map((link) => (
       <a href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
     ))}
   </nav>

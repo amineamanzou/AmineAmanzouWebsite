@@ -1,36 +1,140 @@
 ---
 import "../styles/global.css";
 import { canonical } from "../data/seo";
+import type { Locale } from "../data/site";
 
 type Props = {
   title: string;
   description: string;
-  path: string;
+  path?: string;
+  canonicalPath?: string;
+  alternates?: Array<{ locale: Locale; path: string }>;
   bodyClass?: string;
   noindex?: boolean;
+  locale?: Locale;
+  ogType?: "website" | "article";
+  ogImage?: string;
 };
 
-const { title, description, path, bodyClass, noindex = false } = Astro.props;
+const {
+  title,
+  description,
+  path,
+  canonicalPath,
+  alternates = [],
+  bodyClass,
+  noindex = false,
+  locale = "fr",
+  ogType = "website",
+  ogImage = "/images/amine-amanzou-profile.jpeg",
+} = Astro.props;
+const currentPath = canonicalPath ?? path ?? Astro.url.pathname;
+const canonicalUrl = Astro.site ? new URL(currentPath, Astro.site).toString() : canonical(currentPath);
+const alternateLinks = Astro.site
+  ? alternates.map((alternate) => ({
+      locale: alternate.locale,
+      href: new URL(alternate.path, Astro.site).toString(),
+    }))
+  : alternates.map((alternate) => ({
+      locale: alternate.locale,
+      href: canonical(alternate.path),
+    }));
+const xDefaultPath =
+  alternates.find((alternate) => alternate.locale === "fr")?.path ?? currentPath;
+const xDefaultUrl = Astro.site ? new URL(xDefaultPath, Astro.site).toString() : canonical(xDefaultPath);
+const ogImageUrl = Astro.site ? new URL(ogImage, Astro.site).toString() : canonical(ogImage);
 ---
 
 <!doctype html>
-<html lang="fr">
+<html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, follow" />}
-    <link rel="canonical" href={canonical(path)} />
+    <link rel="canonical" href={canonicalUrl} />
+    {alternateLinks.map((alternate) => <link rel="alternate" hreflang={alternate.locale} href={alternate.href} />)}
+    {alternateLinks.length > 0 && <link rel="alternate" hreflang="x-default" href={xDefaultUrl} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonical(path)} />
-    <meta property="og:image" content={canonical("/images/amine-amanzou-profile.jpeg")} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:site_name" content="Amine Amanzou" />
+    <meta property="og:locale" content={locale === "fr" ? "fr_FR" : "en_US"} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
     <slot name="head" />
   </head>
   <body class={bodyClass}>
     <slot />
+    <script is:inline>
+      (() => {
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const revealItems = Array.from(document.querySelectorAll("[data-reveal]"));
+        const metricValues = Array.from(document.querySelectorAll("[data-count-to]"));
+
+        const formatMetric = (value, prefix, suffix) => `${prefix}${Math.round(value)}${suffix}`;
+
+        if (reducedMotion) {
+          metricValues.forEach((element) => {
+            const target = Number(element.dataset.countTo || "0");
+            element.textContent = formatMetric(target, element.dataset.prefix || "", element.dataset.suffix || "");
+          });
+          return;
+        }
+
+        document.documentElement.classList.add("motion-ready");
+
+        const revealObserver = new IntersectionObserver(
+          (entries, observer) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            });
+          },
+          { threshold: 0.16, rootMargin: "0px 0px -8% 0px" },
+        );
+
+        revealItems.forEach((item) => revealObserver.observe(item));
+
+        const metricObserver = new IntersectionObserver(
+          (entries, observer) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+
+              const element = entry.target;
+              const target = Number(element.dataset.countTo || "0");
+              const prefix = element.dataset.prefix || "";
+              const suffix = element.dataset.suffix || "";
+              const duration = 980;
+              const startedAt = performance.now();
+
+              const step = (now) => {
+                const progress = Math.min((now - startedAt) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 4);
+                element.textContent = formatMetric(target * eased, prefix, suffix);
+
+                if (progress < 1) {
+                  requestAnimationFrame(step);
+                } else {
+                  element.textContent = formatMetric(target, prefix, suffix);
+                }
+              };
+
+              requestAnimationFrame(step);
+              observer.unobserve(element);
+            });
+          },
+          { threshold: 0.6 },
+        );
+
+        metricValues.forEach((metric) => metricObserver.observe(metric));
+      })();
+    </script>
   </body>
 </html>

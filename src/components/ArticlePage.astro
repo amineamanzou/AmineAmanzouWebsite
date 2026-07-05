@@ -1,0 +1,75 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { render } from "astro:content";
+import SiteFooter from "./SiteFooter.astro";
+import Topbar from "./Topbar.astro";
+import { formatArticleDate, getArticlePath } from "../data/articles";
+import { localized, type Locale } from "../data/site";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+type Props = {
+  article: CollectionEntry<"articles">;
+  alternateHref?: string;
+  alternates?: Array<{ locale: Locale; path: string }>;
+};
+
+const { article, alternateHref, alternates = [] } = Astro.props;
+const locale = article.data.locale;
+const copy = localized[locale];
+const pagePath = getArticlePath(article);
+const { Content } = await render(article);
+---
+
+<BaseLayout
+  title={`${article.data.title} | Amine Amanzou`}
+  description={article.data.excerpt}
+  canonicalPath={pagePath}
+  alternates={alternates}
+  bodyClass="article-page"
+  locale={locale}
+  ogType="article"
+  ogImage={article.data.heroImage ?? "/images/amine-amanzou-profile.jpeg"}
+>
+  <Fragment slot="head">
+    <meta property="article:published_time" content={article.data.publishedAt} />
+    <meta property="article:author" content="Amine Amanzou" />
+    <meta property="article:section" content={article.data.label} />
+  </Fragment>
+
+  <Topbar currentPath={pagePath} locale={locale} alternateHref={alternateHref} />
+
+  <main class="article-main">
+    <article class="article-shell">
+      <header class="article-header" data-reveal>
+        <a class="article-back" href={locale === "fr" ? "/blog/" : "/en/blog/"}>{copy.blog.backLabel}</a>
+        <p class="role-line">{article.data.label}</p>
+        <h1>{article.data.title}</h1>
+        <p>{article.data.excerpt}</p>
+        <div class="article-meta">
+          <span>{formatArticleDate(article.data.publishedAt, locale)}</span>
+          <span>{article.data.readTime}</span>
+          {article.data.sourceUrl && (
+            <a href={article.data.sourceUrl} target="_blank" rel="noreferrer">{copy.blog.sourceLabel}</a>
+          )}
+        </div>
+      </header>
+
+      {article.data.heroImage && (
+        <img
+          class="article-hero-image"
+          src={article.data.heroImage}
+          alt=""
+          loading="eager"
+          decoding="async"
+          data-reveal
+        />
+      )}
+
+      <div class="article-content" data-reveal>
+        <Content />
+      </div>
+    </article>
+  </main>
+
+  <SiteFooter locale={locale} />
+</BaseLayout>

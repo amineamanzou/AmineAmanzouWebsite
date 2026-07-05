@@ -20,10 +20,11 @@ metrics and system vocabulary, not as a fake terminal interface.
 
 ## Structure
 
-1. Home: hero, proof metrics, expertise, selected work, CV/download CTA.
-2. CV: long timeline of experience plus education/certifications.
+1. Home: hero, proof metrics, expertise, selected work, dossier/download CTA.
+2. Dossier: long timeline of missions plus education/certifications.
 3. Contact: public email and social links only.
-4. Legacy routes: `/blog/` and `/articles/` redirect to `/`.
+4. English mirror: `/en/`, `/en/dossier/`, `/en/contact/`.
+5. Legacy routes: `/cv/`, `/blog/` and `/articles/` redirect cleanly.
 
 ## Responsive Rules
 

@@ -1,0 +1,60 @@
+---
+import type { CollectionEntry } from "astro:content";
+import SiteFooter from "./SiteFooter.astro";
+import Topbar from "./Topbar.astro";
+import { getArticleCards } from "../data/articles";
+import { localized, type Locale } from "../data/site";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+type Props = {
+  locale?: Locale;
+  articles: CollectionEntry<"articles">[];
+};
+
+const { locale = "fr", articles } = Astro.props;
+const copy = localized[locale];
+const pagePath = locale === "fr" ? "/blog/" : "/en/blog/";
+const cards = getArticleCards(articles, locale);
+---
+
+<BaseLayout
+  title={copy.blog.title}
+  description={copy.blog.description}
+  canonicalPath={pagePath}
+  alternates={[
+    { locale: "fr", path: "/blog/" },
+    { locale: "en", path: "/en/blog/" },
+  ]}
+  bodyClass="blog-page"
+  locale={locale}
+>
+  <Topbar currentPath={pagePath} locale={locale} />
+
+  <main class="page-main">
+    <section class="page-hero section-shell blog-hero">
+      <div data-reveal>
+        <p class="role-line">{copy.blog.kicker}</p>
+        <h1>{copy.blog.heading}</h1>
+        <p>{copy.blog.body}</p>
+      </div>
+    </section>
+
+    <section class="section-shell article-list-section" aria-label={copy.blog.listLabel}>
+      <div class="article-grid">
+        {cards.map((article, index) => (
+          <a class="article-card" href={article.href} data-reveal style={`--i: ${index}`}>
+            {article.heroImage && (
+              <img src={article.heroImage} alt="" loading={index === 0 ? "eager" : "lazy"} decoding="async" />
+            )}
+            <span>{article.label}</span>
+            <h2>{article.title}</h2>
+            <p>{article.excerpt}</p>
+            <small>{article.date} · {article.readTime}</small>
+          </a>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <SiteFooter locale={locale} />
+</BaseLayout>

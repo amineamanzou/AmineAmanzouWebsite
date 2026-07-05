@@ -1,26 +1,50 @@
 ---
+import { getCollection } from "astro:content";
 import SiteFooter from "./SiteFooter.astro";
 import Topbar from "./Topbar.astro";
-import { home, profile, experiences } from "../data/site";
+import { getArticleCards } from "../data/articles";
+import { downloads, home, localized, profile, experiences, type Locale } from "../data/site";
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+type Props = {
+  locale?: Locale;
+};
+
+const { locale = "fr" } = Astro.props;
+const copy = localized[locale];
+const download = downloads[locale];
+const path = locale === "fr" ? "/" : "/en/";
+const dossierPath = locale === "fr" ? "/dossier/" : "/en/dossier/";
+const blogPath = locale === "fr" ? "/blog/" : "/en/blog/";
+const articleCards = getArticleCards(await getCollection("articles"), locale).slice(0, 3);
 ---
 
-<BaseLayout title={home.meta.title} description={home.meta.description} path="/" bodyClass="home-page">
-  <Topbar currentPath="/" />
+<BaseLayout
+  title={copy.meta.title}
+  description={copy.meta.description}
+  canonicalPath={path}
+  alternates={[
+    { locale: "fr", path: "/" },
+    { locale: "en", path: "/en/" },
+  ]}
+  bodyClass="home-page"
+  locale={locale}
+>
+  <Topbar currentPath={path} locale={locale} />
 
   <main>
     <section class="hero section-shell">
-      <div class="hero-copy">
-        <p class="role-line">{profile.role}</p>
-        <h1>{home.hero.title}</h1>
-        <p class="hero-lede">{home.hero.body}</p>
-        <p class="hero-proof">{home.hero.proofLine}</p>
+      <div class="hero-copy" data-reveal>
+        <p class="role-line">{copy.role}</p>
+        <h1>{copy.hero.title}</h1>
+        <p class="hero-lede">{copy.hero.body}</p>
+        <p class="hero-proof">{copy.hero.proofLine}</p>
         <div class="hero-actions">
-          <a class="button button-primary" href="/cv/">Voir le CV</a>
-          <a class="button button-secondary" href="mailto:amineamanzou@gmail.com">Me contacter</a>
+          <a class="button button-primary" href={dossierPath}>{copy.hero.primaryCta}</a>
+          <a class="button button-secondary" href={`mailto:${profile.email}`}>{copy.hero.secondaryCta}</a>
         </div>
       </div>
-      <aside class="portrait-card" aria-label="Profil d'Amine Amanzou">
+      <aside class="portrait-card" aria-label="Profil d'Amine Amanzou" data-reveal>
         <img src={profile.portrait} alt="Portrait d'Amine Amanzou" loading="eager" decoding="async" />
         <div>
           <strong>{profile.name}</strong>
@@ -29,20 +53,24 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </aside>
     </section>
 
-    <section class="proof-band" aria-labelledby="proof-title">
+    <section class="proof-band" id="preuves" aria-labelledby="proof-title">
       <div class="section-shell">
-        <div class="section-heading">
-          <h2 id="proof-title">Des systèmes critiques, des résultats mesurables.</h2>
-          <p>
-            Les preuves viennent de contextes réels: production, énergie, télécom,
-            SaaS, e-commerce et migration cloud.
-          </p>
+        <div class="section-heading" data-reveal>
+          <h2 id="proof-title">{copy.proof.title}</h2>
+          <p>{copy.proof.body}</p>
         </div>
         <div class="metric-grid">
-          {home.metrics.map((metric) => (
-            <article class="metric-card">
+          {home.metrics.map((metric, index) => (
+            <article class="metric-card" data-reveal style={`--i: ${index}`}>
               <span>{metric.label}</span>
-              <strong>{metric.value}</strong>
+              <strong
+                class="metric-value"
+                data-count-to={metric.countTo}
+                data-prefix={metric.prefix ?? ""}
+                data-suffix={metric.suffix ?? ""}
+              >
+                {metric.value}
+              </strong>
               <p>{metric.detail}</p>
             </article>
           ))}
@@ -51,17 +79,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     </section>
 
     <section class="section-shell split-section">
-      <div class="section-heading sticky-heading">
-        <h2>Transformer l'observabilité en fiabilité opérationnelle.</h2>
-        <p>
-          Je ne me contente pas d'installer des outils. Je relie instrumentation,
-          pratiques d'équipe et décisions d'exploitation pour rendre le signal
-          actionnable.
-        </p>
+      <div class="section-heading sticky-heading" data-reveal>
+        <h2>{copy.observability.title}</h2>
+        <p>{copy.observability.body}</p>
       </div>
       <div class="expertise-list">
-        {home.expertise.map((item) => (
-          <article class="expertise-card">
+        {home.expertise.map((item, index) => (
+          <article class="expertise-card" data-reveal style={`--i: ${index}`}>
             <h3>{item.title}</h3>
             <p>{item.body}</p>
             <ul>
@@ -73,13 +97,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     </section>
 
     <section class="section-shell work-preview">
-      <div class="section-heading">
-        <h2>Expérience récente</h2>
-        <p>Un aperçu des missions; la page CV détaille les responsabilités et résultats.</p>
+      <div class="section-heading" data-reveal>
+        <h2>{copy.workPreview.title}</h2>
+        <p>{copy.workPreview.body}</p>
       </div>
       <div class="preview-timeline">
-        {experiences.slice(0, 3).map((experience) => (
-          <article>
+        {experiences.slice(0, 3).map((experience, index) => (
+          <article data-reveal style={`--i: ${index}`}>
             <span>{experience.period}</span>
             <h3>{experience.role}</h3>
             <strong>{experience.company}</strong>
@@ -88,30 +112,48 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         ))}
       </div>
       <div class="center-actions">
-        <a class="button button-primary" href="/cv/">Lire le CV complet</a>
+        <a class="button button-primary" href={dossierPath}>{copy.workPreview.cta}</a>
       </div>
     </section>
 
     <section class="download-band">
       <div class="section-shell download-layout">
-        <div>
-          <h2>Dossier de compétence et resume</h2>
-          <p>
-            Deux versions PDF restent disponibles pour les échanges mission,
-            recrutement ou qualification rapide.
-          </p>
+        <div data-reveal>
+          <h2>{copy.downloadBand.title}</h2>
+          <p>{copy.downloadBand.body}</p>
         </div>
         <div class="download-actions">
-          {profile.downloads.map((download) => (
-            <a class="download-link" href={download.href} target="_blank" rel="noreferrer">
-              <strong>{download.label}</strong>
-              <span>{download.meta}</span>
-            </a>
-          ))}
+          <a class="download-link" href={download.href} target="_blank" rel="noreferrer" data-reveal>
+            <strong>{download.label}</strong>
+            <span>{download.meta}</span>
+          </a>
         </div>
+      </div>
+    </section>
+
+    <section class="section-shell blog-preview" aria-labelledby="blog-preview-title">
+      <div class="section-heading" data-reveal>
+        <h2 id="blog-preview-title">{copy.blogPreview.title}</h2>
+        <p>{copy.blogPreview.body}</p>
+      </div>
+      <div class="article-grid article-grid-preview">
+        {articleCards.map((article, index) => (
+          <a class="article-card" href={article.href} data-reveal style={`--i: ${index}`}>
+            {article.heroImage && (
+              <img src={article.heroImage} alt="" loading="lazy" decoding="async" />
+            )}
+            <span>{article.label}</span>
+            <h3>{article.title}</h3>
+            <p>{article.excerpt}</p>
+            <small>{article.date} · {article.readTime}</small>
+          </a>
+        ))}
+      </div>
+      <div class="center-actions">
+        <a class="button button-secondary" href={blogPath}>{copy.blogPreview.cta}</a>
       </div>
     </section>
   </main>
 
-  <SiteFooter />
+  <SiteFooter locale={locale} />
 </BaseLayout>

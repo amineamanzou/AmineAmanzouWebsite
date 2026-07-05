@@ -1,0 +1,51 @@
+---
+import SiteFooter from "./SiteFooter.astro";
+import Topbar from "./Topbar.astro";
+import { localized, profile, type Locale } from "../data/site";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+type Props = {
+  locale?: Locale;
+};
+
+const { locale = "fr" } = Astro.props;
+const copy = localized[locale];
+const pagePath = locale === "fr" ? "/contact/" : "/en/contact/";
+const featuredLinks = profile.links.filter((link) => ["LinkedIn", "GitHub"].includes(link.label));
+---
+
+<BaseLayout
+  title={copy.contact.title}
+  description={copy.contact.description}
+  canonicalPath={pagePath}
+  alternates={[
+    { locale: "fr", path: "/contact/" },
+    { locale: "en", path: "/en/contact/" },
+  ]}
+  bodyClass="contact-page"
+  locale={locale}
+>
+  <Topbar currentPath={pagePath} locale={locale} />
+
+  <main class="page-main">
+    <section class="contact-hero section-shell">
+      <div data-reveal>
+        <p class="role-line">{copy.role}</p>
+        <h1>{copy.contact.heading}</h1>
+        <p>{copy.contact.body}</p>
+      </div>
+      <div class="contact-panel" data-reveal>
+        <span class="contact-hint">{copy.contact.hint}</span>
+        <a class="mail-link" href={`mailto:${profile.email}`}>{profile.email}</a>
+        <span>{profile.location}</span>
+        <div class="social-list">
+          {featuredLinks.map((link) => (
+            <a href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <SiteFooter locale={locale} />
+</BaseLayout>
