@@ -127,7 +127,7 @@ main {
   flex: 1;
 }
 
-body::before {
+body.home-page::before {
   position: fixed;
   inset: 0;
   z-index: -1;
@@ -885,6 +885,10 @@ h3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+}
+
+.article-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .article-card {
