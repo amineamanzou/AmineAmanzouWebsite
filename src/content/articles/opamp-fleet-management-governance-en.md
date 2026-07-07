@@ -7,6 +7,7 @@ publishedAt: "2026-07-02"
 label: "OpAMP / Fleet governance"
 readTime: "8 min"
 excerpt: "In large observability estates, fleet management is not only about pushing configuration. It is mostly about making permissions, costs, audit, rollbacks and ownership visible."
+sourceUrl: "https://www.linkedin.com/pulse/when-customers-say-fleet-management-mostly-mean-amine-amanzou-lanue/"
 heroImage: "/blog/opamp-fleet-management-governance/cover.png"
 ---
 
