@@ -7,8 +7,6 @@
   root * /srv
   encode zstd gzip
 
-  redir /blog /
-  redir /blog/ /
   redir /articles /
   redir /articles/ /
 
