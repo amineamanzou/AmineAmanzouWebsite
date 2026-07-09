@@ -2,9 +2,20 @@ import { existsSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import inventoryConfig from "../../src/data/indexable-routes.json" with { type: "json" };
 
 const distDir = path.resolve(process.cwd(), "dist");
 const siteUrl = "https://amineamanzou.fr";
+const allowedHreflangs = new Set(["fr", "en", "x-default"]);
+const allowedPageLanguages = new Set(["fr", "en"]);
+const expectedStaticCount = inventoryConfig.expectedTotalCount - inventoryConfig.expectedArticleCount;
+const expectedStaticUrls = new Set(
+  inventoryConfig.staticPagePairs.flatMap(({ fr, en }) => [
+    new URL(fr, siteUrl).href,
+    new URL(en, siteUrl).href,
+  ]),
+);
+const articleUrlPattern = /^https:\/\/amineamanzou\.fr\/(?:en\/)?blog\/[^/]+\/$/;
 const verificationPath = "googlecd92c6ca003ea477.html";
 const verificationContent = "google-site-verification: googlecd92c6ca003ea477.html\n";
 const nonPageHtmlFiles = new Set([verificationPath]);
@@ -164,6 +175,22 @@ function getAlternateLinks(html) {
     }));
 }
 
+function getHtmlLang(html, relativePath) {
+  const htmlTags = getTagAttributes(html, "html");
+  if (htmlTags.length !== 1) {
+    fail(`${relativePath} must contain exactly one html element; found ${htmlTags.length}`);
+    return null;
+  }
+
+  const language = htmlTags[0].lang?.toLowerCase();
+  if (!language || !allowedPageLanguages.has(language)) {
+    fail(`${relativePath} html lang must be one of fr or en; found ${JSON.stringify(htmlTags[0].lang)}`);
+    return null;
+  }
+
+  return language;
+}
+
 function getMetaContent(html, attributeName, attributeValue) {
   const match = getTagAttributes(html, "meta").find(
     (attributes) => attributes[attributeName]?.toLowerCase() === attributeValue.toLowerCase(),
@@ -201,6 +228,24 @@ function getJsonLdProperty(html, relativePath, expectedType, property) {
   }
 
   return values[0];
+}
+
+function isStrictIsoDate(value) {
+  if (typeof value !== "string" || !/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(value)) {
+    return false;
+  }
+
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function assertStrictIsoDate(value, label) {
+  if (!isStrictIsoDate(value)) {
+    fail(`${label} must use a valid ISO YYYY-MM-DD date; found ${JSON.stringify(value)}`);
+    return false;
+  }
+
+  return true;
 }
 
 function parseUrl(value, label) {
@@ -249,6 +294,9 @@ function normalizeAlternates(alternates, label) {
     }
 
     const language = alternate.hreflang.toLowerCase();
+    if (!allowedHreflangs.has(language)) {
+      fail(`${label} hreflang must be one of fr, en, x-default; found ${alternate.hreflang}`);
+    }
     if (normalized.has(language)) fail(`${label} declares hreflang ${language} more than once`);
     normalized.set(language, alternate.href);
   }
@@ -369,6 +417,7 @@ for (const userAgent of ["GPTBot", "ClaudeBot"]) {
 
 const entries = parseSitemapEntries(sitemap);
 const inventory = new Map();
+const pageDetails = new Map();
 
 for (const entry of entries) {
   const url = parseUrl(entry.loc, "sitemap.xml loc");
@@ -394,13 +443,29 @@ for (const entry of entries) {
 
   assertStandardMeta(html, relativePath, url.href);
   assertMatchingAlternates(getAlternateLinks(html), entry.alternates, relativePath);
+  pageDetails.set(url.href, { relativePath, htmlLang: getHtmlLang(html, relativePath) });
 
   if (/\/(?:en\/)?blog\/[^/]+\/$/.test(url.pathname)) {
-    if (!entry.lastmod || Number.isNaN(Date.parse(entry.lastmod))) {
-      fail(`sitemap.xml article ${url.href} must contain a valid lastmod`);
-    } else {
-      const metaModified = getMetaContent(html, "property", "article:modified_time");
-      const jsonLdModified = getJsonLdProperty(html, relativePath, "BlogPosting", "dateModified");
+    const metaPublished = getMetaContent(html, "property", "article:published_time");
+    const metaModified = getMetaContent(html, "property", "article:modified_time");
+    const jsonLdPublished = getJsonLdProperty(html, relativePath, "BlogPosting", "datePublished");
+    const jsonLdModified = getJsonLdProperty(html, relativePath, "BlogPosting", "dateModified");
+    const publishedIsValid = assertStrictIsoDate(
+      metaPublished,
+      `${relativePath} article:published_time`,
+    );
+    const modifiedIsValid = assertStrictIsoDate(
+      metaModified,
+      `${relativePath} article:modified_time`,
+    );
+    assertStrictIsoDate(jsonLdPublished, `${relativePath} BlogPosting.datePublished`);
+    assertStrictIsoDate(jsonLdModified, `${relativePath} BlogPosting.dateModified`);
+    const lastmodIsValid = assertStrictIsoDate(entry.lastmod, `sitemap.xml article ${url.href} lastmod`);
+
+    if (metaPublished !== jsonLdPublished) {
+      fail(`${relativePath} article:published_time must match BlogPosting.datePublished`);
+    }
+    if (lastmodIsValid) {
       if (metaModified !== entry.lastmod) {
         fail(`${relativePath} article:modified_time must match sitemap lastmod ${entry.lastmod}`);
       }
@@ -408,13 +473,55 @@ for (const entry of entries) {
         fail(`${relativePath} BlogPosting.dateModified must match sitemap lastmod ${entry.lastmod}`);
       }
     }
+    if (publishedIsValid && modifiedIsValid && metaModified < metaPublished) {
+      fail(`${relativePath} modified date ${metaModified} must not precede published date ${metaPublished}`);
+    }
   }
+}
+
+const inventoryUrls = [...inventory.keys()];
+const actualStaticUrls = inventoryUrls.filter((url) => expectedStaticUrls.has(url));
+const actualArticleUrls = inventoryUrls.filter((url) => articleUrlPattern.test(url));
+const missingStaticUrls = [...expectedStaticUrls].filter((url) => !inventory.has(url));
+const unexpectedUrls = inventoryUrls.filter(
+  (url) => !expectedStaticUrls.has(url) && !articleUrlPattern.test(url),
+);
+
+if (expectedStaticUrls.size !== expectedStaticCount) {
+  fail(
+    `SEO inventory configuration is inconsistent: expected ${expectedStaticCount} static URLs but staticPagePairs defines ${expectedStaticUrls.size}`,
+  );
+}
+if (
+  inventory.size !== inventoryConfig.expectedTotalCount ||
+  actualStaticUrls.length !== expectedStaticCount ||
+  actualArticleUrls.length !== inventoryConfig.expectedArticleCount ||
+  missingStaticUrls.length > 0 ||
+  unexpectedUrls.length > 0
+) {
+  fail(
+    `SEO inventory mismatch: expected ${inventoryConfig.expectedTotalCount} URLs (${expectedStaticCount} static + ${inventoryConfig.expectedArticleCount} articles), found ${inventory.size} (${actualStaticUrls.length} static + ${actualArticleUrls.length} articles${unexpectedUrls.length > 0 ? ` + ${unexpectedUrls.length} unexpected` : ""})`,
+  );
+  if (missingStaticUrls.length > 0) fail(`Missing static sitemap URLs: ${missingStaticUrls.join(", ")}`);
+  if (unexpectedUrls.length > 0) fail(`Unexpected sitemap URLs: ${unexpectedUrls.join(", ")}`);
 }
 
 for (const [sourceUrl, entry] of inventory) {
   const alternates = normalizeAlternates(entry.alternates, `sitemap.xml entry ${sourceUrl}`);
-  if (![...alternates.entries()].some(([language, href]) => language !== "x-default" && href === sourceUrl)) {
-    fail(`sitemap.xml entry ${sourceUrl} must include a self-referencing hreflang`);
+  const page = pageDetails.get(sourceUrl);
+
+  for (const requiredLanguage of allowedHreflangs) {
+    if (!alternates.has(requiredLanguage)) {
+      fail(`sitemap.xml entry ${sourceUrl} must declare hreflang ${requiredLanguage}`);
+    }
+  }
+  if (alternates.get("x-default") !== alternates.get("fr")) {
+    fail(`sitemap.xml entry ${sourceUrl} x-default must target its French URL ${alternates.get("fr")}`);
+  }
+  if (page?.htmlLang && alternates.get(page.htmlLang) !== sourceUrl) {
+    fail(
+      `sitemap.xml entry ${sourceUrl} must self-reference with hreflang ${page.htmlLang}; found ${alternates.get(page.htmlLang)}`,
+    );
   }
 
   for (const [language, targetUrl] of alternates) {
@@ -423,6 +530,12 @@ for (const [sourceUrl, entry] of inventory) {
     if (!target) {
       fail(`sitemap.xml hreflang ${language} for ${sourceUrl} targets unlisted URL ${targetUrl}`);
       continue;
+    }
+    const targetPage = pageDetails.get(targetUrl);
+    if (targetPage?.htmlLang !== language) {
+      fail(
+        `sitemap.xml hreflang ${language} for ${sourceUrl} targets ${targetUrl} with html lang ${JSON.stringify(targetPage?.htmlLang)}`,
+      );
     }
     const reciprocal = normalizeAlternates(target.alternates, `sitemap.xml entry ${targetUrl}`);
     if (![...reciprocal.values()].includes(sourceUrl)) {
@@ -448,4 +561,6 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`SEO output check passed for ${inventory.size} indexable URL(s).`);
+console.log(
+  `SEO output check passed for ${inventory.size} indexable URLs (${actualStaticUrls.length} static + ${actualArticleUrls.length} articles).`,
+);

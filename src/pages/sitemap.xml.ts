@@ -1,6 +1,7 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import type { APIRoute } from "astro";
 import { getArticlePath } from "../data/articles";
+import inventoryConfig from "../data/indexable-routes.json";
 import { absoluteUrl } from "../data/seo";
 import type { Locale } from "../data/site";
 
@@ -17,13 +18,6 @@ type SitemapEntry = {
   lastmod?: string;
   alternates: SitemapAlternate[];
 };
-
-const staticPagePairs = [
-  { fr: "/", en: "/en/", priorityFr: "1.0", priorityEn: "0.9" },
-  { fr: "/dossier/", en: "/en/dossier/", priorityFr: "0.8", priorityEn: "0.7" },
-  { fr: "/contact/", en: "/en/contact/", priorityFr: "0.7", priorityEn: "0.6" },
-  { fr: "/blog/", en: "/en/blog/", priorityFr: "0.8", priorityEn: "0.7" },
-];
 
 const escapeXml = (value: string) =>
   value
@@ -54,7 +48,7 @@ const alternatesForPaths = (fr: string, en: string, site?: URL): SitemapAlternat
 export const GET: APIRoute = async ({ site }) => {
   const articles = await getCollection("articles");
   const articleGroups = translatedArticleGroups(articles);
-  const entries: SitemapEntry[] = staticPagePairs.flatMap((pair) => {
+  const entries: SitemapEntry[] = inventoryConfig.staticPagePairs.flatMap((pair) => {
     const alternates = alternatesForPaths(pair.fr, pair.en, site);
 
     return [
