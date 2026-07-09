@@ -13,7 +13,7 @@ COPY src ./src
 
 RUN SITE_URL="${SITE_URL}" BASE_PATH="${BASE_PATH}" npm run build
 
-FROM golang:1.26.4-alpine AS caddy-build
+FROM golang:1.26.5-alpine AS caddy-build
 WORKDIR /src
 
 RUN apk add --no-cache ca-certificates git
