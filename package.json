@@ -11,6 +11,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "check:seo": "node scripts/checks/seo-output.mjs",
+    "check:seo:production": "node scripts/checks/production-seo.mjs",
     "review:site": "node scripts/qa/review-site.mjs"
   },
   "devDependencies": {

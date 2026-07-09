@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import { canonical } from "../data/seo";
+import { canonical, type JsonLd } from "../data/seo";
 import type { Locale } from "../data/site";
 
 type Props = {
@@ -14,6 +14,9 @@ type Props = {
   locale?: Locale;
   ogType?: "website" | "article";
   ogImage?: string;
+  publishedAt?: string;
+  modifiedAt?: string;
+  jsonLd?: JsonLd;
 };
 
 const {
@@ -27,6 +30,9 @@ const {
   locale = "fr",
   ogType = "website",
   ogImage = "/images/amine-amanzou-profile.jpeg",
+  publishedAt,
+  modifiedAt,
+  jsonLd,
 } = Astro.props;
 const currentPath = canonicalPath ?? path ?? Astro.url.pathname;
 const canonicalUrl = Astro.site ? new URL(currentPath, Astro.site).toString() : canonical(currentPath);
@@ -43,6 +49,7 @@ const xDefaultPath =
   alternates.find((alternate) => alternate.locale === "fr")?.path ?? currentPath;
 const xDefaultUrl = Astro.site ? new URL(xDefaultPath, Astro.site).toString() : canonical(xDefaultPath);
 const ogImageUrl = Astro.site ? new URL(ogImage, Astro.site).toString() : canonical(ogImage);
+const jsonLdText = jsonLd ? JSON.stringify(jsonLd).replaceAll("<", "\\u003c") : undefined;
 ---
 
 <!doctype html>
@@ -79,15 +86,8 @@ const ogImageUrl = Astro.site ? new URL(ogImage, Astro.site).toString() : canoni
 
         if (window.location.pathname === "/") {
           const storedLocale = readStorage(localeStorageKey);
-          const languages = navigator.languages?.length ? navigator.languages : [navigator.language];
-          const prefersFrench = languages.some((language) => language?.toLowerCase().startsWith("fr"));
-          const targetLocale = storedLocale === "fr" || storedLocale === "en"
-            ? storedLocale
-            : prefersFrench
-              ? "fr"
-              : "en";
 
-          if (targetLocale === "en") {
+          if (storedLocale === "en") {
             window.location.replace(`/en/${window.location.search}${window.location.hash}`);
           }
         }
@@ -119,10 +119,13 @@ const ogImageUrl = Astro.site ? new URL(ogImage, Astro.site).toString() : canoni
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:site_name" content="Amine Amanzou" />
     <meta property="og:locale" content={locale === "fr" ? "fr_FR" : "en_US"} />
+    {publishedAt && <meta property="article:published_time" content={publishedAt} />}
+    {modifiedAt && <meta property="article:modified_time" content={modifiedAt} />}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
+    {jsonLdText && <script is:inline type="application/ld+json" set:html={jsonLdText} />}
     <slot name="head" />
   </head>
   <body class={bodyClass}>

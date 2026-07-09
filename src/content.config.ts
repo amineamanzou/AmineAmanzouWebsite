@@ -10,6 +10,7 @@ const articles = defineCollection({
     articleSlug: z.string(),
     translationKey: z.string(),
     publishedAt: z.string(),
+    modifiedAt: z.string().optional(),
     label: z.string(),
     readTime: z.string(),
     excerpt: z.string(),
