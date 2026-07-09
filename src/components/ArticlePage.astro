@@ -4,6 +4,7 @@ import { render } from "astro:content";
 import SiteFooter from "./SiteFooter.astro";
 import Topbar from "./Topbar.astro";
 import { formatArticleDate, getArticlePath } from "../data/articles";
+import { articleJsonLd } from "../data/seo";
 import { localized, type Locale } from "../data/site";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
@@ -30,9 +31,16 @@ const hasSource = Boolean(article.data.sourceUrl);
   locale={locale}
   ogType="article"
   ogImage={article.data.heroImage ?? "/images/amine-amanzou-profile.jpeg"}
+  publishedAt={article.data.publishedAt}
+  modifiedAt={article.data.modifiedAt ?? article.data.publishedAt}
+  jsonLd={articleJsonLd({
+    article,
+    path: pagePath,
+    image: article.data.heroImage,
+    site: Astro.site,
+  })}
 >
   <Fragment slot="head">
-    <meta property="article:published_time" content={article.data.publishedAt} />
     <meta property="article:author" content="Amine Amanzou" />
     <meta property="article:section" content={article.data.label} />
   </Fragment>

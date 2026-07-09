@@ -1,0 +1,10 @@
+{
+  "expectedTotalCount": 16,
+  "expectedArticleCount": 8,
+  "staticPagePairs": [
+    { "fr": "/", "en": "/en/", "priorityFr": "1.0", "priorityEn": "0.9" },
+    { "fr": "/dossier/", "en": "/en/dossier/", "priorityFr": "0.8", "priorityEn": "0.7" },
+    { "fr": "/contact/", "en": "/en/contact/", "priorityFr": "0.7", "priorityEn": "0.6" },
+    { "fr": "/blog/", "en": "/en/blog/", "priorityFr": "0.8", "priorityEn": "0.7" }
+  ]
+}
