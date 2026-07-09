@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const root = process.cwd();
@@ -67,6 +67,17 @@ function html(path) {
   return readFileSync(join(dist, path), "utf8");
 }
 
+function articleSourceCount(locale) {
+  return readdirSync(join(root, "src/content/articles"))
+    .filter((file) => file.endsWith(".md"))
+    .filter((file) => readFileSync(join(root, "src/content/articles", file), "utf8").includes(`locale: "${locale}"`))
+    .length;
+}
+
+function articleCardCount(page) {
+  return (page.match(/class="article-card"/g) ?? []).length;
+}
+
 for (const file of requiredFiles) {
   assert(existsSync(join(dist, file)), `Missing dist artifact: ${file}`);
 }
@@ -116,6 +127,14 @@ assert(home.includes('hreflang="en" href="https://amineamanzou.fr/en/"'), "Home 
 assert(home.includes('hreflang="x-default" href="https://amineamanzou.fr/"'), "Home missing x-default hreflang");
 assert(home.includes("theme-toggle"), "Home missing theme toggle");
 assert(!home.includes("topbar-cta"), "Home should not render the legacy topbar CTA");
+assert(
+  articleCardCount(home) === articleSourceCount("fr"),
+  "Home should render every French article card",
+);
+assert(
+  articleCardCount(homeEn) === articleSourceCount("en"),
+  "English home should render every English article card",
+);
 assert(blogArticle.includes('property="og:type" content="article"'), "Article missing OG article type");
 assert(blogArticle.includes('property="article:published_time"'), "Article missing published time metadata");
 assert(robots.includes("Sitemap: https://amineamanzou.fr/sitemap.xml"), "Robots missing sitemap");
