@@ -16,7 +16,7 @@ const download = downloads[locale];
 const path = locale === "fr" ? "/" : "/en/";
 const dossierPath = locale === "fr" ? "/dossier/" : "/en/dossier/";
 const blogPath = locale === "fr" ? "/blog/" : "/en/blog/";
-const articleCards = getArticleCards(await getCollection("articles"), locale).slice(0, 3);
+const articleCards = getArticleCards(await getCollection("articles"), locale);
 ---
 
 <BaseLayout
