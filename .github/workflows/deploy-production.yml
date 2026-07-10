@@ -1,13 +1,12 @@
 name: Deploy Production
 
 on:
-  pull_request:
   push:
     branches: [main]
   workflow_dispatch:
 
 concurrency:
-  group: amineamanzou-production
+  group: production-amineamanzou-website
   cancel-in-progress: false
 
 permissions:
@@ -15,13 +14,13 @@ permissions:
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/amineamanzou-website
-  LOCAL_IMAGE_TAG: amineamanzou-website:${{ github.sha }}
 
 jobs:
-  build:
-    name: Build and publish Astro runtime
+  release:
+    name: Verify and publish immutable production image
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
+    environment: production
     permissions:
       contents: read
       packages: write
@@ -35,10 +34,10 @@ jobs:
       image_ref: ${{ steps.release.outputs.image_ref }}
     steps:
       - name: Checkout app
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.2.0
         with:
           node-version: 22
           cache: npm
@@ -63,89 +62,21 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=main
-            type=raw,value=${{ github.sha }}
+          tags: type=raw,value=${{ github.sha }}
           labels: |
             org.opencontainers.image.title=Amine Amanzou Website
             org.opencontainers.image.description=Static Astro portfolio for amineamanzou.fr
             org.opencontainers.image.url=https://amineamanzou.fr
-
-      - name: Build local image for advisory scan
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
-        with:
-          context: .
-          load: true
-          tags: ${{ env.LOCAL_IMAGE_TAG }}
-          labels: ${{ steps.docker_meta.outputs.labels }}
-          build-args: |
-            SITE_URL=https://amineamanzou.fr
-            BASE_PATH=/
-            VCS_REF=${{ github.sha }}
-
-      - name: Trivy SARIF advisory scan
-        id: trivy_sarif
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: ${{ env.LOCAL_IMAGE_TAG }}
-          format: sarif
-          output: trivy-results.sarif
-          severity: MEDIUM,HIGH,CRITICAL
-          vuln-type: os,library
-          exit-code: "0"
-
-      - name: Upload Trivy SARIF to code scanning
-        uses: github/codeql-action/upload-sarif@v4
-        continue-on-error: true
-        with:
-          sarif_file: trivy-results.sarif
-
-      - name: Upload Trivy SARIF artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: trivy-results
-          path: trivy-results.sarif
-          if-no-files-found: error
-
-      - name: Generate image SBOM
-        id: image_sbom
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: ${{ env.LOCAL_IMAGE_TAG }}
-          format: cyclonedx
-          output: image-sbom.cdx.json
-          severity: MEDIUM,HIGH,CRITICAL
-          vuln-type: os,library
-          exit-code: "0"
-
-      - name: Upload image SBOM artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: image-sbom-cyclonedx
-          path: image-sbom.cdx.json
-          if-no-files-found: error
-
-      - name: Trivy critical vulnerability advisory
-        id: trivy_critical
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        continue-on-error: true
-        with:
-          image-ref: ${{ env.LOCAL_IMAGE_TAG }}
-          format: table
-          severity: CRITICAL
-          vuln-type: os,library
-          exit-code: "1"
+            org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Login to GHCR
-        if: github.ref == 'refs/heads/main'
         uses: docker/login-action@c99871dec2022cc055c062a10cc1a1310835ceb4 # v4.3.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push release candidate
-        if: github.ref == 'refs/heads/main'
+      - name: Build and push SHA-tagged release candidate
         id: push
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
@@ -160,27 +91,68 @@ jobs:
             BASE_PATH=/
             VCS_REF=${{ github.sha }}
 
-      - name: Trivy pushed digest advisory scan
-        if: github.ref == 'refs/heads/main'
+      - name: Gate the exact pushed digest on critical vulnerabilities
         id: trivy_pushed_digest
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        continue-on-error: true
         env:
           TRIVY_USERNAME: ${{ github.actor }}
           TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         with:
           image-ref: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
           format: table
-          severity: MEDIUM,HIGH,CRITICAL
+          severity: CRITICAL
           vuln-type: os,library
           exit-code: "1"
 
+      - name: Scan the exact pushed digest for code scanning
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: MEDIUM,HIGH,CRITICAL
+          vuln-type: os,library
+          exit-code: "0"
+
+      - name: Upload Trivy SARIF to code scanning
+        uses: github/codeql-action/upload-sarif@1ad29ea4a422cce9a242a9fae469541dcd08addc # v4.33.0
+        continue-on-error: true
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: Upload Trivy SARIF artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
+        with:
+          name: trivy-results
+          path: trivy-results.sarif
+          if-no-files-found: error
+
+      - name: Generate SBOM from the exact pushed digest
+        id: image_sbom
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+          format: cyclonedx
+          output: image-sbom.cdx.json
+          vuln-type: os,library
+
+      - name: Upload image SBOM artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
+        with:
+          name: image-sbom-cyclonedx
+          path: image-sbom.cdx.json
+          if-no-files-found: error
+
       - name: Install Cosign
-        if: github.ref == 'refs/heads/main'
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Sign pushed digest
-        if: github.ref == 'refs/heads/main'
         id: cosign_sign
         env:
           COSIGN_EXPERIMENTAL: "1"
@@ -190,7 +162,6 @@ jobs:
           cosign sign --yes "$IMAGE_REF"
 
       - name: Verify pushed digest signature
-        if: github.ref == 'refs/heads/main'
         id: cosign_verify
         env:
           COSIGN_EXPERIMENTAL: "1"
@@ -198,10 +169,9 @@ jobs:
         run: |
           cosign verify "$IMAGE_REF" \
             --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
-            --certificate-identity-regexp="^https://github.com/${{ github.repository }}/\\.github/workflows/deploy-production\\.yml@refs/.+$"
+            --certificate-identity-regexp="^https://github.com/${{ github.repository }}/\\.github/workflows/deploy-production\\.yml@refs/heads/main$"
 
       - name: Attest image provenance
-        if: github.ref == 'refs/heads/main'
         id: attest_provenance
         uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
@@ -210,7 +180,6 @@ jobs:
           push-to-registry: true
 
       - name: Attest image SBOM
-        if: github.ref == 'refs/heads/main'
         id: attest_sbom
         uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
@@ -220,7 +189,6 @@ jobs:
           push-to-registry: true
 
       - name: Verify image provenance attestation
-        if: github.ref == 'refs/heads/main'
         id: verify_attestation
         env:
           GH_TOKEN: ${{ github.token }}
@@ -229,25 +197,31 @@ jobs:
           gh attestation verify "oci://${IMAGE_REF}" \
             --repo "${{ github.repository }}" \
             --signer-workflow "${{ github.repository }}/.github/workflows/deploy-production.yml" \
-            --source-ref "${{ github.ref }}" \
+            --source-ref "refs/heads/main" \
             --source-digest "${{ github.sha }}" \
             --predicate-type "https://slsa.dev/provenance/v1"
 
+      - name: Promote the verified digest to main without rebuilding
+        env:
+          IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+        run: |
+          docker buildx imagetools create --tag "${IMAGE_NAME}:main" "$IMAGE_REF"
+          docker buildx imagetools inspect "${IMAGE_NAME}:main"
+
       - name: Release digest
-        if: github.ref == 'refs/heads/main'
         id: release
         run: |
           test -n "${{ steps.push.outputs.digest }}"
           echo "image=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
           echo "image_ref=${IMAGE_NAME}@${{ steps.push.outputs.digest }}" >> "$GITHUB_OUTPUT"
-          echo "Published signed digest ${IMAGE_NAME}@${{ steps.push.outputs.digest }}"
+          echo "Promoted verified digest ${IMAGE_NAME}@${{ steps.push.outputs.digest }}"
 
       - name: Emit production CI/CD event
-        if: always() && github.ref == 'refs/heads/main'
+        if: always()
         env:
           IMAGE_DIGEST: ${{ steps.push.outputs.digest }}
           IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
-          TRIVY_STATUS: ${{ steps.trivy_pushed_digest.outcome || steps.trivy_critical.outcome || 'unknown' }}
+          TRIVY_STATUS: ${{ steps.trivy_pushed_digest.outcome || 'unknown' }}
           COSIGN_STATUS: ${{ steps.cosign_verify.outcome || steps.cosign_sign.outcome || 'unknown' }}
           ATTESTATION_STATUS: ${{ steps.verify_attestation.outcome || steps.attest_provenance.outcome || 'unknown' }}
         run: |
@@ -264,8 +238,8 @@ jobs:
             --out cicd-event-production.json
 
       - name: Upload production CI/CD event
-        if: always() && github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v7
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
         with:
           name: cicd-event-production
           path: cicd-event-production.json
