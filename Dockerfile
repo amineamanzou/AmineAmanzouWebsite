@@ -1,4 +1,4 @@
-FROM node:26-alpine AS build
+FROM node:26-alpine@sha256:e88a35be04478413b7c71c455cd9865de9b9360e1f43456be5951032d7ac1a66 AS build
 WORKDIR /app
 
 ARG SITE_URL=https://amineamanzou.fr
@@ -13,13 +13,13 @@ COPY src ./src
 
 RUN SITE_URL="${SITE_URL}" BASE_PATH="${BASE_PATH}" npm run build
 
-FROM golang:1.26.5-alpine AS caddy-build
+FROM golang:1.26.5-alpine@sha256:0178a641fbb4858c5f1b48e34bdaabe0350a330a1b1149aabd498d0699ff5fb2 AS caddy-build
 WORKDIR /src
 
 RUN apk add --no-cache ca-certificates git
 RUN CGO_ENABLED=0 go install -trimpath -ldflags="-s -w -X github.com/caddyserver/caddy/v2.CustomVersion=v2.11.4" github.com/caddyserver/caddy/v2/cmd/caddy@v2.11.4
 
-FROM alpine:3.22
+FROM alpine:3.22@sha256:14358309a308569c32bdc37e2e0e9694be33a9d99e68afb0f5ff33cc1f695dce
 WORKDIR /srv
 
 ARG VCS_REF=unknown
@@ -44,6 +44,9 @@ ENV XDG_CONFIG_HOME=/config \
 
 USER caddy
 EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:8080/healthz >/dev/null || exit 1
 
 ENTRYPOINT ["/usr/bin/caddy"]
 CMD ["run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
