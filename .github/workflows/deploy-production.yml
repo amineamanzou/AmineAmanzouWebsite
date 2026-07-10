@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      browser_observability:
+        description: Enable the consent-gated Browser RUM canary in this image
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: production-amineamanzou-website
@@ -45,6 +51,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Reject high or critical production dependency vulnerabilities
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Astro check
         run: npm run check
 
@@ -53,6 +62,21 @@ jobs:
 
       - name: Review static site
         run: npm run review:site
+
+      - name: Verify exact enabled canary build contract
+        if: inputs.browser_observability
+        env:
+          PUBLIC_BROWSER_OBSERVABILITY_ENABLED: "true"
+          PUBLIC_BROWSER_OBSERVABILITY_URL: ${{ vars.PUBLIC_BROWSER_OBSERVABILITY_URL }}
+          PUBLIC_BROWSER_OBSERVABILITY_API_KEY: browser-public
+          PUBLIC_BROWSER_SERVICE_NAME: amineamanzou-frontend
+          PUBLIC_BROWSER_SERVICE_VERSION: ${{ github.sha }}
+          PUBLIC_BROWSER_SITE_NAME: amineamanzou.fr
+          PUBLIC_DEPLOYMENT_ENVIRONMENT: production
+        run: |
+          npm run build
+          npm run check:browser-observability -- --mode=on
+          npm run review:site
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
@@ -90,6 +114,12 @@ jobs:
             SITE_URL=https://amineamanzou.fr
             BASE_PATH=/
             VCS_REF=${{ github.sha }}
+            PUBLIC_BROWSER_OBSERVABILITY_ENABLED=${{ inputs.browser_observability && 'true' || 'false' }}
+            PUBLIC_BROWSER_OBSERVABILITY_URL=${{ vars.PUBLIC_BROWSER_OBSERVABILITY_URL }}
+            PUBLIC_BROWSER_OBSERVABILITY_API_KEY=browser-public
+            PUBLIC_BROWSER_SERVICE_NAME=amineamanzou-frontend
+            PUBLIC_BROWSER_SITE_NAME=amineamanzou.fr
+            PUBLIC_DEPLOYMENT_ENVIRONMENT=production
 
       - name: Gate the exact pushed digest on critical vulnerabilities
         id: trivy_pushed_digest

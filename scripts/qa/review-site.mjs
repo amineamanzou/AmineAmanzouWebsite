@@ -9,9 +9,11 @@ const requiredFiles = [
   "dossier/index.html",
   "cv/index.html",
   "contact/index.html",
+  "privacy/index.html",
   "en/index.html",
   "en/dossier/index.html",
   "en/contact/index.html",
+  "en/privacy/index.html",
   "blog/index.html",
   "blog/opamp-fleet-management-governance/index.html",
   "blog/opamp-fleet-management-agents/index.html",
@@ -89,6 +91,8 @@ const contact = html("contact/index.html");
 const homeEn = html("en/index.html");
 const dossierEn = html("en/dossier/index.html");
 const contactEn = html("en/contact/index.html");
+const privacy = html("privacy/index.html");
+const privacyEn = html("en/privacy/index.html");
 const blog = html("blog/index.html");
 const blogArticle = html("blog/opamp-fleet-management-governance/index.html");
 const blogEn = html("en/blog/index.html");
@@ -121,6 +125,9 @@ assert(blog.includes("Qui utilise vraiment OpAMP"), "Blog index missing imported
 assert(blogArticle.includes("Quand un client dit"), "Blog article route missing rendered article");
 assert(blogEn.includes("Observability, SRE and Fleet Management"), "English blog index missing heading");
 assert(articles.includes("url=/blog/"), "Legacy articles route missing blog redirect");
+assert(privacy.includes("Confidentialité et mesure de performance"), "French privacy notice missing");
+assert(privacy.includes("__rum_sid"), "French privacy notice missing RUM cookie disclosure");
+assert(privacyEn.includes("Privacy and performance measurement"), "English privacy notice missing");
 assert(home.includes('rel="canonical" href="https://amineamanzou.fr/"'), "Home missing canonical URL");
 assert(home.includes('hreflang="fr" href="https://amineamanzou.fr/"'), "Home missing FR hreflang");
 assert(home.includes('hreflang="en" href="https://amineamanzou.fr/en/"'), "Home missing EN hreflang");

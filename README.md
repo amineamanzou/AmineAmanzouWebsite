@@ -41,6 +41,24 @@ Build the release image:
 docker build -t ghcr.io/amineamanzou/amineamanzou-website:local .
 ```
 
+## Browser observability canary
+
+Browser RUM is disabled in ordinary local, CI and production builds. An explicit
+manual production workflow input can enable the canary when the public receiver
+URL is configured. The exact public build contract is documented in
+`.env.example`; `PUBLIC_BROWSER_OBSERVABILITY_API_KEY=browser-public` is a
+non-authenticating browser marker and must never be replaced with a ClickStack
+server key.
+
+The HyperDX SDK is loaded only after versioned, explicit visitor consent. Session
+replay, console capture, network instrumentation, DOM text and input capture are
+disabled. Consent can be withdrawn from the persistent privacy control, which
+removes the `__rum_sid` cookie and reloads the page.
+
+The lockfile overrides `protobufjs` to the patched `7.6.5` release because the
+disabled replay dependency otherwise resolves a vulnerable `7.5.x` version.
+CI and production reject high or critical production dependency advisories.
+
 ## Production Flow
 
 GitHub Actions builds and publishes a signed image:

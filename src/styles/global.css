@@ -39,6 +39,7 @@
   --card-hover-shadow: 0 18px 42px rgb(17 24 39 / 10%);
   --blue-shadow: 0 16px 30px rgb(37 99 235 / 22%);
   --blue-hover-shadow: 0 18px 34px rgb(37 99 235 / 28%);
+  --z-consent: 100;
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --shadow: 0 18px 55px rgb(17 24 39 / 10%);
@@ -1187,6 +1188,119 @@ h3 {
   font-weight: 700;
 }
 
+.rum-consent {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: var(--z-consent);
+  width: min(440px, calc(100vw - 32px));
+  color: var(--ink);
+}
+
+.rum-consent-panel {
+  padding: 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.rum-consent-heading {
+  display: flex;
+  gap: 16px;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.rum-consent-heading h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+.rum-consent-panel > p,
+.rum-consent-panel details p {
+  margin: 12px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.rum-consent-panel details {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.rum-consent-panel summary {
+  width: fit-content;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.rum-consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.rum-consent-actions .button {
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 750;
+}
+
+.rum-consent-actions .button-secondary {
+  border-color: var(--line-strong);
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+
+.rum-consent-close,
+.rum-consent-settings,
+.rum-consent-withdraw {
+  border: 0;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font: inherit;
+  font-weight: 750;
+}
+
+.rum-consent-close {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.rum-consent-settings {
+  margin-left: auto;
+  padding: 8px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+  font-size: 0.82rem;
+}
+
+.rum-consent-withdraw {
+  padding: 6px 2px;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rum-consent-status:empty {
+  display: none;
+}
+
 .page-main {
   padding-top: 48px;
 }
@@ -1558,6 +1672,18 @@ h3 {
 
   body {
     font-size: 15px;
+  }
+
+  .rum-consent {
+    inset-inline: 12px;
+    bottom: 12px;
+    width: auto;
+  }
+
+  .rum-consent-panel {
+    max-height: calc(100vh - 24px);
+    padding: 18px;
+    overflow-y: auto;
   }
 
   .topbar {
