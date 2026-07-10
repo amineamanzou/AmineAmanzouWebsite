@@ -22,7 +22,14 @@ const localePersistScript = `try{localStorage.setItem('amineamanzou-locale','${l
 <header class="topbar">
   <a class="brand" href={locale === "fr" ? "/" : "/en/"} aria-label={locale === "fr" ? "Retour à l'accueil" : "Back to home"}>
     <span class="brand-mark" aria-hidden="true">
-      <img src={profile.brandMark} alt="" loading="eager" decoding="async" />
+      <img
+        src={profile.brandMark}
+        width="96"
+        height="96"
+        alt=""
+        loading="eager"
+        decoding="async"
+      />
     </span>
     <span>
       <strong>{profile.name}</strong>

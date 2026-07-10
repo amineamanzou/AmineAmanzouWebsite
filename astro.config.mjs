@@ -4,6 +4,9 @@ const site = process.env.SITE_URL ?? "https://amineamanzou.fr";
 const base = process.env.BASE_PATH ?? "/";
 
 export default defineConfig({
+  build: {
+    inlineStylesheets: "always",
+  },
   devToolbar: {
     enabled: false,
   },
