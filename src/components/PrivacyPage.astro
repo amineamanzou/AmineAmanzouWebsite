@@ -1,0 +1,66 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteFooter from "./SiteFooter.astro";
+import Topbar from "./Topbar.astro";
+import type { Locale } from "../data/site";
+
+type Props = { locale?: Locale };
+const { locale = "fr" } = Astro.props;
+const pagePath = locale === "fr" ? "/privacy/" : "/en/privacy/";
+const copy = locale === "fr"
+  ? {
+      title: "Confidentialité et mesure de performance",
+      description: "Notice sur les préférences fonctionnelles et la mesure de fiabilité optionnelle du site.",
+      intro: "Ce site est statique. Il ne crée aucun compte utilisateur et n’envoie aucune identité persistante à un service d’analytics.",
+      functionalTitle: "Préférences fonctionnelles",
+      functional: "Le thème et la langue peuvent être conservés dans le stockage local du navigateur. Ces choix servent uniquement au fonctionnement et à l’affichage du site.",
+      rumTitle: "Mesure optionnelle de performance et de fiabilité",
+      rum: "Après votre accord explicite, le site peut charger HyperDX Browser pour mesurer les Web Vitals, les chargements de document, les tâches longues et des catégories d’erreurs techniques minimisées.",
+      excluded: "La session n’est pas rejouée et les corps OTLP ne sont pas journalisés par l’ingress. Le SDK peut inclure transitoirement une URL complète, le user-agent, la taille d’écran ou des événements techniques dans la requête first-party. Le collector supprime ces champs avant stockage dans ClickStack. La console, les champs, le texte du DOM, les corps et en-têtes réseau applicatifs, les messages et piles d’erreur et l’identité utilisateur ne sont jamais conservés.",
+      cookieTitle: "Session et conservation",
+      cookie: "Le cookie first-party __rum_sid expire après 15 minutes d’inactivité et une session dure au maximum 4 heures. Si le stockage local est indisponible pendant un retrait, un cookie de préférence __rum_optout peut conserver le refus pendant un an. Les traces et sessions sont conservées 30 jours dans une instance ClickStack privée administrée par Amine Amanzou.",
+      withdrawalTitle: "Refus et retrait",
+      withdrawal: "Vous pouvez refuser sans perte de fonctionnalité. Le contrôle Confidentialité reste accessible en bas de page. Un retrait supprime le cookie de session, enregistre le refus et recharge la page sans réinitialiser le SDK.",
+    }
+  : {
+      title: "Privacy and performance measurement",
+      description: "Notice covering functional preferences and optional website reliability measurement.",
+      intro: "This is a static website. It creates no user account and sends no persistent user identity to an analytics service.",
+      functionalTitle: "Functional preferences",
+      functional: "Theme and language may be stored locally in the browser. These choices are used only to operate and display the website.",
+      rumTitle: "Optional performance and reliability measurement",
+      rum: "After your explicit consent, the website may load HyperDX Browser to measure Web Vitals, document loads, long tasks and privacy-minimised technical error categories.",
+      excluded: "Sessions are not replayed and the ingress does not log OTLP bodies. The SDK may transiently include a complete URL, user-agent, screen size or technical events in the first-party request. The collector removes these fields before ClickStack storage. Console output, fields, DOM text, application network bodies and headers, error messages and stacks and user identity are never retained.",
+      cookieTitle: "Session and retention",
+      cookie: "The first-party __rum_sid cookie expires after 15 minutes of inactivity and a session lasts no more than 4 hours. If local storage is unavailable during withdrawal, an __rum_optout preference cookie may retain the opt-out for one year. Traces and sessions are retained for 30 days in a private ClickStack instance administered by Amine Amanzou.",
+      withdrawalTitle: "Refusal and withdrawal",
+      withdrawal: "You may refuse without losing functionality. The Privacy control remains available at the bottom of the page. Withdrawal deletes the session cookie, records the refusal and reloads the page without starting the SDK again.",
+    };
+---
+
+<BaseLayout
+  title={`${copy.title} · Amine Amanzou`}
+  description={copy.description}
+  canonicalPath={pagePath}
+  alternates={[{ locale: "fr", path: "/privacy/" }, { locale: "en", path: "/en/privacy/" }]}
+  bodyClass="privacy-page"
+  locale={locale}
+>
+  <Topbar currentPath={pagePath} locale={locale} />
+  <main class="page-main">
+    <article class="article-shell article-content privacy-content">
+      <h1>{copy.title}</h1>
+      <p>{copy.intro}</p>
+      <h2>{copy.functionalTitle}</h2>
+      <p>{copy.functional}</p>
+      <h2>{copy.rumTitle}</h2>
+      <p>{copy.rum}</p>
+      <p>{copy.excluded}</p>
+      <h2>{copy.cookieTitle}</h2>
+      <p>{copy.cookie}</p>
+      <h2>{copy.withdrawalTitle}</h2>
+      <p>{copy.withdrawal}</p>
+    </article>
+  </main>
+  <SiteFooter locale={locale} />
+</BaseLayout>

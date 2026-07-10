@@ -41,14 +41,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Reject high or critical production dependency vulnerabilities
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Astro check
         run: npm run check
 
       - name: Build static site
         run: npm run build
 
+      - name: Verify browser observability is off by default
+        run: npm run check:browser-observability -- --mode=off
+
       - name: Review static site
         run: npm run review:site
+
+      - name: Build browser observability contract
+        env:
+          PUBLIC_BROWSER_OBSERVABILITY_ENABLED: "true"
+          PUBLIC_BROWSER_OBSERVABILITY_URL: https://otel.amineamanzou.fr
+          PUBLIC_BROWSER_OBSERVABILITY_API_KEY: browser-public
+          PUBLIC_BROWSER_SERVICE_NAME: amineamanzou-frontend
+          PUBLIC_BROWSER_SERVICE_VERSION: ${{ github.sha }}
+          PUBLIC_BROWSER_SITE_NAME: amineamanzou.fr
+          PUBLIC_DEPLOYMENT_ENVIRONMENT: production
+        run: npm run build
+
+      - name: Verify browser observability enabled contract
+        run: npm run check:browser-observability -- --mode=on
 
       - name: Build image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
@@ -61,3 +81,5 @@ jobs:
             SITE_URL=https://amineamanzou.fr
             BASE_PATH=/
             VCS_REF=${{ github.sha }}
+            PUBLIC_BROWSER_OBSERVABILITY_ENABLED=false
+            PUBLIC_DEPLOYMENT_ENVIRONMENT=production

@@ -16,6 +16,9 @@ const { locale = "fr" } = Astro.props;
     <span>{locale === "fr" ? profile.role : profile.roleEn}</span>
   </div>
   <nav aria-label={locale === "fr" ? "Liens sociaux" : "Social links"}>
+    <a href={locale === "fr" ? "/privacy/" : "/en/privacy/"}>
+      {locale === "fr" ? "Confidentialité" : "Privacy"}
+    </a>
     {featuredLinks.map((link) => (
       <a href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
     ))}

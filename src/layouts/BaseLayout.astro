@@ -50,6 +50,12 @@ const xDefaultPath =
 const xDefaultUrl = Astro.site ? new URL(xDefaultPath, Astro.site).toString() : canonical(xDefaultPath);
 const ogImageUrl = Astro.site ? new URL(ogImage, Astro.site).toString() : canonical(ogImage);
 const jsonLdText = jsonLd ? JSON.stringify(jsonLd).replaceAll("<", "\\u003c") : undefined;
+// No-index routes in this site are immediate compatibility redirects. Starting
+// a RUM session there would create a duplicate, near-empty navigation session.
+const browserObservabilityEnabled = import.meta.env.PUBLIC_BROWSER_OBSERVABILITY_ENABLED === "true" && !noindex;
+const BrowserObservability = browserObservabilityEnabled
+  ? (await import("../components/BrowserObservability.astro")).default
+  : undefined;
 ---
 
 <!doctype html>
@@ -130,6 +136,7 @@ const jsonLdText = jsonLd ? JSON.stringify(jsonLd).replaceAll("<", "\\u003c") : 
   </head>
   <body class={bodyClass}>
     <slot />
+    {BrowserObservability && <BrowserObservability locale={locale} />}
     <script is:inline>
       (() => {
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

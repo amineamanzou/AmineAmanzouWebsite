@@ -13,7 +13,14 @@
     "check": "astro check",
     "check:seo": "node scripts/checks/seo-output.mjs",
     "check:seo:production": "node scripts/checks/production-seo.mjs",
+    "check:browser-observability": "node scripts/checks/browser-observability.mjs",
     "review:site": "node scripts/qa/review-site.mjs"
+  },
+  "dependencies": {
+    "@hyperdx/browser": "0.24.0"
+  },
+  "overrides": {
+    "protobufjs": "7.6.5"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",

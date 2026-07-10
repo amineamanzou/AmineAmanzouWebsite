@@ -1,0 +1,264 @@
+---
+import type { Locale } from "../data/site";
+
+type Props = {
+  locale: Locale;
+};
+
+const { locale } = Astro.props;
+const enabled = import.meta.env.PUBLIC_BROWSER_OBSERVABILITY_ENABLED === "true";
+const consentVersion = "2026-07-10";
+const config = {
+  apiKey: import.meta.env.PUBLIC_BROWSER_OBSERVABILITY_API_KEY?.trim() ?? "",
+  endpoint: import.meta.env.PUBLIC_BROWSER_OBSERVABILITY_URL?.trim() ?? "",
+  environment: import.meta.env.PUBLIC_DEPLOYMENT_ENVIRONMENT?.trim() ?? "",
+  service: import.meta.env.PUBLIC_BROWSER_SERVICE_NAME?.trim() ?? "",
+  site: import.meta.env.PUBLIC_BROWSER_SITE_NAME?.trim() ?? "",
+  version: import.meta.env.PUBLIC_BROWSER_SERVICE_VERSION?.trim() ?? "",
+};
+
+if (enabled) {
+  const missing = Object.entries(config).filter(([, value]) => value === "").map(([key]) => key);
+  if (missing.length > 0) {
+    throw new Error(`Browser observability is enabled but missing build variables: ${missing.join(", ")}`);
+  }
+}
+
+const copy = locale === "fr"
+  ? {
+      title: "Mesure de performance, avec votre accord",
+      description: "Je souhaite mesurer les Web Vitals, les chargements lents et des erreurs techniques minimisées afin d’améliorer ce site.",
+      essential: "Avec votre accord, le cookie first-party __rum_sid expire après 15 minutes d’inactivité et une session dure au maximum 4 heures. Les données de performance et de fiabilité sont conservées côté serveur pendant 30 jours. Vous pouvez retirer votre accord à tout moment via Confidentialité.",
+      details: "Aucune session n’est rejouée et aucun corps de requête n’est journalisé. Le SDK peut inclure transitoirement une URL complète, le user-agent, la taille d’écran ou des événements techniques dans la requête envoyée à l’ingress first-party. Le collector les supprime avant stockage dans ClickStack; seuls une route fermée, une catégorie d’erreur et le type de ressource peuvent être conservés.",
+      publicKey: "La clé navigateur est publique et non authentifiante. Ce n’est pas une clé serveur ClickStack.",
+      accept: "Accepter la mesure",
+      decline: "Continuer sans mesure",
+      withdraw: "Retirer mon accord",
+      settings: "Confidentialité",
+      summary: "Détails de la mesure",
+      close: "Fermer",
+      unavailable: "La mesure de performance est indisponible. Votre choix reste refusé.",
+      withdrawalUnavailable: "Le retrait a supprimé le cookie de session, mais n’a pas pu enregistrer votre refus. Fermez cet onglet pour arrêter la session.",
+      privacy: "Lire la notice de confidentialité complète",
+    }
+  : {
+      title: "Performance measurement, with your consent",
+      description: "I would like to measure Web Vitals, slow loads and privacy-minimised technical errors to improve this website.",
+      essential: "With your consent, the first-party __rum_sid cookie expires after 15 minutes of inactivity and a session lasts no more than 4 hours. Performance and reliability data is retained server-side for 30 days. You can withdraw consent at any time through Privacy.",
+      details: "Sessions are never replayed and request bodies are not logged. The SDK may transiently include a complete URL, user-agent, screen size or technical events in the request sent to the first-party ingress. The collector removes them before ClickStack storage; only a closed route, an error category and the resource type may be retained.",
+      publicKey: "The browser key is public and non-authenticating. It is not a ClickStack server key.",
+      accept: "Allow measurement",
+      decline: "Continue without measurement",
+      withdraw: "Withdraw my consent",
+      settings: "Privacy",
+      summary: "Measurement details",
+      close: "Close",
+      unavailable: "Performance measurement is unavailable. Your choice remains denied.",
+      withdrawalUnavailable: "The session cookie was deleted, but your withdrawal could not be saved. Close this tab to stop the session.",
+      privacy: "Read the full privacy notice",
+    };
+---
+
+{enabled && (
+  <aside
+    class="rum-consent"
+    data-rum-consent
+    data-consent-version={consentVersion}
+    data-api-key={config.apiKey}
+    data-endpoint={config.endpoint}
+    data-environment={config.environment}
+    data-service={config.service}
+    data-site={config.site}
+    data-version={config.version}
+    data-unavailable={copy.unavailable}
+    data-withdrawal-unavailable={copy.withdrawalUnavailable}
+  >
+    <button class="rum-consent-settings" type="button" data-rum-settings hidden>
+      {copy.settings}
+    </button>
+    <section
+      class="rum-consent-panel"
+      role="dialog"
+      aria-labelledby={`rum-consent-title-${locale}`}
+      aria-describedby={`rum-consent-description-${locale}`}
+      data-rum-panel
+      hidden
+    >
+      <div class="rum-consent-heading">
+        <h2 id={`rum-consent-title-${locale}`}>{copy.title}</h2>
+        <button class="rum-consent-close" type="button" data-rum-close aria-label={copy.close}>×</button>
+      </div>
+      <p id={`rum-consent-description-${locale}`}>{copy.description}</p>
+      <p class="rum-consent-essential">{copy.essential}</p>
+      <details>
+        <summary>{copy.summary}</summary>
+        <p>{copy.details}</p>
+        <p>{copy.publicKey}</p>
+        <p><a href={locale === "fr" ? "/privacy/" : "/en/privacy/"}>{copy.privacy}</a></p>
+      </details>
+      <div class="rum-consent-actions">
+        <button class="button button-primary" type="button" data-rum-accept>{copy.accept}</button>
+        <button class="button button-secondary" type="button" data-rum-decline>{copy.decline}</button>
+        <button class="rum-consent-withdraw" type="button" data-rum-withdraw hidden>{copy.withdraw}</button>
+      </div>
+      <p class="rum-consent-status" data-rum-status aria-live="polite"></p>
+    </section>
+  </aside>
+)}
+
+<script>
+  import { initBrowserObservability } from "../scripts/browser-observability";
+
+  const root = document.querySelector<HTMLElement>("[data-rum-consent]");
+
+  if (root) {
+    const panel = root.querySelector<HTMLElement>("[data-rum-panel]");
+    const settings = root.querySelector<HTMLButtonElement>("[data-rum-settings]");
+    const accept = root.querySelector<HTMLButtonElement>("[data-rum-accept]");
+    const decline = root.querySelector<HTMLButtonElement>("[data-rum-decline]");
+    const withdraw = root.querySelector<HTMLButtonElement>("[data-rum-withdraw]");
+    const close = root.querySelector<HTMLButtonElement>("[data-rum-close]");
+    const status = root.querySelector<HTMLElement>("[data-rum-status]");
+    const consentVersion = root.dataset.consentVersion ?? "";
+    const consentKey = `amineamanzou-browser-observability-consent-${consentVersion}`;
+
+    type ConsentState = "granted" | "denied";
+    type ConsentDecision = { state: ConsentState; version: string; decidedAt: string };
+    const optOutCookie = "__rum_optout";
+
+    const readCookie = (name: string): string | null => {
+      const prefix = `${encodeURIComponent(name)}=`;
+      const value = document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(prefix));
+      return value ? decodeURIComponent(value.slice(prefix.length)) : null;
+    };
+
+    const deleteOptOutCookie = () => {
+      document.cookie = `${optOutCookie}=; Path=/; Max-Age=0; SameSite=Strict`;
+    };
+
+    const writeOptOutCookie = (): boolean => {
+      const secure = window.location.protocol === "https:" ? "; Secure" : "";
+      document.cookie = `${optOutCookie}=${encodeURIComponent(consentVersion)}; Path=/; Max-Age=31536000; SameSite=Strict${secure}`;
+      return readCookie(optOutCookie) === consentVersion;
+    };
+
+    const readConsent = (): ConsentState | null => {
+      if (readCookie(optOutCookie) === consentVersion) return "denied";
+      try {
+        const value = localStorage.getItem(consentKey);
+        // Backward-safe with the short-lived string format used while the
+        // canary was developed; the next decision migrates it to JSON.
+        if (value === "granted" || value === "denied") return value;
+        if (!value) return null;
+        const decision = JSON.parse(value) as Partial<ConsentDecision>;
+        if (decision.version !== consentVersion) return null;
+        return decision.state === "granted" || decision.state === "denied" ? decision.state : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const writeConsent = (state: ConsentState): boolean => {
+      try {
+        const decision: ConsentDecision = {
+          state,
+          version: consentVersion,
+          decidedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(consentKey, JSON.stringify(decision));
+        deleteOptOutCookie();
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const deleteRumCookie = () => {
+      const expiry = "__rum_sid=; Path=/; Max-Age=0; SameSite=Strict";
+      document.cookie = expiry;
+      document.cookie = `${expiry}; Domain=${window.location.hostname}`;
+      const parentDomain = window.location.hostname.split(".").slice(-2).join(".");
+      if (parentDomain.includes(".")) document.cookie = `${expiry}; Domain=.${parentDomain}`;
+    };
+
+    const showSettings = () => {
+      if (!panel || !settings || !withdraw) return;
+      const granted = readConsent() === "granted";
+      panel.hidden = false;
+      settings.hidden = true;
+      withdraw.hidden = !granted;
+      panel.querySelector<HTMLButtonElement>(granted ? "[data-rum-withdraw]" : "[data-rum-accept]")?.focus();
+    };
+
+    const hidePanel = () => {
+      if (!panel || !settings) return;
+      panel.hidden = true;
+      settings.hidden = false;
+      settings.focus();
+    };
+
+    const start = async () => {
+      if (status) status.textContent = "";
+      try {
+        await initBrowserObservability({
+          apiKey: root.dataset.apiKey ?? "",
+          endpoint: root.dataset.endpoint ?? "",
+          environment: root.dataset.environment ?? "",
+          service: root.dataset.service ?? "",
+          site: root.dataset.site ?? "",
+          version: root.dataset.version ?? "",
+        });
+      } catch {
+        writeConsent("denied");
+        deleteRumCookie();
+        showSettings();
+        if (status) status.textContent = root.dataset.unavailable ?? "";
+      }
+    };
+
+    accept?.addEventListener("click", () => {
+      if (!writeConsent("granted")) {
+        deleteRumCookie();
+        if (status) status.textContent = root.dataset.unavailable ?? "";
+        return;
+      }
+      hidePanel();
+      void start();
+    });
+
+    decline?.addEventListener("click", () => {
+      writeConsent("denied") || writeOptOutCookie();
+      deleteRumCookie();
+      hidePanel();
+    });
+
+    withdraw?.addEventListener("click", () => {
+      const persisted = writeConsent("denied") || writeOptOutCookie();
+      deleteRumCookie();
+      if (persisted) {
+        window.location.reload();
+      } else {
+        showSettings();
+        if (status) status.textContent = root.dataset.withdrawalUnavailable ?? "";
+      }
+    });
+
+    settings?.addEventListener("click", showSettings);
+    close?.addEventListener("click", hidePanel);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && panel && !panel.hidden && readConsent() !== null) hidePanel();
+    });
+
+    const consent = readConsent();
+    if (consent === "granted") {
+      if (settings) settings.hidden = false;
+      void start();
+    } else if (consent === "denied") {
+      if (settings) settings.hidden = false;
+    } else if (panel) {
+      panel.hidden = false;
+      requestAnimationFrame(() => accept?.focus());
+    }
+  }
+</script>
