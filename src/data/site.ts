@@ -52,8 +52,8 @@ export const profile = {
   roleEn: "Freelance Site Reliability Engineer · Observability Expert",
   location: "Lyon, France",
   email: "amineamanzou@gmail.com",
-  portrait: "/images/amine-amanzou-profile.jpeg",
-  brandMark: "/images/amine-amanzou-profile-front.png",
+  portrait: "/images/amine-amanzou-profile-960.webp",
+  brandMark: "/images/amine-amanzou-profile-front-96.webp",
   links: [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/amineamanzou/" },
     { label: "GitHub", href: "https://github.com/amineamanzou" },
