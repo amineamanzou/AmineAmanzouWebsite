@@ -21,10 +21,13 @@ const copy = locale === "fr"
       analytics: "Après un accord séparé, le site peut charger PostHog depuis son infrastructure Cloud EU. Les événements couvrent les pages consultées, les CTA, les téléchargements, les sorties vers des plateformes connues, les changements de langue et les seuils de lecture à 50 et 90 %.",
       analyticsExcluded: "L’autocapture, les replays, les heatmaps, les Web Vitals PostHog, les feature flags, les profils personnels et les URL complètes sont désactivés. Les recherches ne transmettent jamais le texte saisi : seuls un type de commande fermé, une tranche de longueur et le nombre de résultats sont admis.",
       analyticsRetention: "PostHog jette l’adresse IP après les transformations techniques nécessaires. Le plan actuel conserve les événements au maximum un an. L’identifiant aléatoire reste propre à ce domaine et n’est jamais relié à un email ou à une identité commerciale.",
+      analyticsLimits: "Ces événements décrivent une intention de navigation, pas un résultat commercial. Un clic sur un lien email n’est jamais compté comme un lead ou un rendez-vous. Les paramètres de campagne donnent un indice d’attribution ; ils ne prouvent pas qu’une campagne a causé une conversion.",
       cookieTitle: "Session et conservation",
       cookie: "Le cookie first-party __rum_sid expire après 15 minutes d’inactivité et une session dure au maximum 4 heures. Si le stockage local est indisponible pendant un retrait, un cookie de préférence __rum_optout peut conserver le refus pendant un an. Les traces et sessions sont conservées 30 jours dans une instance ClickStack privée administrée par Amine Amanzou.",
       withdrawalTitle: "Refus et retrait",
       withdrawal: "Vous pouvez refuser chaque finalité sans perte de fonctionnalité. Les contrôles Confidentialité et Analytics restent accessibles en bas de page. Un retrait enregistre le refus, efface le stockage du SDK concerné et recharge la page sans relancer la collecte.",
+      deletionTitle: "Suppression des données",
+      deletion: "Le retrait arrête les nouvelles mesures et efface les données du SDK dans ce navigateur. Pour demander la suppression d’événements déjà transmis, écrivez à admin@itart.studio en indiquant le site, une période approximative et, si vous le connaissez, l’identifiant technique aléatoire. Aucune identité nominative n’étant collectée, une demande sans identifiant ni période peut ne pas permettre d’isoler les événements concernés. Les données identifiées sont supprimées dans PostHog ; sinon elles expirent au plus tard après un an.",
       analyticsSettings: "Gérer les analytics",
     }
   : {
@@ -40,10 +43,13 @@ const copy = locale === "fr"
       analytics: "After separate consent, the website may load PostHog from its EU Cloud infrastructure. Events cover page views, CTAs, downloads, outbound links to known platforms, locale changes and 50/90 percent reading thresholds.",
       analyticsExcluded: "Autocapture, replays, heatmaps, PostHog Web Vitals, feature flags, personal profiles and complete URLs are disabled. Search text is never transmitted: only a closed command type, a length bucket and the number of results are accepted.",
       analyticsRetention: "PostHog discards the IP address after the technical transformations required for ingestion. The current plan retains events for no more than one year. The random identifier remains specific to this domain and is never linked to an email or commercial identity.",
+      analyticsLimits: "These events describe navigation intent, not a commercial outcome. A click on an email link is never counted as a lead or a meeting. Campaign parameters provide attribution evidence; they do not prove that a campaign caused a conversion.",
       cookieTitle: "Session and retention",
       cookie: "The first-party __rum_sid cookie expires after 15 minutes of inactivity and a session lasts no more than 4 hours. If local storage is unavailable during withdrawal, an __rum_optout preference cookie may retain the opt-out for one year. Traces and sessions are retained for 30 days in a private ClickStack instance administered by Amine Amanzou.",
       withdrawalTitle: "Refusal and withdrawal",
       withdrawal: "You may refuse either purpose without losing functionality. The Privacy and Analytics controls remain available at the bottom of the page. Withdrawal records the refusal, clears the relevant SDK storage and reloads without restarting collection.",
+      deletionTitle: "Data deletion",
+      deletion: "Withdrawal stops new measurement and clears SDK data in this browser. To request deletion of events already sent, email admin@itart.studio with the site, an approximate time range and, if known, the random technical identifier. Because no named identity is collected, a request without an identifier or time range may not allow the relevant events to be isolated. Identified data is deleted in PostHog; otherwise it expires no later than one year after collection.",
       analyticsSettings: "Manage analytics",
     };
 ---
@@ -70,10 +76,13 @@ const copy = locale === "fr"
       <p>{copy.analytics}</p>
       <p>{copy.analyticsExcluded}</p>
       <p>{copy.analyticsRetention}</p>
+      <p>{copy.analyticsLimits}</p>
       <h2>{copy.cookieTitle}</h2>
       <p>{copy.cookie}</p>
       <h2>{copy.withdrawalTitle}</h2>
       <p>{copy.withdrawal}</p>
+      <h2>{copy.deletionTitle}</h2>
+      <p>{copy.deletion}</p>
       <p><button class="button button-secondary" type="button" data-open-analytics-settings>{copy.analyticsSettings}</button></p>
     </article>
   </main>
