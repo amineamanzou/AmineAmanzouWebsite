@@ -10,6 +10,11 @@ on:
         required: false
         type: boolean
         default: false
+      product_analytics:
+        description: Enable the consent-gated PostHog product analytics canary in this image
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: production-amineamanzou-website
@@ -78,6 +83,20 @@ jobs:
           npm run check:browser-observability -- --mode=on
           npm run review:site
 
+      - name: Verify exact product analytics canary build contract
+        if: inputs.product_analytics
+        env:
+          PUBLIC_PRODUCT_ANALYTICS_ENABLED: "true"
+          PUBLIC_POSTHOG_KEY: ${{ vars.PUBLIC_POSTHOG_KEY }}
+          PUBLIC_POSTHOG_HOST: https://eu.i.posthog.com
+          PUBLIC_ANALYTICS_SITE_NAME: amineamanzou.fr
+          PUBLIC_SERVICE_VERSION: ${{ github.sha }}
+          PUBLIC_DEPLOYMENT_ENVIRONMENT: production
+        run: |
+          npm run build
+          npm run check:product-analytics -- --mode=on
+          npm run review:site
+
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
@@ -120,6 +139,10 @@ jobs:
             PUBLIC_BROWSER_SERVICE_NAME=amineamanzou-frontend
             PUBLIC_BROWSER_SITE_NAME=amineamanzou.fr
             PUBLIC_DEPLOYMENT_ENVIRONMENT=production
+            PUBLIC_PRODUCT_ANALYTICS_ENABLED=${{ inputs.product_analytics && 'true' || 'false' }}
+            PUBLIC_POSTHOG_KEY=${{ vars.PUBLIC_POSTHOG_KEY }}
+            PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
+            PUBLIC_ANALYTICS_SITE_NAME=amineamanzou.fr
 
       - name: Gate the exact pushed digest on critical vulnerabilities
         id: trivy_pushed_digest

@@ -20,7 +20,7 @@ const { locale = "fr" } = Astro.props;
       {locale === "fr" ? "Confidentialité" : "Privacy"}
     </a>
     {featuredLinks.map((link) => (
-      <a href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
+      <a href={link.href} target="_blank" rel="noreferrer" data-analytics-event="site.outbound_click" data-analytics-destination={link.label.toLowerCase()} data-analytics-placement="footer">{link.label}</a>
     ))}
   </nav>
 </footer>

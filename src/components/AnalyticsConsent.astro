@@ -1,0 +1,270 @@
+---
+import type { AnalyticsPageType } from "../lib/analytics/events";
+import type { Locale } from "../data/site";
+
+type Props = {
+  locale: Locale;
+  pageType: AnalyticsPageType;
+};
+
+const { locale, pageType } = Astro.props;
+const consentVersion = "2026-07-11";
+const config = {
+  apiKey: import.meta.env.PUBLIC_POSTHOG_KEY?.trim() ?? "",
+  host: import.meta.env.PUBLIC_POSTHOG_HOST?.trim() ?? "",
+  environment: import.meta.env.PUBLIC_DEPLOYMENT_ENVIRONMENT?.trim() ?? "",
+  site: import.meta.env.PUBLIC_ANALYTICS_SITE_NAME?.trim() ?? "",
+  version: import.meta.env.PUBLIC_SERVICE_VERSION?.trim() ?? "",
+};
+const missing = Object.entries(config).filter(([, value]) => value === "").map(([key]) => key);
+if (missing.length > 0) {
+  throw new Error(`Product analytics is enabled but missing build variables: ${missing.join(", ")}`);
+}
+
+const copy = locale === "fr"
+  ? {
+      title: "Mesurer l’usage de ce site ?",
+      description: "Avec votre accord, PostHog mesure les pages consultées et quelques actions fermées : ouverture du dossier, téléchargement, clic vers un contact et profondeur de lecture.",
+      excluded: "L’autocapture, les replays, les heatmaps, les profils personnels et les URL complètes sont désactivés. Le texte saisi dans une recherche ne quitte jamais le navigateur.",
+      retention: "Les données sont hébergées dans PostHog Cloud EU et conservées au maximum un an avec le plan actuel. Le choix reste propre à ce domaine et peut être retiré à tout moment.",
+      accept: "Autoriser les analytics",
+      decline: "Continuer sans analytics",
+      withdraw: "Retirer mon accord",
+      settings: "Analytics",
+      close: "Fermer",
+      privacySignal: "Le signal Global Privacy Control ou Do Not Track de ce navigateur bloque les analytics.",
+      unavailable: "PostHog est indisponible. Aucune donnée analytics n’a été envoyée.",
+      privacy: "Lire la notice de confidentialité complète",
+    }
+  : {
+      title: "Measure how this site is used?",
+      description: "With your consent, PostHog measures page views and a small closed set of actions: opening the capability statement, downloading it, contact clicks and reading depth.",
+      excluded: "Autocapture, replays, heatmaps, personal profiles and complete URLs are disabled. Text entered in a search never leaves the browser.",
+      retention: "Data is hosted in PostHog Cloud EU and retained for no more than one year under the current plan. The choice remains specific to this domain and can be withdrawn at any time.",
+      accept: "Allow analytics",
+      decline: "Continue without analytics",
+      withdraw: "Withdraw consent",
+      settings: "Analytics",
+      close: "Close",
+      privacySignal: "This browser’s Global Privacy Control or Do Not Track signal blocks analytics.",
+      unavailable: "PostHog is unavailable. No analytics data was sent.",
+      privacy: "Read the full privacy notice",
+    };
+---
+
+<aside
+  class="analytics-consent"
+  data-analytics-consent
+  data-consent-version={consentVersion}
+  data-api-key={config.apiKey}
+  data-host={config.host}
+  data-environment={config.environment}
+  data-site={config.site}
+  data-version={config.version}
+  data-locale={locale}
+  data-page-type={pageType}
+  data-privacy-signal={copy.privacySignal}
+  data-unavailable={copy.unavailable}
+>
+  <button class="analytics-settings" type="button" data-analytics-settings hidden>{copy.settings}</button>
+  <section
+    class="analytics-panel"
+    role="dialog"
+    aria-labelledby={`analytics-title-${locale}`}
+    aria-describedby={`analytics-description-${locale}`}
+    data-analytics-panel
+    hidden
+  >
+    <div class="analytics-heading">
+      <h2 id={`analytics-title-${locale}`}>{copy.title}</h2>
+      <button class="analytics-close" type="button" data-analytics-close aria-label={copy.close}>×</button>
+    </div>
+    <p id={`analytics-description-${locale}`}>{copy.description}</p>
+    <p>{copy.excluded}</p>
+    <p>{copy.retention}</p>
+    <p><a href={locale === "fr" ? "/privacy/" : "/en/privacy/"}>{copy.privacy}</a></p>
+    <div class="analytics-actions">
+      <button class="button button-primary" type="button" data-analytics-accept>{copy.accept}</button>
+      <button class="button button-secondary" type="button" data-analytics-decline>{copy.decline}</button>
+      <button class="analytics-withdraw" type="button" data-analytics-withdraw hidden>{copy.withdraw}</button>
+    </div>
+    <p class="analytics-status" data-analytics-status aria-live="polite"></p>
+  </section>
+</aside>
+
+<script>
+  import { initProductAnalytics, shutdownProductAnalytics } from "../lib/analytics/posthog";
+  import type { AnalyticsPageType } from "../lib/analytics/events";
+
+  const root = document.querySelector<HTMLElement>("[data-analytics-consent]");
+  if (root) {
+    type ConsentState = "granted" | "denied";
+    type ConsentDecision = { state: ConsentState; version: string; decidedAt: string };
+
+    const panel = root.querySelector<HTMLElement>("[data-analytics-panel]");
+    const settings = root.querySelector<HTMLButtonElement>("[data-analytics-settings]");
+    const accept = root.querySelector<HTMLButtonElement>("[data-analytics-accept]");
+    const decline = root.querySelector<HTMLButtonElement>("[data-analytics-decline]");
+    const withdraw = root.querySelector<HTMLButtonElement>("[data-analytics-withdraw]");
+    const close = root.querySelector<HTMLButtonElement>("[data-analytics-close]");
+    const status = root.querySelector<HTMLElement>("[data-analytics-status]");
+    const version = root.dataset.consentVersion ?? "";
+    const storageKey = `amineamanzou-product-analytics-consent-${version}`;
+    const optOutCookie = "__product_analytics_optout";
+
+    const privacySignalEnabled = (): boolean => {
+      const navigatorWithGpc = navigator as Navigator & { globalPrivacyControl?: boolean };
+      const windowWithDnt = window as Window & { doNotTrack?: string };
+      return navigatorWithGpc.globalPrivacyControl === true
+        || navigator.doNotTrack === "1"
+        || windowWithDnt.doNotTrack === "1";
+    };
+
+    const readCookie = (name: string): string | null => {
+      const prefix = `${encodeURIComponent(name)}=`;
+      const value = document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(prefix));
+      return value ? decodeURIComponent(value.slice(prefix.length)) : null;
+    };
+
+    const deleteOptOutCookie = () => {
+      document.cookie = `${optOutCookie}=; Path=/; Max-Age=0; SameSite=Strict`;
+    };
+
+    const writeOptOutCookie = (): boolean => {
+      const secure = window.location.protocol === "https:" ? "; Secure" : "";
+      document.cookie = `${optOutCookie}=${encodeURIComponent(version)}; Path=/; Max-Age=31536000; SameSite=Strict${secure}`;
+      return readCookie(optOutCookie) === version;
+    };
+
+    const readConsent = (): ConsentState | null => {
+      if (privacySignalEnabled() || readCookie(optOutCookie) === version) return "denied";
+      try {
+        const value = localStorage.getItem(storageKey);
+        if (!value) return null;
+        const decision = JSON.parse(value) as Partial<ConsentDecision>;
+        if (decision.version !== version) return null;
+        return decision.state === "granted" || decision.state === "denied" ? decision.state : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const writeConsent = (state: ConsentState): boolean => {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({ state, version, decidedAt: new Date().toISOString() } satisfies ConsentDecision));
+        deleteOptOutCookie();
+        return readConsent() === state;
+      } catch {
+        return false;
+      }
+    };
+
+    const persistDenial = (): boolean => writeConsent("denied") || writeOptOutCookie();
+
+    const showSettings = () => {
+      if (!panel || !settings || !withdraw || !accept) return;
+      const privacySignal = privacySignalEnabled();
+      const granted = readConsent() === "granted" && !privacySignal;
+      panel.hidden = false;
+      settings.hidden = true;
+      withdraw.hidden = !granted;
+      accept.disabled = privacySignal;
+      if (status) status.textContent = privacySignal ? root.dataset.privacySignal ?? "" : "";
+      panel.querySelector<HTMLButtonElement>(granted ? "[data-analytics-withdraw]" : "[data-analytics-accept]")?.focus();
+    };
+
+    const hidePanel = () => {
+      if (!panel || !settings) return;
+      panel.hidden = true;
+      settings.hidden = false;
+      settings.focus();
+    };
+
+    const start = async () => {
+      if (privacySignalEnabled()) return;
+      try {
+        await initProductAnalytics({
+          apiKey: root.dataset.apiKey ?? "",
+          host: root.dataset.host ?? "",
+          environment: root.dataset.environment ?? "",
+          site: root.dataset.site ?? "",
+          version: root.dataset.version ?? "",
+          locale: root.dataset.locale === "en" ? "en" : "fr",
+          pageType: (root.dataset.pageType ?? "other") as AnalyticsPageType,
+          consentStorageName: `amineamanzou_product_analytics_${version}`,
+        });
+      } catch {
+        persistDenial();
+        shutdownProductAnalytics();
+        showSettings();
+        if (status) status.textContent = root.dataset.unavailable ?? "";
+      }
+    };
+
+    const showWhenRumDecisionIsClosed = () => {
+      const rumPanel = document.querySelector<HTMLElement>("[data-rum-panel]");
+      if (!rumPanel || rumPanel.hidden) {
+        showSettings();
+        return;
+      }
+      const observer = new MutationObserver(() => {
+        if (!rumPanel.hidden) return;
+        observer.disconnect();
+        showSettings();
+      });
+      observer.observe(rumPanel, { attributes: true, attributeFilter: ["hidden"] });
+    };
+
+    accept?.addEventListener("click", () => {
+      if (privacySignalEnabled() || !writeConsent("granted")) {
+        showSettings();
+        return;
+      }
+      hidePanel();
+      void start();
+    });
+    decline?.addEventListener("click", () => {
+      persistDenial();
+      shutdownProductAnalytics();
+      hidePanel();
+    });
+    withdraw?.addEventListener("click", () => {
+      const persisted = persistDenial();
+      shutdownProductAnalytics();
+      if (persisted && readConsent() === "denied") window.location.reload();
+      else showSettings();
+    });
+    settings?.addEventListener("click", showSettings);
+    close?.addEventListener("click", hidePanel);
+    document.querySelectorAll<HTMLElement>("[data-open-analytics-settings]").forEach((control) => {
+      control.addEventListener("click", showSettings);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && panel && !panel.hidden && readConsent() !== null) hidePanel();
+    });
+
+    const consent = readConsent();
+    if (consent === "granted" && !privacySignalEnabled()) {
+      if (settings) settings.hidden = false;
+      void start();
+    } else if (consent === "denied") {
+      if (settings) settings.hidden = false;
+    } else {
+      showWhenRumDecisionIsClosed();
+    }
+  }
+</script>
+
+<style>
+  .analytics-consent { position: fixed; right: 1rem; bottom: 4.75rem; z-index: 101; }
+  .analytics-settings, .analytics-close, .analytics-withdraw { font: inherit; cursor: pointer; }
+  .analytics-settings { border: 1px solid var(--color-border, #334155); border-radius: 999px; padding: .55rem .8rem; background: var(--color-surface, #0f172a); color: var(--color-text, #f8fafc); }
+  .analytics-panel { width: min(34rem, calc(100vw - 2rem)); max-height: min(80vh, 42rem); overflow: auto; border: 1px solid var(--color-border, #334155); border-radius: 1rem; padding: 1.25rem; background: var(--color-surface, #0f172a); color: var(--color-text, #f8fafc); box-shadow: 0 1.5rem 4rem rgb(0 0 0 / .28); }
+  .analytics-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
+  .analytics-heading h2 { margin: 0; font-size: 1.25rem; }
+  .analytics-close { border: 0; background: transparent; color: inherit; font-size: 1.5rem; }
+  .analytics-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
+  .analytics-withdraw { border: 0; background: transparent; color: inherit; text-decoration: underline; }
+  .analytics-status:empty { display: none; }
+  @media (max-width: 640px) { .analytics-consent { right: .75rem; bottom: 4.25rem; } }
+</style>

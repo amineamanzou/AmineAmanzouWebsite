@@ -40,8 +40,8 @@ const articleCards = getArticleCards(await getCollection("articles"), locale);
         <p class="hero-lede">{copy.hero.body}</p>
         <p class="hero-proof">{copy.hero.proofLine}</p>
         <div class="hero-actions">
-          <a class="button button-primary" href={dossierPath}>{copy.hero.primaryCta}</a>
-          <a class="button button-secondary" href={`mailto:${profile.email}`}>{copy.hero.secondaryCta}</a>
+          <a class="button button-primary" href={dossierPath} data-analytics-event="site.cta_click" data-analytics-cta-id="open_dossier" data-analytics-placement="hero">{copy.hero.primaryCta}</a>
+          <a class="button button-secondary" href={`mailto:${profile.email}`} data-analytics-event="site.cta_click" data-analytics-cta-id="contact_mission" data-analytics-placement="hero">{copy.hero.secondaryCta}</a>
         </div>
       </div>
       <aside class="portrait-card" aria-label={locale === "fr" ? "Profil d'Amine Amanzou" : "Amine Amanzou profile"} data-reveal>
@@ -122,7 +122,7 @@ const articleCards = getArticleCards(await getCollection("articles"), locale);
         ))}
       </div>
       <div class="center-actions">
-        <a class="button button-primary" href={dossierPath}>{copy.workPreview.cta}</a>
+        <a class="button button-primary" href={dossierPath} data-analytics-event="site.cta_click" data-analytics-cta-id="view_full_dossier" data-analytics-placement="work_preview">{copy.workPreview.cta}</a>
       </div>
     </section>
 
@@ -133,7 +133,7 @@ const articleCards = getArticleCards(await getCollection("articles"), locale);
           <p>{copy.downloadBand.body}</p>
         </div>
         <div class="download-actions">
-          <a class="download-link" href={download.href} target="_blank" rel="noreferrer" data-reveal>
+          <a class="download-link" href={download.href} target="_blank" rel="noreferrer" data-reveal data-analytics-event="site.asset_download" data-analytics-asset-id={locale === "fr" ? "dossier_fr_pdf" : "dossier_en_pdf"} data-analytics-placement="download_band">
             <strong>{download.label}</strong>
             <span>{download.meta}</span>
           </a>
@@ -148,7 +148,7 @@ const articleCards = getArticleCards(await getCollection("articles"), locale);
       </div>
       <div class="article-grid article-grid-preview">
         {articleCards.map((article, index) => (
-          <a class="article-card" href={article.href} data-reveal style={`--i: ${index}`}>
+          <a class="article-card" href={article.href} data-reveal style={`--i: ${index}`} data-analytics-event="site.article_open" data-analytics-article-id={article.slug} data-analytics-placement="blog_preview">
             {article.heroImage && (
               <img src={article.heroImage} alt="" loading="lazy" decoding="async" />
             )}
@@ -160,7 +160,7 @@ const articleCards = getArticleCards(await getCollection("articles"), locale);
         ))}
       </div>
       <div class="center-actions">
-        <a class="button button-secondary" href={blogPath}>{copy.blogPreview.cta}</a>
+        <a class="button button-secondary" href={blogPath} data-analytics-event="site.cta_click" data-analytics-cta-id="read_blog" data-analytics-placement="blog_preview">{copy.blogPreview.cta}</a>
       </div>
     </section>
   </main>

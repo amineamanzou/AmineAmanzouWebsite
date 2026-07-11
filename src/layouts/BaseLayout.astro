@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import { canonical, type JsonLd } from "../data/seo";
 import type { Locale } from "../data/site";
+import type { AnalyticsPageType } from "../lib/analytics/events";
 
 type Props = {
   title: string;
@@ -55,6 +56,24 @@ const jsonLdText = jsonLd ? JSON.stringify(jsonLd).replaceAll("<", "\\u003c") : 
 const browserObservabilityEnabled = import.meta.env.PUBLIC_BROWSER_OBSERVABILITY_ENABLED === "true" && !noindex;
 const BrowserObservability = browserObservabilityEnabled
   ? (await import("../components/BrowserObservability.astro")).default
+  : undefined;
+const productAnalyticsEnabled = import.meta.env.PUBLIC_PRODUCT_ANALYTICS_ENABLED === "true" && !noindex;
+const analyticsPath = currentPath.split(/[?#]/, 1)[0].replace(/^\/en(?=\/|$)/, "") || "/";
+const analyticsPageType: AnalyticsPageType = analyticsPath === "/"
+  ? "home"
+  : analyticsPath === "/dossier/"
+    ? "dossier"
+    : analyticsPath === "/contact/"
+      ? "contact"
+      : analyticsPath === "/blog/"
+        ? "blog_index"
+        : analyticsPath.startsWith("/blog/")
+          ? "article"
+          : analyticsPath === "/privacy/"
+            ? "privacy"
+            : "other";
+const AnalyticsConsent = productAnalyticsEnabled
+  ? (await import("../components/AnalyticsConsent.astro")).default
   : undefined;
 ---
 
@@ -137,6 +156,7 @@ const BrowserObservability = browserObservabilityEnabled
   <body class={bodyClass}>
     <slot />
     {BrowserObservability && <BrowserObservability locale={locale} />}
+    {AnalyticsConsent && <AnalyticsConsent locale={locale} pageType={analyticsPageType} />}
     <script is:inline>
       (() => {
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
