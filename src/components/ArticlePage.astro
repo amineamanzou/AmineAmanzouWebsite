@@ -80,7 +80,7 @@ const hasSource = Boolean(article.data.sourceUrl);
             <strong>{article.data.articleSlug}.linkedin</strong>
           </div>
           <p>{copy.blog.sourceText}</p>
-          <a class="button button-primary" href={article.data.sourceUrl} target="_blank" rel="noreferrer">
+          <a class="button button-primary" href={article.data.sourceUrl} target="_blank" rel="noreferrer" data-analytics-event="site.outbound_click" data-analytics-destination="source_article" data-analytics-placement="article_body">
             {copy.blog.sourceCta}
           </a>
         </aside>

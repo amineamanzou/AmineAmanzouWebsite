@@ -36,11 +36,11 @@ const featuredLinks = profile.links.filter((link) => ["LinkedIn", "GitHub"].incl
       </div>
       <div class="contact-panel" data-reveal>
         <span class="contact-hint">{copy.contact.hint}</span>
-        <a class="mail-link" href={`mailto:${profile.email}`}>{profile.email}</a>
+        <a class="mail-link" href={`mailto:${profile.email}`} data-analytics-event="site.cta_click" data-analytics-cta-id="contact_mission" data-analytics-placement="contact_panel">{profile.email}</a>
         <span>{profile.location}</span>
         <div class="social-list">
           {featuredLinks.map((link) => (
-            <a href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
+            <a href={link.href} target="_blank" rel="noreferrer" data-analytics-event="site.outbound_click" data-analytics-destination={link.label.toLowerCase()} data-analytics-placement="contact_panel">{link.label}</a>
           ))}
         </div>
       </div>

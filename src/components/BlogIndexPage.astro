@@ -42,7 +42,7 @@ const cards = getArticleCards(articles, locale);
     <section class="section-shell article-list-section" aria-label={copy.blog.listLabel}>
       <div class="article-grid">
         {cards.map((article, index) => (
-          <a class="article-card" href={article.href} data-reveal style={`--i: ${index}`}>
+          <a class="article-card" href={article.href} data-reveal style={`--i: ${index}`} data-analytics-event="site.article_open" data-analytics-article-id={article.slug} data-analytics-placement="blog_index">
             {article.heroImage && (
               <img src={article.heroImage} alt="" loading={index === 0 ? "eager" : "lazy"} decoding="async" />
             )}

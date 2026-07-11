@@ -10,6 +10,10 @@ ARG PUBLIC_BROWSER_OBSERVABILITY_API_KEY=
 ARG PUBLIC_BROWSER_SERVICE_NAME=amineamanzou-frontend
 ARG PUBLIC_BROWSER_SITE_NAME=amineamanzou.fr
 ARG PUBLIC_DEPLOYMENT_ENVIRONMENT=production
+ARG PUBLIC_PRODUCT_ANALYTICS_ENABLED=false
+ARG PUBLIC_POSTHOG_KEY=
+ARG PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
+ARG PUBLIC_ANALYTICS_SITE_NAME=amineamanzou.fr
 
 COPY package.json package-lock.json* ./
 RUN npm ci && npm audit --omit=dev --audit-level=high
@@ -28,11 +32,21 @@ RUN SITE_URL="${SITE_URL}" \
   PUBLIC_BROWSER_SERVICE_VERSION="${VCS_REF}" \
   PUBLIC_BROWSER_SITE_NAME="${PUBLIC_BROWSER_SITE_NAME}" \
   PUBLIC_DEPLOYMENT_ENVIRONMENT="${PUBLIC_DEPLOYMENT_ENVIRONMENT}" \
+  PUBLIC_PRODUCT_ANALYTICS_ENABLED="${PUBLIC_PRODUCT_ANALYTICS_ENABLED}" \
+  PUBLIC_POSTHOG_KEY="${PUBLIC_POSTHOG_KEY}" \
+  PUBLIC_POSTHOG_HOST="${PUBLIC_POSTHOG_HOST}" \
+  PUBLIC_ANALYTICS_SITE_NAME="${PUBLIC_ANALYTICS_SITE_NAME}" \
+  PUBLIC_SERVICE_VERSION="${VCS_REF}" \
   npm run build \
   && if [ "${PUBLIC_BROWSER_OBSERVABILITY_ENABLED}" = "true" ]; then \
     npm run check:browser-observability -- --mode=on; \
   else \
     npm run check:browser-observability -- --mode=off; \
+  fi \
+  && if [ "${PUBLIC_PRODUCT_ANALYTICS_ENABLED}" = "true" ]; then \
+    npm run check:product-analytics -- --mode=on; \
+  else \
+    npm run check:product-analytics -- --mode=off; \
   fi \
   && npm run review:site
 

@@ -37,7 +37,7 @@ const localePersistScript = `try{localStorage.setItem('amineamanzou-locale','${l
     </span>
   </a>
   <div class="topbar-actions">
-    <a class="language-toggle" href={switchTarget} aria-label={switchCopy.aria} data-locale-target={localeTarget} onclick={localePersistScript}>
+    <a class="language-toggle" href={switchTarget} aria-label={switchCopy.aria} data-locale-target={localeTarget} onclick={localePersistScript} data-analytics-event="site.locale_change" data-analytics-target-locale={localeTarget} data-analytics-placement="topbar">
       <span aria-hidden="true">{switchCopy.flag}</span>
       <strong>{switchCopy.label}</strong>
     </a>

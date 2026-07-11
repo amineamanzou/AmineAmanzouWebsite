@@ -45,7 +45,7 @@ const pageEducation = locale === "fr" ? education : educationEn;
         <p>{copy.dossier.intro}</p>
       </div>
       <div class="download-actions compact" data-reveal>
-        <a class="download-link" href={download.href} target="_blank" rel="noreferrer">
+        <a class="download-link" href={download.href} target="_blank" rel="noreferrer" data-analytics-event="site.asset_download" data-analytics-asset-id={locale === "fr" ? "dossier_fr_pdf" : "dossier_en_pdf"} data-analytics-placement="dossier_page">
           <strong>{download.label}</strong>
           <span>{download.meta}</span>
         </a>
@@ -89,7 +89,7 @@ const pageEducation = locale === "fr" ? education : educationEn;
       <div class="education-grid">
         {pageEducation.map((item, index) => (
           item.href ? (
-            <a class="education-card is-clickable" href={item.href} target="_blank" rel="noreferrer" data-reveal style={`--i: ${index}`}>
+            <a class="education-card is-clickable" href={item.href} target="_blank" rel="noreferrer" data-reveal style={`--i: ${index}`} data-analytics-event="site.outbound_click" data-analytics-destination="education_reference" data-analytics-placement="dossier_page">
               <img src={item.icon} alt="" loading="lazy" decoding="async" />
               <span>{item.period}</span>
               <h3>{item.title}</h3>
