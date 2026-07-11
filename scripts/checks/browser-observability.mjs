@@ -26,6 +26,7 @@ assert(source.includes("disableReplay: true"), "Session replay must be disabled"
 assert(source.includes("disableIntercom: true"), "Intercom integration must be disabled");
 assert(source.includes("consoleCapture: false"), "Console capture must be disabled");
 assert(source.includes("advancedNetworkCapture: false"), "Advanced network capture must be disabled");
+assert(source.includes("tracePropagationTargets: []"), "Trace propagation targets must remain empty");
 assert(source.includes('"service.namespace": "web-frontend"'), "Browser resources must use the web-frontend namespace");
 assert(source.includes('"deployment.environment": config.environment'), "Browser resources must carry the deployment environment");
 assert(source.includes('return "/blog/:slug/"'), "Browser routes must use a closed route vocabulary");
