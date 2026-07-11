@@ -59,6 +59,8 @@ if (mode === "off") {
     "A click on an email link is never counted as a lead or a meeting.",
     "ils ne prouvent pas qu’une campagne a causé une conversion.",
     "they do not prove that a campaign caused a conversion.",
+    "ce plafond n’est pas encore vérifié comme une règle techniquement appliquée",
+    "this limit has not yet been verified as a technically enforced rule",
     "admin@itart.studio",
   ]) {
     assert(privacySource.includes(required), `Product analytics governance notice is missing: ${required}`);
