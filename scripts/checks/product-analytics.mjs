@@ -51,7 +51,14 @@ if (mode === "off") {
   ]) {
     assert(applicationJs.includes(required), `Hardened PostHog option missing from application bundle: ${required}`);
   }
-  for (const forbidden of ["business.lead_created", "business.lead_qualified", "business.meeting_booked", "business.engagement_won"]) {
+  for (const forbidden of [
+    "business.lead_created",
+    "business.lead_qualified",
+    "business.opportunity_proposed",
+    "business.opportunity_declined",
+    "business.meeting_booked",
+    "business.engagement_won",
+  ]) {
     assert(!all.includes(forbidden), `Browser bundle contains forbidden business event: ${forbidden}`);
   }
   for (const required of [
