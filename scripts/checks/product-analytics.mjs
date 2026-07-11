@@ -26,6 +26,7 @@ const html = rows.filter((row) => row.file.endsWith(".html"));
 const js = rows.filter((row) => row.file.endsWith(".js"));
 const all = rows.map((row) => row.content).join("\n");
 const applicationJs = js.filter((row) => !row.file.includes("module.no-external")).map((row) => row.content).join("\n");
+const privacySource = await readFile(path.join(root, "src/components/PrivacyPage.astro"), "utf8");
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -52,6 +53,17 @@ if (mode === "off") {
   }
   for (const forbidden of ["business.lead_created", "business.lead_qualified", "business.meeting_booked", "business.engagement_won"]) {
     assert(!all.includes(forbidden), `Browser bundle contains forbidden business event: ${forbidden}`);
+  }
+  for (const required of [
+    "Un clic sur un lien email n’est jamais compté comme un lead ou un rendez-vous.",
+    "A click on an email link is never counted as a lead or a meeting.",
+    "ils ne prouvent pas qu’une campagne a causé une conversion.",
+    "they do not prove that a campaign caused a conversion.",
+    "ce plafond n’est pas encore vérifié comme une règle techniquement appliquée",
+    "this limit has not yet been verified as a technically enforced rule",
+    "admin@itart.studio",
+  ]) {
+    assert(privacySource.includes(required), `Product analytics governance notice is missing: ${required}`);
   }
 }
 
