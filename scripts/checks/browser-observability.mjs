@@ -18,7 +18,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-assert(packageJson.dependencies?.["@hyperdx/browser"] === "0.24.0", "@hyperdx/browser must be pinned exactly to 0.24.0");
+assert(packageJson.dependencies?.["@hyperdx/browser"] === "0.25.1", "@hyperdx/browser must be pinned exactly to 0.25.1");
 assert(packageJson.overrides?.protobufjs === "7.6.5", "Patched protobufjs override must stay pinned to 7.6.5");
 assert(source.includes('await import("@hyperdx/browser")'), "HyperDX must stay behind a dynamic import");
 assert(source.indexOf("validateConfig(config)") < source.indexOf('await import("@hyperdx/browser")'), "Configuration must be validated before loading the SDK chunk");
