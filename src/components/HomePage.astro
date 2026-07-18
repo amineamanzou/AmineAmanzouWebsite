@@ -4,7 +4,7 @@ import SiteFooter from "./SiteFooter.astro";
 import Topbar from "./Topbar.astro";
 import { getArticleCards } from "../data/articles";
 import { downloads, home, localized, profile, experiences, experiencesEn, type Locale } from "../data/site";
-import { services, serviceCtaId, serviceMailto } from "../data/services";
+import { services, serviceBookingUrl, serviceCtaId } from "../data/services";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 type Props = { locale?: Locale };
@@ -40,7 +40,7 @@ const homeCopy = locale === "fr" ? {
   casesKicker: "Cas sélectionnés", casesTitle: "La preuve avant la stack.", casesBody: "Des contextes où le signal devait soutenir une décision, une migration ou une équipe en incident.",
   expertiseKicker: "Expertise technique",
   blogKicker: "Guides et retours terrain", blogTitle: "Des articles reliés aux décisions de production.", blogBody: "OpenTelemetry, fleet management, observabilité et pratiques SRE documentés à partir de sources, de tests et de missions.",
-  finalTitle: "Qualifier le besoin sans réunion de découverte à rallonge.", finalBody: "Le dossier donne le parcours complet. L’email de diagnostic collecte directement la stack, la douleur, les volumes et les disponibilités.", contact: "Écrire directement",
+  finalTitle: "Qualifier le besoin sans réunion de découverte à rallonge.", finalBody: "Le dossier donne le parcours complet. Le créneau de cadrage demande le contexte utile avant la réunion.", contact: "Écrire directement",
 } : {
   offersKicker: "Three services, explicit scope",
   offersTitle: "Start with the problem blocking production.",
@@ -61,7 +61,7 @@ const homeCopy = locale === "fr" ? {
   casesKicker: "Selected work", casesTitle: "Proof before the stack.", casesBody: "Production contexts where signal had to support a decision, a migration or an incident team.",
   expertiseKicker: "Technical expertise",
   blogKicker: "Guides and field notes", blogTitle: "Articles tied to production decisions.", blogBody: "OpenTelemetry, fleet management, observability and SRE practices documented through sources, tests and delivery experience.",
-  finalTitle: "Qualify the work without a drawn-out discovery call.", finalBody: "The profile covers the full track record. The audit email asks for the stack, pain, volume and availability upfront.", contact: "Email directly",
+  finalTitle: "Qualify the work without a drawn-out discovery call.", finalBody: "The profile covers the full track record. The scoping call collects the useful context before the meeting.", contact: "Email directly",
 };
 ---
 
@@ -75,7 +75,7 @@ const homeCopy = locale === "fr" ? {
         <p class="hero-lede">{copy.hero.body}</p>
         <p class="hero-proof">{copy.hero.proofLine}</p>
         <div class="hero-actions">
-          <a class="button button-primary" href={serviceMailto(diagnostic, locale)} data-analytics-event="site.cta_click" data-analytics-cta-id="start_observability_diagnostic" data-analytics-placement="hero">{copy.hero.primaryCta}</a>
+          <a class="button button-primary" href={serviceBookingUrl(diagnostic)} target="_blank" rel="noreferrer" data-analytics-event="site.cta_click" data-analytics-cta-id="start_observability_diagnostic" data-analytics-placement="hero">{copy.hero.primaryCta}</a>
           <a class="button button-secondary" href="#missions">{copy.hero.secondaryCta}</a>
         </div>
       </div>

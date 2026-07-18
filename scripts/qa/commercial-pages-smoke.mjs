@@ -107,9 +107,8 @@ try {
     assert(focusVisible, `${item.name}: first keyboard focus is not visible`);
 
     if (item.service) {
-      const href = await page.locator('a[href^="mailto:"]').first().getAttribute("href");
-      assert(href?.includes("subject="), `${item.name}: prequalified email subject missing`);
-      assert(href?.includes("body="), `${item.name}: prequalified email body missing`);
+      const href = await page.locator('a[href^="https://calendar.google.com/calendar/appointments/schedules/"]').first().getAttribute("href");
+      assert(href, `${item.name}: direct Google Calendar booking link missing`);
       const structuredTypes = await page.locator('script[type="application/ld+json"]').evaluateAll((scripts) => {
         const types = [];
         const visit = (value) => {

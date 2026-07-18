@@ -41,7 +41,7 @@ const requiredHomeText = [
   "Odigo",
   "Ylio",
   "Orange",
-  "Demander un diagnostic",
+  "Réserver un échange de cadrage",
   "OpenTelemetry &amp; Reliability Sprint",
   "Agentic SRE",
   "Télécharger le dossier de compétence",
@@ -173,6 +173,9 @@ assert(diagnostic.includes('"@type":"Offer","price":"4500"'), "Diagnostic page m
 assert(diagnostic.includes('"@type":"FAQPage"'), "Diagnostic page missing FAQ structured data");
 assert(otelSprint.includes("Faire passer OpenTelemetry du POC au chemin critique"), "OTel sprint page missing H1");
 assert(fractionalLead.includes("2 à 8 jours / mois"), "Fractional page missing cadence");
+for (const [name, page] of [["diagnostic", diagnostic], ["otel sprint", otelSprint], ["fractional lead", fractionalLead]]) {
+  assert(page.includes("https://calendar.google.com/calendar/appointments/schedules/"), `${name} page missing public booking destination`);
+}
 assert(blogArticle.includes('property="og:type" content="article"'), "Article missing OG article type");
 assert(blogArticle.includes('property="article:published_time"'), "Article missing published time metadata");
 assert(robots.includes("Sitemap: https://amineamanzou.fr/sitemap.xml"), "Robots missing sitemap");

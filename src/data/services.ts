@@ -124,8 +124,8 @@ const diagnostic: ServiceDefinition = {
         { question: "Peut-on poursuivre après les cinq jours ?", answer: "Oui. Le plan peut être exécuté par vos équipes, prolongé par un OpenTelemetry & Reliability Sprint ou suivi dans un rôle de Fractional Observability Lead." },
       ],
       ctaTitle: "Donnez-moi le contexte avant le premier échange.",
-      ctaBody: "L’email prépare les cinq informations utiles : stack, douleur, volumes, contexte et disponibilité.",
-      ctaLabel: "Demander un diagnostic",
+      ctaBody: "Le formulaire demande votre organisation, votre rôle, ce qui déclenche le diagnostic et, si vous l’avez, la stack actuelle.",
+      ctaLabel: "Réserver l’échange de cadrage",
       emailSubject: "Diagnostic observabilité — demande de cadrage",
       emailBody: "Bonjour Amine,\n\nContexte et système concerné :\n\nStack observabilité actuelle :\n\nDouleur principale / incident récent :\n\nOrdre de grandeur des volumes :\n\nDisponibilités pour un échange :\n",
     },
@@ -188,8 +188,8 @@ const diagnostic: ServiceDefinition = {
         { question: "Can you stay after the five days?", answer: "Yes. Your teams can execute the plan, or I can continue through an OpenTelemetry & Reliability Sprint or as a Fractional Observability Lead." },
       ],
       ctaTitle: "Send the operating context before our first call.",
-      ctaBody: "The email prompts for the five useful inputs: stack, pain, volume, context and availability.",
-      ctaLabel: "Request an audit",
+      ctaBody: "The booking form asks for your organisation, role, what triggered the review and, when available, the current stack.",
+      ctaLabel: "Book the scoping call",
       emailSubject: "Observability audit — scoping request",
       emailBody: "Hi Amine,\n\nContext and system in scope:\n\nCurrent observability stack:\n\nMain pain / recent incident:\n\nApproximate telemetry volume:\n\nAvailability for a call:\n",
     },
@@ -249,8 +249,8 @@ const otelSprint: ServiceDefinition = {
         { question: "Que reste-t-il après le sprint ?", answer: "Une configuration versionnée, des décisions d’architecture, des tests, des runbooks et une équipe formée sur leur exploitation." },
       ],
       ctaTitle: "Choisissons le flux qui doit tenir en production.",
-      ctaBody: "Décrivez le POC, la stack de destination, le chemin critique et la date qui contraint la mise en production.",
-      ctaLabel: "Discuter du sprint OTel",
+      ctaBody: "Le formulaire demande votre rôle, le stade du projet et, si elle est déjà définie, la stack actuelle et cible.",
+      ctaLabel: "Réserver l’échange sur le sprint",
       emailSubject: "OpenTelemetry & Reliability Sprint — cadrage",
       emailBody: "Bonjour Amine,\n\nPOC ou système concerné :\n\nStack actuelle et destination :\n\nChemin critique à sécuriser :\n\nContraintes de calendrier :\n\nDisponibilités pour un échange :\n",
     },
@@ -298,7 +298,7 @@ const otelSprint: ServiceDefinition = {
         { question: "Does the sprint include SLOs and alerting?", answer: "Yes, within the selected scope: service and telemetry-pipeline SLOs, actionable alerts and supporting runbooks." },
         { question: "What remains after the sprint?", answer: "Versioned configuration, architecture decisions, tests, runbooks and a team trained to operate them." },
       ],
-      ctaTitle: "Choose the flow that must hold up in production.", ctaBody: "Describe the proof of concept, target stack, critical path and delivery constraint.", ctaLabel: "Discuss the OTel sprint",
+      ctaTitle: "Choose the flow that must hold up in production.", ctaBody: "The booking form asks for your role, the current stage and, when defined, the current and target stack.", ctaLabel: "Book the sprint scoping call",
       emailSubject: "OpenTelemetry & Reliability Sprint — scoping", emailBody: "Hi Amine,\n\nProof of concept or system in scope:\n\nCurrent and target stack:\n\nCritical path to secure:\n\nDelivery constraints:\n\nAvailability for a call:\n",
     },
   },
@@ -350,7 +350,7 @@ const fractionalLead: ServiceDefinition = {
         { question: "Pouvez-vous travailler avec plusieurs vendors ?", answer: "Oui. Je porte les critères techniques et opérationnels, prépare les arbitrages et garde la décision reliée aux usages plutôt qu’aux démonstrations commerciales." },
         { question: "Comment sont encadrés les agents SRE ?", answer: "Par niveaux d’autonomie, droits minimaux, traces, évaluations, checkpoints, critères de rollback et validation humaine aux points sensibles." },
       ],
-      ctaTitle: "Reprenons la roadmap et les décisions qui attendent.", ctaBody: "Partagez le nombre d’équipes, la cadence envisagée, les échéances et les arbitrages observabilité en cours.", ctaLabel: "Discuter du rôle fractional",
+      ctaTitle: "Reprenons la roadmap et les décisions qui attendent.", ctaBody: "Le formulaire demande votre rôle, la décision à porter dans les trois prochains mois et, si utile, la taille du périmètre.", ctaLabel: "Réserver l’échange de cadrage",
       emailSubject: "Fractional Observability Lead — échange", emailBody: "Bonjour Amine,\n\nContexte et nombre d’équipes :\n\nRoadmap / échéances en cours :\n\nDécisions ou risques à reprendre :\n\nCadence envisagée :\n\nDisponibilités pour un échange :\n",
     },
     en: {
@@ -396,7 +396,7 @@ const fractionalLead: ServiceDefinition = {
         { question: "Can you work across multiple vendors?", answer: "Yes. I carry the technical and operational criteria, prepare trade-offs and keep decisions tied to use rather than sales demos." },
         { question: "How do you govern SRE agents?", answer: "Through autonomy levels, least privilege, traces, evaluations, checkpoints, rollback criteria and human approval at sensitive points." },
       ],
-      ctaTitle: "Bring the roadmap and the decisions still waiting.", ctaBody: "Share the team count, expected cadence, deadlines and current observability trade-offs.", ctaLabel: "Discuss a fractional role",
+      ctaTitle: "Bring the roadmap and the decisions still waiting.", ctaBody: "The booking form asks for your role, the decision due in the next three months and, when useful, the size of the scope.", ctaLabel: "Book the scoping call",
       emailSubject: "Fractional Observability Lead — discussion", emailBody: "Hi Amine,\n\nContext and number of teams:\n\nCurrent roadmap / deadlines:\n\nDecisions or risks to pick up:\n\nExpected cadence:\n\nAvailability for a call:\n",
     },
   },
@@ -416,8 +416,12 @@ export const serviceCtaId: Record<ServiceId, "start_observability_diagnostic" | 
   fractional_lead: "discuss_fractional_lead",
 };
 
-export function serviceMailto(service: ServiceDefinition, locale: Locale): string {
-  const copy = service.copy[locale];
-  const params = new URLSearchParams({ subject: copy.emailSubject, body: copy.emailBody });
-  return `mailto:amineamanzou@gmail.com?${params.toString()}`;
+const serviceBookingUrls: Record<ServiceId, string> = {
+  diagnostic: "https://calendar.google.com/calendar/appointments/schedules/AcZssZ39bKgvlj7pD2Bau_euoMXvWt4cMhm1Dbl5k6ticPyoLGXUhtJ7PvnrYBifoHR-mymdccyMhbwJ",
+  otel_sprint: "https://calendar.google.com/calendar/appointments/schedules/AcZssZ3BeaH78Gtn6qyJj2dDOCjgKcghrY0-5yfeQsnkHL39C2YIQ6NXSuoiWn-_x1pYLqwa9B7DPwVU",
+  fractional_lead: "https://calendar.google.com/calendar/appointments/schedules/AcZssZ2ctdY39HtMb7S3JXAu6hsOWfmpl22leBHP1ihEzOfYDxrU8WXOUJpDPKYVT6wmXQ_FFaZyevfA",
+};
+
+export function serviceBookingUrl(service: ServiceDefinition): string {
+  return serviceBookingUrls[service.id];
 }
