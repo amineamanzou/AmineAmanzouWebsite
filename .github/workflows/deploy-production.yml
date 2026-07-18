@@ -3,6 +3,9 @@ name: Deploy Production
 on:
   push:
     branches: [main]
+  schedule:
+    # Rebuild daily so future-dated articles committed to main appear on their publication date.
+    - cron: "17 5 * * *"
   workflow_dispatch:
     inputs:
       browser_observability:
@@ -61,6 +64,9 @@ jobs:
 
       - name: Astro check
         run: npm run check
+
+      - name: Validate content inventory and publication calendar
+        run: npm run check:content
 
       - name: Build static site
         run: npm run build

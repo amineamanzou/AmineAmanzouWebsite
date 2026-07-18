@@ -10,6 +10,12 @@ excerpt: "After five articles and a complete lab, this is the OpenTelemetry cont
 sourceUrl: "https://www.linkedin.com/pulse/opentelemetry-control-plane-i-would-build-amine-amanzou-axfce"
 heroImage: "/blog/opamp-fleet-management-control-plane/article-05-cover-control-plane.en.png"
 heroImageAlt: "Blueprint for a pipeline-first OpenTelemetry control plane"
+pillar: "fleet-management"
+intent: "case-study"
+primaryQuery: "OpenTelemetry control plane"
+relatedOffer: "fractional_lead"
+keywords: ["OpenTelemetry", "control plane", "fleet management", "OpAMP"]
+proofLevel: "lab"
 ---
 
 I have been circling around this topic for a year and a half.

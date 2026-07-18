@@ -12,10 +12,12 @@
     "preview": "astro preview",
     "check": "astro check",
     "check:seo": "node scripts/checks/seo-output.mjs",
+    "check:content": "node scripts/checks/content-inventory.mjs",
     "check:seo:production": "node scripts/checks/production-seo.mjs",
     "check:browser-observability": "node scripts/checks/browser-observability.mjs",
     "check:product-analytics": "node scripts/checks/product-analytics.mjs",
     "review:site": "node scripts/qa/review-site.mjs",
+    "review:commercial": "node scripts/qa/commercial-pages-smoke.mjs",
     "review:product-analytics": "node scripts/qa/product-analytics-smoke.mjs",
     "review:observability": "node scripts/qa/browser-observability-actions-smoke.mjs"
   },

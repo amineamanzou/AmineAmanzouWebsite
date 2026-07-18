@@ -10,6 +10,12 @@ excerpt: "Après cinq articles et un lab complet, voici le control plane OpenTel
 sourceUrl: "https://www.linkedin.com/pulse/le-control-plane-opentelemetry-que-je-construirais-amine-amanzou-bnmee"
 heroImage: "/blog/opamp-fleet-management-control-plane/article-05-cover-control-plane.png"
 heroImageAlt: "Blueprint d'un control plane OpenTelemetry centré sur les pipelines"
+pillar: "fleet-management"
+intent: "case-study"
+primaryQuery: "control plane OpenTelemetry"
+relatedOffer: "fractional_lead"
+keywords: ["OpenTelemetry", "control plane", "fleet management", "OpAMP"]
+proofLevel: "lab"
 ---
 
 Je tourne autour de ce sujet depuis un an et demi.

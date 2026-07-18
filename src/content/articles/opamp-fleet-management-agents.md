@@ -9,6 +9,13 @@ readTime: "11 min"
 excerpt: "Dans les grands parcs, la question n'est plus seulement quel agent installer. Elle devient: qui contrôle vraiment le parc qui produit les logs, métriques et traces ?"
 sourceUrl: "https://www.linkedin.com/pulse/qui-utilise-vraiment-opamp-pour-g%25C3%25A9rer-ses-agents-amine-amanzou-2qvte/"
 heroImage: "/blog/opamp-fleet-management-agents/cover.jpg"
+heroImageAlt: "Panorama des approches OpAMP pour gérer une flotte de Collectors OpenTelemetry"
+pillar: "fleet-management"
+intent: "informational"
+primaryQuery: "OpAMP fleet management OpenTelemetry"
+relatedOffer: "fractional_lead"
+keywords: ["OpAMP", "OpenTelemetry", "fleet management", "Collector"]
+proofLevel: "documentation"
 ---
 
 Quand on parle d'agents d'observabilité, on parle souvent du choix de l'agent. OpenTelemetry Collector, agent propriétaire, distribution vendor, sidecar, daemonset, appliance, binaire maison. Le débat part vite sur la performance, les receivers, les exporters, le coût d'ingestion ou le support Kubernetes.

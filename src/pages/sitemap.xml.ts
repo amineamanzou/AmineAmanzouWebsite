@@ -4,6 +4,7 @@ import { getArticlePath } from "../data/articles";
 import inventoryConfig from "../data/indexable-routes.json";
 import { absoluteUrl } from "../data/seo";
 import type { Locale } from "../data/site";
+import { publishedArticles } from "../data/publication";
 
 export const prerender = true;
 
@@ -46,7 +47,7 @@ const alternatesForPaths = (fr: string, en: string, site?: URL): SitemapAlternat
 ];
 
 export const GET: APIRoute = async ({ site }) => {
-  const articles = await getCollection("articles");
+  const articles = publishedArticles(await getCollection("articles"));
   const articleGroups = translatedArticleGroups(articles);
   const entries: SitemapEntry[] = inventoryConfig.staticPagePairs.flatMap((pair) => {
     const alternates = alternatesForPaths(pair.fr, pair.en, site);

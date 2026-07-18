@@ -1,4 +1,4 @@
-export const ANALYTICS_SCHEMA_VERSION = "1.0.0" as const;
+export const ANALYTICS_SCHEMA_VERSION = "1.1.0" as const;
 
 export const analyticsEventNames = [
   "$pageview",
@@ -19,6 +19,7 @@ export const analyticsPageTypes = [
   "contact",
   "blog_index",
   "article",
+  "service",
   "privacy",
   "other",
 ] as const;
@@ -36,6 +37,10 @@ export const analyticsPlacements = [
   "blog_index",
   "article_body",
   "article_footer",
+  "service_hero",
+  "service_proof",
+  "service_footer",
+  "article_offer_cta",
   "contact_panel",
   "dossier_page",
   "terminal",
@@ -51,6 +56,9 @@ export const analyticsCtaIds = [
   "open_contact",
   "clarification_call",
   "source_article",
+  "start_observability_diagnostic",
+  "discuss_otel_sprint",
+  "discuss_fractional_lead",
 ] as const;
 
 export type AnalyticsCtaId = (typeof analyticsCtaIds)[number];
@@ -75,7 +83,7 @@ export type AnalyticsLengthBucket = "0" | "1-8" | "9-24" | "25-64" | "65+";
 
 export type AnalyticsEventPayloads = {
   "$pageview": Record<string, never>;
-  "site.cta_click": { cta_id: AnalyticsCtaId };
+  "site.cta_click": { cta_id: AnalyticsCtaId; article_id?: string };
   "site.asset_download": { asset_id: AnalyticsAssetId };
   "site.outbound_click": { destination: AnalyticsOutboundDestination };
   "site.locale_change": { target_locale: "fr" | "en" };
@@ -90,7 +98,7 @@ export type AnalyticsEventPayloads = {
 
 export const eventPropertyAllowlist: Record<AnalyticsEventName, readonly string[]> = {
   "$pageview": [],
-  "site.cta_click": ["cta_id"],
+  "site.cta_click": ["cta_id", "article_id"],
   "site.asset_download": ["asset_id"],
   "site.outbound_click": ["destination"],
   "site.locale_change": ["target_locale"],

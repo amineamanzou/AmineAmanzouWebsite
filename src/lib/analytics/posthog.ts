@@ -168,7 +168,8 @@ function captureFromElement(element: HTMLElement): void {
 
   if (name === "site.cta_click") {
     const value = element.dataset.analyticsCtaId ?? "";
-    if (isOneOf(value, analyticsCtaIds)) capture(name, { cta_id: value as AnalyticsEventPayloads[typeof name]["cta_id"] }, placement);
+    const articleId = normalizeArticleId(element.dataset.analyticsArticleId ?? "");
+    if (isOneOf(value, analyticsCtaIds)) capture(name, { cta_id: value as AnalyticsEventPayloads[typeof name]["cta_id"], ...(articleId ? { article_id: articleId } : {}) }, placement);
   } else if (name === "site.asset_download") {
     const value = element.dataset.analyticsAssetId ?? "";
     if (isOneOf(value, analyticsAssetIds)) capture(name, { asset_id: value as AnalyticsEventPayloads[typeof name]["asset_id"] }, placement);

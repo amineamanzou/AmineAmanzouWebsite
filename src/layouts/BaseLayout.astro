@@ -69,6 +69,8 @@ const analyticsPageType: AnalyticsPageType = analyticsPath === "/"
         ? "blog_index"
         : analyticsPath.startsWith("/blog/")
           ? "article"
+          : ["/audit-observabilite/", "/observability-audit/", "/consultant-opentelemetry/", "/opentelemetry-consulting/", "/fractional-observability-lead/"].includes(analyticsPath)
+            ? "service"
           : analyticsPath === "/privacy/"
             ? "privacy"
             : "other";

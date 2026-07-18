@@ -8,7 +8,21 @@ const distDir = path.resolve(process.cwd(), "dist");
 const siteUrl = "https://amineamanzou.fr";
 const allowedHreflangs = new Set(["fr", "en", "x-default"]);
 const allowedPageLanguages = new Set(["fr", "en"]);
-const expectedStaticCount = inventoryConfig.expectedTotalCount - inventoryConfig.expectedArticleCount;
+const expectedStaticCount = inventoryConfig.staticPagePairs.length * 2;
+const articleSourceFiles = await readdir(path.resolve(process.cwd(), "src/content/articles"), { recursive: true });
+const publicationDate = process.env.PUBLICATION_DATE?.trim() || (() => {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+})();
+const articlePublicationDates = await Promise.all(
+  articleSourceFiles.filter((file) => file.endsWith(".md")).map(async (file) => {
+    const source = await readFile(path.resolve(process.cwd(), "src/content/articles", file), "utf8");
+    return source.match(/^publishedAt:\s*["'](\d{4}-\d{2}-\d{2})["']\s*$/m)?.[1];
+  }),
+);
+const expectedArticleCount = articlePublicationDates.filter((date) => date && date <= publicationDate).length;
+const expectedTotalCount = expectedStaticCount + expectedArticleCount;
 const expectedStaticUrls = new Set(
   inventoryConfig.staticPagePairs.flatMap(({ fr, en }) => [
     new URL(fr, siteUrl).href,
@@ -493,14 +507,14 @@ if (expectedStaticUrls.size !== expectedStaticCount) {
   );
 }
 if (
-  inventory.size !== inventoryConfig.expectedTotalCount ||
+  inventory.size !== expectedTotalCount ||
   actualStaticUrls.length !== expectedStaticCount ||
-  actualArticleUrls.length !== inventoryConfig.expectedArticleCount ||
+  actualArticleUrls.length !== expectedArticleCount ||
   missingStaticUrls.length > 0 ||
   unexpectedUrls.length > 0
 ) {
   fail(
-    `SEO inventory mismatch: expected ${inventoryConfig.expectedTotalCount} URLs (${expectedStaticCount} static + ${inventoryConfig.expectedArticleCount} articles), found ${inventory.size} (${actualStaticUrls.length} static + ${actualArticleUrls.length} articles${unexpectedUrls.length > 0 ? ` + ${unexpectedUrls.length} unexpected` : ""})`,
+    `SEO inventory mismatch: expected ${expectedTotalCount} URLs (${expectedStaticCount} static + ${expectedArticleCount} articles), found ${inventory.size} (${actualStaticUrls.length} static + ${actualArticleUrls.length} articles${unexpectedUrls.length > 0 ? ` + ${unexpectedUrls.length} unexpected` : ""})`,
   );
   if (missingStaticUrls.length > 0) fail(`Missing static sitemap URLs: ${missingStaticUrls.join(", ")}`);
   if (unexpectedUrls.length > 0) fail(`Unexpected sitemap URLs: ${unexpectedUrls.join(", ")}`);

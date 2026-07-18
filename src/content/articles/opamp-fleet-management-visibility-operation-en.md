@@ -10,6 +10,12 @@ excerpt: "An agent visible in a UI is not necessarily operated by it. The lab sh
 sourceUrl: "https://www.linkedin.com/pulse/seeing-agent-ui-does-mean-you-operate-amine-amanzou-spvde"
 heroImage: "/blog/opamp-fleet-management-visibility-operation/cover-en.png"
 heroImageAlt: "Boundary between seeing an agent in a UI and operating it in production"
+pillar: "fleet-management"
+intent: "case-study"
+primaryQuery: "OpenTelemetry fleet operations"
+relatedOffer: "otel_sprint"
+keywords: ["OpenTelemetry", "fleet operations", "OpAMP", "Collector"]
+proofLevel: "lab"
 ---
 
 In the previous article, I described the benchmark lab: the five approaches, the infrastructure, the simulated load, and the labels I used to avoid mixing public documentation with reproduced evidence.

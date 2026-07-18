@@ -9,6 +9,13 @@ readTime: "8 min"
 excerpt: "Dans les grands parcs d'observabilité, le fleet management ne veut pas seulement dire pousser une configuration. Il sert surtout à rendre visibles les droits, les coûts, l'audit, les rollbacks et les responsabilités."
 sourceUrl: "https://www.linkedin.com/pulse/quand-un-client-dit-fleet-management-il-parle-surtout-amine-amanzou-p5gee/"
 heroImage: "/blog/opamp-fleet-management-governance/cover.png"
+heroImageAlt: "Gouvernance d'une flotte OpenTelemetry entre droits, coûts et responsabilités"
+pillar: "fleet-management"
+intent: "commercial"
+primaryQuery: "gouvernance fleet management OpenTelemetry"
+relatedOffer: "fractional_lead"
+keywords: ["gouvernance", "fleet management", "OpenTelemetry", "coûts"]
+proofLevel: "experience"
 ---
 
 Dans les missions d'observabilité, la demande arrive rarement avec le mot gouvernance.

@@ -40,6 +40,7 @@ if (mode === "off") {
   assert(html.some((row) => row.content.includes("data-analytics-consent")), "Consent UI is missing from enabled build");
   assert(html.some((row) => row.content.includes("data-page-type=\"article\"")), "Article page type is missing");
   assert(html.some((row) => row.content.includes("data-page-type=\"home\"")), "Home page type is missing");
+  assert(html.some((row) => row.content.includes("data-page-type=\"service\"")), "Service page type is missing");
   assert(html.every((row) => !row.content.includes("module.no-external")), "PostHog SDK chunk is statically referenced by HTML");
   assert(js.some((row) => row.file.includes("module.no-external")), "Dynamic PostHog SDK chunk was not emitted");
   for (const required of [

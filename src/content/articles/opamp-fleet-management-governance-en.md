@@ -9,6 +9,13 @@ readTime: "8 min"
 excerpt: "In large observability estates, fleet management is not only about pushing configuration. It is mostly about making permissions, costs, audit, rollbacks and ownership visible."
 sourceUrl: "https://www.linkedin.com/pulse/when-customers-say-fleet-management-mostly-mean-amine-amanzou-lanue/"
 heroImage: "/blog/opamp-fleet-management-governance/cover.png"
+heroImageAlt: "OpenTelemetry fleet governance across permissions, cost and ownership"
+pillar: "fleet-management"
+intent: "commercial"
+primaryQuery: "OpenTelemetry fleet management governance"
+relatedOffer: "fractional_lead"
+keywords: ["governance", "fleet management", "OpenTelemetry", "cost"]
+proofLevel: "experience"
 ---
 
 In observability work, the request rarely starts with the word governance.
