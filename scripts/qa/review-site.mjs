@@ -17,8 +17,10 @@ const requiredFiles = [
   "blog/index.html",
   "blog/opamp-fleet-management-governance/index.html",
   "blog/opamp-fleet-management-agents/index.html",
+  "blog/opamp-fleet-management-control-plane/index.html",
   "en/blog/index.html",
   "en/blog/opamp-fleet-management-governance/index.html",
+  "en/blog/opamp-fleet-management-control-plane/index.html",
   "articles/index.html",
   "robots.txt",
   "sitemap.xml",
@@ -95,6 +97,8 @@ const privacy = html("privacy/index.html");
 const privacyEn = html("en/privacy/index.html");
 const blog = html("blog/index.html");
 const blogArticle = html("blog/opamp-fleet-management-governance/index.html");
+const controlPlaneArticle = html("blog/opamp-fleet-management-control-plane/index.html");
+const controlPlaneArticleEn = html("en/blog/opamp-fleet-management-control-plane/index.html");
 const blogEn = html("en/blog/index.html");
 const articles = html("articles/index.html");
 const robots = html("robots.txt");
@@ -123,6 +127,10 @@ assert(legacyCv.includes("url=/dossier/"), "Legacy CV route missing dossier redi
 assert(blog.includes("Observabilité, SRE et Fleet Management"), "Blog index missing heading");
 assert(blog.includes("Qui utilise vraiment OpAMP"), "Blog index missing imported articles");
 assert(blogArticle.includes("Quand un client dit"), "Blog article route missing rendered article");
+assert(controlPlaneArticle.includes("Le control plane OpenTelemetry"), "French control-plane article is missing");
+assert(controlPlaneArticleEn.includes("The OpenTelemetry control plane"), "English control-plane article is missing");
+assert(controlPlaneArticle.includes("amine-amanzou-bnmee"), "French control-plane LinkedIn source is missing");
+assert(controlPlaneArticleEn.includes("amine-amanzou-axfce"), "English control-plane LinkedIn source is missing");
 assert(blogEn.includes("Observability, SRE and Fleet Management"), "English blog index missing heading");
 assert(articles.includes("url=/blog/"), "Legacy articles route missing blog redirect");
 assert(privacy.includes("Confidentialité et mesure de performance"), "French privacy notice missing");

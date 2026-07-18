@@ -1,6 +1,6 @@
 {
-  "expectedTotalCount": 18,
-  "expectedArticleCount": 8,
+  "expectedTotalCount": 22,
+  "expectedArticleCount": 12,
   "staticPagePairs": [
     { "fr": "/", "en": "/en/", "priorityFr": "1.0", "priorityEn": "0.9" },
     { "fr": "/dossier/", "en": "/en/dossier/", "priorityFr": "0.8", "priorityEn": "0.7" },
