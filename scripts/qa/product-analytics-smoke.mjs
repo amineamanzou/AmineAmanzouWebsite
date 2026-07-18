@@ -84,15 +84,27 @@ try {
     throw new Error(`PostHog did not receive the manual pageview: ${JSON.stringify({ requests, pageErrors, consoleMessages, storage, allRequests })}`);
   }
 
-  await page.evaluate(() => {
-    document.querySelector("[data-analytics-cta-id='start_observability_diagnostic']")?.addEventListener("click", (event) => event.preventDefault(), { once: true });
-  });
-  const requestsBeforeClick = requests.filter((request) => request.method === "POST").length;
-  await page.locator("[data-analytics-cta-id='start_observability_diagnostic']").first().click();
-  await waitFor(
-    () => requests.filter((request) => request.method === "POST").length === requestsBeforeClick + 1,
-    "One CTA click did not emit exactly one additional request",
-  );
+  const offers = [
+    { path: "/audit-observabilite/", ctaId: "start_observability_diagnostic", serviceId: "diagnostic" },
+    { path: "/consultant-opentelemetry/", ctaId: "discuss_otel_sprint", serviceId: "otel_sprint" },
+    { path: "/fractional-observability-lead/", ctaId: "discuss_fractional_lead", serviceId: "fractional_lead" },
+  ];
+  for (const offer of offers) {
+    await page.goto(new URL(offer.path, pageUrl).href, { waitUntil: "networkidle", timeout });
+    await waitFor(
+      () => requests.filter((request) => request.method === "POST").length > 0,
+      `${offer.serviceId} pageview was not sent`,
+    );
+    await page.evaluate((ctaId) => {
+      document.querySelector(`[data-analytics-cta-id='${ctaId}']`)?.addEventListener("click", (event) => event.preventDefault(), { once: true });
+    }, offer.ctaId);
+    const requestsBeforeClick = requests.filter((request) => request.method === "POST").length;
+    await page.locator(`[data-analytics-cta-id='${offer.ctaId}']`).first().click();
+    await waitFor(
+      () => requests.filter((request) => request.method === "POST").length === requestsBeforeClick + 1,
+      `${offer.serviceId} CTA click did not emit exactly one additional request`,
+    );
+  }
 
   const serialized = requests.map((request) => {
     try {
@@ -105,7 +117,10 @@ try {
     assert(!serialized.includes(forbidden), `Forbidden analytics data reached the endpoint: ${forbidden}`);
   }
   assert(serialized.includes("site.cta_click"), "CTA event name is missing from PostHog payload");
-  assert(serialized.includes("start_observability_diagnostic"), "Closed CTA id is missing from PostHog payload");
+  for (const offer of offers) {
+    assert(serialized.includes(offer.ctaId), `Closed CTA id is missing from PostHog payload: ${offer.ctaId}`);
+    assert(serialized.includes(offer.serviceId), `Closed service id is missing from PostHog payload: ${offer.serviceId}`);
+  }
   assert(serialized.includes("p2-qa"), "Normalized campaign attribution is missing");
 
   await page.locator("[data-analytics-settings]").click();
@@ -138,7 +153,7 @@ try {
   assert(pageErrors.length === 0, `Browser errors: ${pageErrors.join(" | ")}`);
   console.log(JSON.stringify({
     ok: true,
-    phases: ["pre-consent", "manual-events", "withdrawal", "gpc"],
+    phases: ["pre-consent", "offer-events", "withdrawal", "gpc"],
     postRequests: requests.filter((request) => request.method === "POST").length,
     sdkLoadedOnlyAfterConsent: true,
     sensitiveValuesExcluded: true,

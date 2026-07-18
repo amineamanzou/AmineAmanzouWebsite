@@ -41,6 +41,21 @@ if (mode === "off") {
   assert(html.some((row) => row.content.includes("data-page-type=\"article\"")), "Article page type is missing");
   assert(html.some((row) => row.content.includes("data-page-type=\"home\"")), "Home page type is missing");
   assert(html.some((row) => row.content.includes("data-page-type=\"service\"")), "Service page type is missing");
+  for (const contract of [
+    { file: "audit-observabilite/index.html", ctaId: "start_observability_diagnostic" },
+    { file: "consultant-opentelemetry/index.html", ctaId: "discuss_otel_sprint" },
+    { file: "fractional-observability-lead/index.html", ctaId: "discuss_fractional_lead" },
+    { file: "en/observability-audit/index.html", ctaId: "start_observability_diagnostic" },
+    { file: "en/opentelemetry-consulting/index.html", ctaId: "discuss_otel_sprint" },
+    { file: "en/fractional-observability-lead/index.html", ctaId: "discuss_fractional_lead" },
+  ]) {
+    const page = html.find((row) => row.file === contract.file);
+    assert(page, `Service analytics page is missing: ${contract.file}`);
+    assert(page.content.includes(`data-analytics-cta-id=\"${contract.ctaId}\"`), `Service CTA contract is missing from ${contract.file}`);
+  }
+  for (const required of ["1.2.0", "service_id", "diagnostic", "otel_sprint", "fractional_lead"]) {
+    assert(all.includes(required), `Offer analytics contract marker is missing: ${required}`);
+  }
   assert(html.every((row) => !row.content.includes("module.no-external")), "PostHog SDK chunk is statically referenced by HTML");
   assert(js.some((row) => row.file.includes("module.no-external")), "Dynamic PostHog SDK chunk was not emitted");
   for (const required of [

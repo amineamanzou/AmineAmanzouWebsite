@@ -1,6 +1,6 @@
 # P2 product analytics contract
 
-Status: implemented dark on `codex/p2-product-analytics`; production collection is disabled by default and remains gated by P1 acceptance.
+Status: active in production after explicit consent. Automatic push and scheduled builds keep the client enabled; a manual production dispatch with `product_analytics=false` publishes the kill-switch image.
 
 ## Runtime contract
 
@@ -12,14 +12,14 @@ Status: implemented dark on `codex/p2-product-analytics`; production collection 
 - CTA IDs, assets and outbound destinations are enums. A mail click remains intent and is never treated as a lead or meeting.
 - URL query strings, hashes, full referrers, DOM text and emails are removed by the client allow-list.
 
-The common properties are `schema_version`, `site_name`, `environment`, `release_sha`, `locale`, `page_type`, `page_path`, `placement` and an optional referrer hostname. UTM attribution accepts only the five standard `utm_*` keys, is bounded, and starts after consent.
+The common properties are `schema_version`, `site_name`, `environment`, `release_sha`, `locale`, `page_type`, `page_path`, `placement` and an optional referrer hostname. Service pageviews and service CTA events add the closed `service_id` enum: `diagnostic`, `otel_sprint` or `fractional_lead`. UTM attribution accepts only the five standard `utm_*` keys, is bounded, and starts after consent.
 
 ## Activation and rollback
 
-Production push builds always keep `PUBLIC_PRODUCT_ANALYTICS_ENABLED=false`. After the P1 gate is accepted, a manual production dispatch may enable the portfolio P2 canary only when `PUBLIC_POSTHOG_KEY` exists as a repository variable. Disable the workflow input and rebuild to kill collection; the site remains fully functional without the SDK.
+Production push and scheduled builds set `PUBLIC_PRODUCT_ANALYTICS_ENABLED=true` and require `PUBLIC_POSTHOG_KEY` as a repository variable. A manual production dispatch with `product_analytics=false` rebuilds the site without the consent surface or SDK and remains the operational kill switch. The site remains fully functional in that mode.
 
 ## Verification
 
-`npm run check:product-analytics -- --mode=off` proves the default bundle has no consent UI, PostHog host or project key. The enabled check verifies the hardened SDK configuration and absence of browser `business.*` events. `npm run review:product-analytics` proves no pre-consent request, a single CTA event, withdrawal cleanup and GPC blocking.
+`npm run check:product-analytics -- --mode=off` proves a kill-switch bundle has no consent UI, PostHog host or project key. The enabled check verifies the hardened SDK configuration, all six service routes and the absence of browser `business.*` events. `npm run review:product-analytics` proves no pre-consent request, one event per CTA across the three offers, withdrawal cleanup and GPC blocking.
 
 PostHog project: [Web Product Analytics](https://eu.posthog.com/project/221181/dashboard). Dashboard shells intentionally remain empty until real consented events arrive.
