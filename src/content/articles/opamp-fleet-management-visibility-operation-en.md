@@ -7,6 +7,7 @@ publishedAt: "2026-07-11"
 label: "OpAMP / Fleet operations"
 readTime: "8 min"
 excerpt: "An agent visible in a UI is not necessarily operated by it. The lab shows where visibility, lifecycle, security, and trust in the inventory actually stop."
+sourceUrl: "https://www.linkedin.com/pulse/seeing-agent-ui-does-mean-you-operate-amine-amanzou-spvde"
 heroImage: "/blog/opamp-fleet-management-visibility-operation/cover-en.png"
 heroImageAlt: "Boundary between seeing an agent in a UI and operating it in production"
 ---
