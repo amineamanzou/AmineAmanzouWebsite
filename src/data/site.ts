@@ -177,7 +177,7 @@ export const localized = {
         "J’interviens quand les alertes s’empilent, que le diagnostic ralentit et que la facture de télémétrie n’explique plus la couverture obtenue.",
       proofLine:
         "Enedis, Orange, Odigo et Ylio : gouvernance, migrations critiques, OpenTelemetry et réduction d’incidents en production.",
-      primaryCta: "Demander un diagnostic",
+      primaryCta: "Réserver un échange de cadrage",
       secondaryCta: "Voir les missions",
     },
     proof: {
@@ -259,7 +259,7 @@ export const localized = {
         "I step in when alerts pile up, diagnosis slows down and telemetry spend no longer explains the coverage teams receive.",
       proofLine:
         "Enedis, Orange, Odigo and Ylio: governance, critical migrations, OpenTelemetry and fewer production incidents.",
-      primaryCta: "Request an audit",
+      primaryCta: "Book a scoping call",
       secondaryCta: "View missions",
     },
     proof: {

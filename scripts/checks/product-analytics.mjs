@@ -52,6 +52,7 @@ if (mode === "off") {
     const page = html.find((row) => row.file === contract.file);
     assert(page, `Service analytics page is missing: ${contract.file}`);
     assert(page.content.includes(`data-analytics-cta-id=\"${contract.ctaId}\"`), `Service CTA contract is missing from ${contract.file}`);
+    assert(page.content.includes("calendar.google.com/calendar/appointments/schedules/"), `Service booking destination is missing from ${contract.file}`);
   }
   for (const required of ["1.2.0", "service_id", "diagnostic", "otel_sprint", "fractional_lead"]) {
     assert(all.includes(required), `Offer analytics contract marker is missing: ${required}`);
@@ -78,8 +79,8 @@ if (mode === "off") {
     assert(!all.includes(forbidden), `Browser bundle contains forbidden business event: ${forbidden}`);
   }
   for (const required of [
-    "Un clic sur un lien email n’est jamais compté comme un lead ou un rendez-vous.",
-    "A click on an email link is never counted as a lead or a meeting.",
+    "Un clic vers une page de réservation n’est jamais compté comme un lead ni comme un rendez-vous confirmé.",
+    "A click through to a booking page is never counted as a lead or a confirmed meeting.",
     "ils ne prouvent pas qu’une campagne a causé une conversion.",
     "they do not prove that a campaign caused a conversion.",
     "ce plafond n’est pas encore vérifié comme une règle techniquement appliquée",
