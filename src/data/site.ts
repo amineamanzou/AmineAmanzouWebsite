@@ -198,7 +198,7 @@ export const localized = {
     blogPreview: {
       title: "Écrire pour clarifier la production.",
       body:
-        "Articles sur Observabilité, Fleet Management, OpAMP et pratiques SRE, repris du travail éditorial The Unreliable Engineer.",
+        "Des retours terrain sur l’observabilité, le Fleet Management, OpAMP et les pratiques SRE qui tiennent en production.",
       cta: "Lire les articles",
     },
     downloadBand: {
@@ -236,7 +236,7 @@ export const localized = {
       kicker: "Blog",
       heading: "Observabilité, SRE et Fleet Management.",
       body:
-        "Une sélection d'articles publiés sur The Unreliable Engineer, un média où je fais de la création de contenu et où je partage sur des sujets plus Tech, IA, etc.",
+        "J’y documente ce que je teste, ce que j’observe sur le terrain et ce qui reste à vérifier : observabilité, OpenTelemetry, Fleet Management, fiabilité et Agentic SRE.",
       listLabel: "Liste des articles",
       backLabel: "Retour aux articles",
       sourceLabel: "Source LinkedIn",
@@ -280,7 +280,7 @@ export const localized = {
     blogPreview: {
       title: "Writing to clarify production.",
       body:
-        "Articles about Observability, Fleet Management, OpAMP and SRE practices, carried over from The Unreliable Engineer editorial work.",
+        "Field notes on observability, Fleet Management, OpAMP and SRE practices that hold up in production.",
       cta: "Read the articles",
     },
     downloadBand: {
@@ -318,7 +318,7 @@ export const localized = {
       kicker: "Blog",
       heading: "Observability, SRE and Fleet Management.",
       body:
-        "A selection of articles published on The Unreliable Engineer, a media project where I create content and share ideas on deeper tech, AI and adjacent topics.",
+        "I use this space to document what I test, what I observe in the field and what still needs validation: observability, OpenTelemetry, Fleet Management, reliability and Agentic SRE.",
       listLabel: "Article list",
       backLabel: "Back to articles",
       sourceLabel: "LinkedIn source",
