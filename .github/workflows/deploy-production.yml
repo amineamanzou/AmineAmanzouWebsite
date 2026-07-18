@@ -14,7 +14,7 @@ on:
         type: boolean
         default: false
       product_analytics:
-        description: Enable the consent-gated PostHog product analytics canary in this image
+        description: Manual runs only; false publishes the consent-gated PostHog kill-switch image
         required: false
         type: boolean
         default: false
@@ -90,7 +90,7 @@ jobs:
           npm run review:site
 
       - name: Verify exact product analytics canary build contract
-        if: inputs.product_analytics
+        if: github.event_name != 'workflow_dispatch' || inputs.product_analytics
         env:
           PUBLIC_PRODUCT_ANALYTICS_ENABLED: "true"
           PUBLIC_POSTHOG_KEY: ${{ vars.PUBLIC_POSTHOG_KEY }}
@@ -145,7 +145,7 @@ jobs:
             PUBLIC_BROWSER_SERVICE_NAME=amineamanzou-frontend
             PUBLIC_BROWSER_SITE_NAME=amineamanzou.fr
             PUBLIC_DEPLOYMENT_ENVIRONMENT=production
-            PUBLIC_PRODUCT_ANALYTICS_ENABLED=${{ inputs.product_analytics && 'true' || 'false' }}
+            PUBLIC_PRODUCT_ANALYTICS_ENABLED=${{ github.event_name != 'workflow_dispatch' || inputs.product_analytics }}
             PUBLIC_POSTHOG_KEY=${{ vars.PUBLIC_POSTHOG_KEY }}
             PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
             PUBLIC_ANALYTICS_SITE_NAME=amineamanzou.fr

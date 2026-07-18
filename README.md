@@ -59,6 +59,15 @@ The lockfile overrides `protobufjs` to the patched `7.6.5` release because the
 disabled replay dependency otherwise resolves a vulnerable `7.5.x` version.
 CI and production reject high or critical production dependency advisories.
 
+## Product analytics
+
+Production push and scheduled builds enable the consent-gated PostHog client.
+It records only the closed `site.*` contract after opt-in. Service pageviews and
+CTA clicks carry one of three bounded service IDs: `diagnostic`, `otel_sprint`
+or `fractional_lead`. A manual production dispatch with
+`product_analytics=false` publishes a kill-switch image without the consent UI
+or SDK.
+
 ## Production Flow
 
 GitHub Actions builds and publishes a signed image:
