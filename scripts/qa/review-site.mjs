@@ -10,10 +10,16 @@ const requiredFiles = [
   "cv/index.html",
   "contact/index.html",
   "privacy/index.html",
+  "audit-observabilite/index.html",
+  "consultant-opentelemetry/index.html",
+  "fractional-observability-lead/index.html",
   "en/index.html",
   "en/dossier/index.html",
   "en/contact/index.html",
   "en/privacy/index.html",
+  "en/observability-audit/index.html",
+  "en/opentelemetry-consulting/index.html",
+  "en/fractional-observability-lead/index.html",
   "blog/index.html",
   "blog/opamp-fleet-management-governance/index.html",
   "blog/opamp-fleet-management-agents/index.html",
@@ -30,12 +36,14 @@ const requiredFiles = [
 ];
 
 const requiredHomeText = [
-  "Freelance SRE",
+  "Consultant Observabilité",
   "Enedis",
   "Odigo",
   "Ylio",
   "Orange",
-  "Voir le dossier",
+  "Demander un diagnostic",
+  "OpenTelemetry &amp; Reliability Sprint",
+  "Agentic SRE",
   "Télécharger le dossier de compétence",
 ];
 
@@ -55,7 +63,7 @@ const requiredContactText = [
 ];
 
 const requiredEnglishText = [
-  "Freelance SRE",
+  "Observability Consultant",
   "Download the capability statement",
   "Missions and experience",
   "Clickable email address",
@@ -72,9 +80,16 @@ function html(path) {
 }
 
 function articleSourceCount(locale) {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const cutoff = process.env.PUBLICATION_DATE?.trim() || `${values.year}-${values.month}-${values.day}`;
   return readdirSync(join(root, "src/content/articles"))
     .filter((file) => file.endsWith(".md"))
-    .filter((file) => readFileSync(join(root, "src/content/articles", file), "utf8").includes(`locale: "${locale}"`))
+    .filter((file) => {
+      const source = readFileSync(join(root, "src/content/articles", file), "utf8");
+      const date = source.match(/^publishedAt:\s*["'](\d{4}-\d{2}-\d{2})["']\s*$/m)?.[1];
+      return source.includes(`locale: "${locale}"`) && date && date <= cutoff;
+    })
     .length;
 }
 
@@ -103,6 +118,9 @@ const blogEn = html("en/blog/index.html");
 const articles = html("articles/index.html");
 const robots = html("robots.txt");
 const sitemap = html("sitemap.xml");
+const diagnostic = html("audit-observabilite/index.html");
+const otelSprint = html("consultant-opentelemetry/index.html");
+const fractionalLead = html("fractional-observability-lead/index.html");
 
 for (const text of requiredHomeText) {
   assert(home.includes(text), `Home missing expected text: ${text}`);
@@ -143,13 +161,18 @@ assert(home.includes('hreflang="x-default" href="https://amineamanzou.fr/"'), "H
 assert(home.includes("theme-toggle"), "Home missing theme toggle");
 assert(!home.includes("topbar-cta"), "Home should not render the legacy topbar CTA");
 assert(
-  articleCardCount(home) === articleSourceCount("fr"),
-  "Home should render every French article card",
+  articleCardCount(home) === Math.min(3, articleSourceCount("fr")),
+  "Home should render three French pillar article cards",
 );
 assert(
-  articleCardCount(homeEn) === articleSourceCount("en"),
-  "English home should render every English article card",
+  articleCardCount(homeEn) === Math.min(3, articleSourceCount("en")),
+  "English home should render three English pillar article cards",
 );
+assert(diagnostic.includes("À partir de 4 500 € HT"), "Diagnostic page missing public price");
+assert(diagnostic.includes('"@type":"Offer","price":"4500"'), "Diagnostic page missing structured Offer");
+assert(diagnostic.includes('"@type":"FAQPage"'), "Diagnostic page missing FAQ structured data");
+assert(otelSprint.includes("Faire passer OpenTelemetry du POC au chemin critique"), "OTel sprint page missing H1");
+assert(fractionalLead.includes("2 à 8 jours / mois"), "Fractional page missing cadence");
 assert(blogArticle.includes('property="og:type" content="article"'), "Article missing OG article type");
 assert(blogArticle.includes('property="article:published_time"'), "Article missing published time metadata");
 assert(robots.includes("Sitemap: https://amineamanzou.fr/sitemap.xml"), "Robots missing sitemap");

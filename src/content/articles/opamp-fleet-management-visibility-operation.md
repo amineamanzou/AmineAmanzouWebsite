@@ -10,6 +10,12 @@ excerpt: "Un agent visible dans une interface n'est pas forcément piloté. Le l
 sourceUrl: "https://www.linkedin.com/pulse/voir-un-agent-dans-une-ui-ce-nest-pas-le-piloter-amine-amanzou-yzvxe"
 heroImage: "/blog/opamp-fleet-management-visibility-operation/cover.png"
 heroImageAlt: "Frontière entre la visibilité d'un agent dans une interface et son pilotage opérationnel"
+pillar: "fleet-management"
+intent: "case-study"
+primaryQuery: "pilotage flotte OpenTelemetry"
+relatedOffer: "otel_sprint"
+keywords: ["OpenTelemetry", "fleet operations", "OpAMP", "Collector"]
+proofLevel: "lab"
 ---
 
 Dans l'article précédent, j'ai détaillé le lab de benchmark: les cinq approches, l'infra, la charge simulée et les labels utilisés pour ne pas mélanger une documentation publique avec une preuve reproduite.

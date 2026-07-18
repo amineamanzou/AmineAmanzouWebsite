@@ -85,10 +85,10 @@ try {
   }
 
   await page.evaluate(() => {
-    document.querySelector("[data-analytics-cta-id='open_dossier']")?.addEventListener("click", (event) => event.preventDefault(), { once: true });
+    document.querySelector("[data-analytics-cta-id='start_observability_diagnostic']")?.addEventListener("click", (event) => event.preventDefault(), { once: true });
   });
   const requestsBeforeClick = requests.filter((request) => request.method === "POST").length;
-  await page.locator("[data-analytics-cta-id='open_dossier']").click();
+  await page.locator("[data-analytics-cta-id='start_observability_diagnostic']").first().click();
   await waitFor(
     () => requests.filter((request) => request.method === "POST").length === requestsBeforeClick + 1,
     "One CTA click did not emit exactly one additional request",
@@ -105,7 +105,7 @@ try {
     assert(!serialized.includes(forbidden), `Forbidden analytics data reached the endpoint: ${forbidden}`);
   }
   assert(serialized.includes("site.cta_click"), "CTA event name is missing from PostHog payload");
-  assert(serialized.includes("open_dossier"), "Closed CTA id is missing from PostHog payload");
+  assert(serialized.includes("start_observability_diagnostic"), "Closed CTA id is missing from PostHog payload");
   assert(serialized.includes("p2-qa"), "Normalized campaign attribution is missing");
 
   await page.locator("[data-analytics-settings]").click();

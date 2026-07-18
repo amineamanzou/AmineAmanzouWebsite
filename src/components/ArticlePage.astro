@@ -1,30 +1,49 @@
 ---
-import type { CollectionEntry } from "astro:content";
-import { render } from "astro:content";
+import { getCollection, render, type CollectionEntry } from "astro:content";
 import SiteFooter from "./SiteFooter.astro";
 import Topbar from "./Topbar.astro";
-import { formatArticleDate, getArticlePath } from "../data/articles";
+import { formatArticleDate, getArticleCards, getArticlePath } from "../data/articles";
 import { articleJsonLd } from "../data/seo";
+import { getService } from "../data/services";
 import { localized, type Locale } from "../data/site";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-type Props = {
-  article: CollectionEntry<"articles">;
-  alternateHref?: string;
-  alternates?: Array<{ locale: Locale; path: string }>;
-};
+type Props = { article: CollectionEntry<"articles">; alternateHref?: string; alternates?: Array<{ locale: Locale; path: string }> };
 
 const { article, alternateHref, alternates = [] } = Astro.props;
 const locale = article.data.locale;
 const copy = localized[locale];
 const pagePath = getArticlePath(article);
-const { Content } = await render(article);
-const hasSource = Boolean(article.data.sourceUrl);
+const { Content, headings } = await render(article);
+const tocHeadings = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const hasToc = tocHeadings.length >= 4;
+const allArticles = await getCollection("articles");
+const relatedArticles = getArticleCards(
+  allArticles.filter((candidate) => candidate.id !== article.id && candidate.data.locale === locale && candidate.data.pillar === article.data.pillar),
+  locale,
+).slice(0, 3);
+const relatedService = getService(article.data.relatedOffer);
+const relatedServiceCopy = relatedService.copy[locale];
+const blogPath = locale === "fr" ? "/blog/" : "/en/blog/";
+const proofCopy = {
+  fr: {
+    documentation: ["Documentation", "Les constats centraux sont reliés à des sources publiques. Les limites de ces sources restent distinguées des observations terrain."],
+    lab: ["Test terrain", "Les résultats décrits ont été reproduits dans un environnement de test. Ils valent pour ce protocole et cette version, pas pour tous les contextes."],
+    experience: ["Expérience", "L’analyse s’appuie sur des situations rencontrées en mission. Les détails sensibles et les généralisations non vérifiées restent hors du récit."],
+    hypothesis: ["Hypothèse", "Ce contenu propose une piste à tester. Il ne la présente pas comme une pratique déjà validée en production."],
+  },
+  en: {
+    documentation: ["Documentation", "The central claims are tied to public sources. Source limitations remain separate from field observations."],
+    lab: ["Field test", "The results were reproduced in a test environment. They apply to this protocol and version, not every context."],
+    experience: ["Experience", "The analysis draws from delivery situations. Sensitive details and unverified generalizations stay outside the account."],
+    hypothesis: ["Hypothesis", "This article proposes a direction to test. It does not present it as production-proven practice."],
+  },
+}[locale][article.data.proofLevel];
 ---
 
 <BaseLayout
-  title={`${article.data.title} | Amine Amanzou`}
-  description={article.data.excerpt}
+  title={article.data.seoTitle ?? `${article.data.title} | Amine Amanzou`}
+  description={article.data.seoDescription ?? article.data.excerpt}
   canonicalPath={pagePath}
   alternates={alternates}
   bodyClass="article-page"
@@ -33,64 +52,36 @@ const hasSource = Boolean(article.data.sourceUrl);
   ogImage={article.data.heroImage ?? "/images/amine-amanzou-profile.jpeg"}
   publishedAt={article.data.publishedAt}
   modifiedAt={article.data.modifiedAt ?? article.data.publishedAt}
-  jsonLd={articleJsonLd({
-    article,
-    path: pagePath,
-    image: article.data.heroImage,
-    site: Astro.site,
-  })}
+  jsonLd={articleJsonLd({ article, path: pagePath, image: article.data.heroImage, site: Astro.site })}
 >
-  <Fragment slot="head">
-    <meta property="article:author" content="Amine Amanzou" />
-    <meta property="article:section" content={article.data.label} />
-  </Fragment>
-
+  <Fragment slot="head"><meta property="article:author" content="Amine Amanzou" /><meta property="article:section" content={article.data.label} /></Fragment>
   <Topbar currentPath={pagePath} locale={locale} alternateHref={alternateHref} />
 
   <main class="article-main">
     <article class="article-shell">
       <header class="article-header" data-reveal>
-        <a class="article-back" href={locale === "fr" ? "/blog/" : "/en/blog/"}>{copy.blog.backLabel}</a>
-        <p class="role-line">{article.data.label}</p>
-        <h1>{article.data.title}</h1>
-        <p>{article.data.excerpt}</p>
-        <div class="article-meta">
-          <span>{formatArticleDate(article.data.publishedAt, locale)}</span>
-          <span>{article.data.readTime}</span>
-        </div>
+        <nav class="breadcrumb" aria-label={locale === "fr" ? "Fil d’Ariane" : "Breadcrumb"}><a href={blogPath}>Blog</a><span aria-hidden="true">/</span><span>{article.data.label}</span></nav>
+        <p class="role-line">{article.data.label}</p><h1>{article.data.title}</h1><p>{article.data.excerpt}</p>
+        <div class="article-meta"><span>{locale === "fr" ? "Publié le" : "Published"} {formatArticleDate(article.data.publishedAt, locale)}</span>{article.data.modifiedAt && <span>{locale === "fr" ? "Mis à jour le" : "Updated"} {formatArticleDate(article.data.modifiedAt, locale)}</span>}<span>{article.data.readTime}</span></div>
       </header>
 
-      {article.data.heroImage && (
-        <img
-          class="article-hero-image"
-          src={article.data.heroImage}
-          alt=""
-          loading="eager"
-          decoding="async"
-          data-reveal
-        />
-      )}
+      {article.data.heroImage && <img class="article-hero-image" src={article.data.heroImage} alt={article.data.heroImageAlt} loading="eager" decoding="async" data-reveal />}
 
-      {hasSource && article.data.sourceUrl && (
-        <aside class="article-source">
-          <div class="article-source-label" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-            <strong>{article.data.articleSlug}.linkedin</strong>
-          </div>
-          <p>{copy.blog.sourceText}</p>
-          <a class="button button-primary" href={article.data.sourceUrl} target="_blank" rel="noreferrer" data-analytics-event="site.outbound_click" data-analytics-destination="source_article" data-analytics-placement="article_body">
-            {copy.blog.sourceCta}
-          </a>
-        </aside>
-      )}
+      <aside class="article-proof-note" data-reveal><span>{proofCopy[0]}</span><p>{proofCopy[1]}</p></aside>
 
-      <div class="article-content">
-        <Content />
-      </div>
+      {hasToc && <nav class="article-toc" aria-label={locale === "fr" ? "Sommaire" : "Table of contents"} data-reveal><strong>{locale === "fr" ? "Dans cet article" : "In this article"}</strong><ol>{tocHeadings.map((heading) => <li class:list={[heading.depth === 3 && "is-nested"]}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol></nav>}
+
+      {article.data.sourceUrl && <aside class="article-source"><div class="article-source-label" aria-hidden="true"><span></span><span></span><span></span><strong>{article.data.articleSlug}.linkedin</strong></div><p>{copy.blog.sourceText}</p><a class="button button-primary" href={article.data.sourceUrl} target="_blank" rel="noreferrer" data-analytics-event="site.outbound_click" data-analytics-destination="source_article" data-analytics-placement="article_body">{copy.blog.sourceCta}</a></aside>}
+
+      <div class="article-content"><Content /></div>
+
+      <aside class="article-offer-cta" data-reveal>
+        <span>{locale === "fr" ? "Offre associée" : "Related service"}</span><h2>{relatedServiceCopy.eyebrow}</h2><p>{relatedServiceCopy.description}</p>
+        <a class="button button-primary" href={relatedServiceCopy.path} data-analytics-event="site.cta_click" data-analytics-cta-id={article.data.relatedOffer === "diagnostic" ? "start_observability_diagnostic" : article.data.relatedOffer === "otel_sprint" ? "discuss_otel_sprint" : "discuss_fractional_lead"} data-analytics-placement="article_offer_cta" data-analytics-article-id={article.data.articleSlug}>{locale === "fr" ? "Voir l’offre" : "View the service"}</a>
+      </aside>
+
+      {relatedArticles.length > 0 && <section class="article-related"><div class="section-heading"><h2>{locale === "fr" ? "Dans le même pilier" : "From the same pillar"}</h2></div><div class="article-grid">{relatedArticles.map((related) => <a class="article-card" href={related.href}><span>{related.label}</span><h3>{related.title}</h3><p>{related.excerpt}</p><small>{related.date} · {related.readTime}</small></a>)}</div></section>}
     </article>
   </main>
-
   <SiteFooter locale={locale} />
 </BaseLayout>

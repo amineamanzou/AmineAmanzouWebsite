@@ -1,5 +1,6 @@
 import type { CollectionEntry } from "astro:content";
 import type { Locale } from "./site";
+import { isPublished } from "./publication";
 
 export type ArticleCard = {
   slug: string;
@@ -11,6 +12,9 @@ export type ArticleCard = {
   excerpt: string;
   href: string;
   heroImage?: string;
+  heroImageAlt: string;
+  pillar: CollectionEntry<"articles">["data"]["pillar"];
+  intent: CollectionEntry<"articles">["data"]["intent"];
 };
 
 export const formatArticleDate = (isoDate: string, locale: Locale) =>
@@ -30,7 +34,7 @@ export const getArticleCards = (
   locale: Locale,
 ): ArticleCard[] =>
   articles
-    .filter((article) => article.data.locale === locale)
+    .filter((article) => article.data.locale === locale && isPublished(article))
     .sort((a, b) => b.data.publishedAt.localeCompare(a.data.publishedAt))
     .map((article) => ({
       slug: article.data.articleSlug,
@@ -42,4 +46,7 @@ export const getArticleCards = (
       excerpt: article.data.excerpt,
       href: getArticlePath(article),
       heroImage: article.data.heroImage,
+      heroImageAlt: article.data.heroImageAlt,
+      pillar: article.data.pillar,
+      intent: article.data.intent,
     }));

@@ -1,0 +1,116 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteFooter from "./SiteFooter.astro";
+import Topbar from "./Topbar.astro";
+import { getService, serviceCtaId, serviceMailto, type ServiceId } from "../data/services";
+import { serviceJsonLd } from "../data/seo";
+import type { Locale } from "../data/site";
+
+type Props = { serviceId: ServiceId; locale?: Locale };
+
+const { serviceId, locale = "fr" } = Astro.props;
+const service = getService(serviceId);
+const copy = service.copy[locale];
+const homePath = locale === "fr" ? "/" : "/en/";
+const mailto = serviceMailto(service, locale);
+const ctaId = serviceCtaId[service.id];
+---
+
+<BaseLayout
+  title={copy.title}
+  description={copy.description}
+  canonicalPath={copy.path}
+  alternates={[
+    { locale: "fr", path: service.copy.fr.path },
+    { locale: "en", path: service.copy.en.path },
+  ]}
+  bodyClass="service-page"
+  locale={locale}
+  jsonLd={serviceJsonLd({ service, locale, site: Astro.site })}
+>
+  <Topbar currentPath={copy.path} locale={locale} alternateHref={copy.alternatePath} />
+
+  <main>
+    <header class="service-hero section-shell">
+      <div class="service-hero-copy" data-reveal>
+        <nav class="breadcrumb" aria-label={locale === "fr" ? "Fil d’Ariane" : "Breadcrumb"}>
+          <a href={homePath}>{locale === "fr" ? "Accueil" : "Home"}</a><span aria-hidden="true">/</span><span>{copy.eyebrow}</span>
+        </nav>
+        <p class="role-line">{copy.eyebrow}</p>
+        <h1>{copy.h1}</h1>
+        <p class="hero-lede">{copy.intro}</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href={mailto} data-analytics-event="site.cta_click" data-analytics-cta-id={ctaId} data-analytics-placement="service_hero">{copy.ctaLabel}</a>
+          <a class="button button-secondary" href="#livrables">{locale === "fr" ? "Voir les livrables" : "See deliverables"}</a>
+        </div>
+      </div>
+      <aside class="service-facts" aria-label={locale === "fr" ? "Cadre de l’offre" : "Engagement details"} data-reveal>
+        <div><span>{copy.durationLabel}</span><strong>{copy.duration}</strong></div>
+        <div><span>{copy.priceLabel}</span><strong>{copy.price}</strong></div>
+        <p>{locale === "fr" ? "Intervention à distance ou sur site selon le contexte. France et international." : "Remote or on-site depending on context. France and international."}</p>
+      </aside>
+    </header>
+
+    <section class="service-dark-section">
+      <div class="section-shell service-symptom-layout">
+        <div class="section-heading" data-reveal><p class="section-kicker">01</p><h2>{copy.symptomsTitle}</h2></div>
+        <ul class="symptom-list">
+          {copy.symptoms.map((symptom, index) => <li data-reveal style={`--i: ${index}`}><span>{String(index + 1).padStart(2, "0")}</span>{symptom}</li>)}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section-shell service-outcome">
+      <div data-reveal><p class="section-kicker">02 · {locale === "fr" ? "Résultat" : "Outcome"}</p><h2>{copy.outcomeTitle}</h2><p class="section-lede">{copy.outcome}</p></div>
+      <ul class="outcome-list">{copy.results.map((result) => <li data-reveal>{result}</li>)}</ul>
+    </section>
+
+    <section class="section-shell service-deliverables" id="livrables">
+      <div class="section-heading" data-reveal><p class="section-kicker">03</p><h2>{copy.deliverablesTitle}</h2></div>
+      <div class="deliverable-grid">
+        {copy.deliverables.map((item, index) => <article data-reveal style={`--i: ${index}`}><span>{String(index + 1).padStart(2, "0")}</span><h3>{item.title}</h3><p>{item.body}</p></article>)}
+      </div>
+    </section>
+
+    <section class="service-method-section">
+      <div class="section-shell">
+        <div class="section-heading" data-reveal><p class="section-kicker">04</p><h2>{copy.methodTitle}</h2></div>
+        <ol class="method-list">
+          {copy.method.map((item) => <li data-reveal><strong>{item.step}</strong><div><h3>{item.title}</h3><p>{item.body}</p></div></li>)}
+        </ol>
+      </div>
+    </section>
+
+    <section class="section-shell service-proof" data-analytics-placement="service_proof">
+      <div class="section-heading" data-reveal><p class="section-kicker">05 · {locale === "fr" ? "Preuve" : "Proof"}</p><h2>{copy.proofTitle}</h2></div>
+      <div class="proof-case-grid">
+        {copy.proofs.map((proof) => <article data-reveal><span>{proof.company}</span><strong>{proof.metric}</strong><p>{proof.body}</p></article>)}
+      </div>
+    </section>
+
+    <section class="agentic-section">
+      <div class="section-shell agentic-layout">
+        <div data-reveal><p class="section-kicker">Agentic SRE</p><h2>{copy.agenticTitle}</h2><p class="section-lede">{copy.agenticBody}</p></div>
+        <div data-reveal><ul class="agentic-artifacts">{copy.agenticItems.map((item) => <li>{item}</li>)}</ul><p class="agentic-limit">{copy.agenticLimit}</p></div>
+      </div>
+    </section>
+
+    <section class="section-shell service-engagement">
+      <div data-reveal><p class="section-kicker">06 · {locale === "fr" ? "Engagement" : "Engagement"}</p><h2>{copy.engagementTitle}</h2><p class="section-lede">{copy.engagementBody}</p></div>
+      <aside data-reveal><span>{copy.durationLabel}</span><strong>{copy.duration}</strong><span>{copy.priceLabel}</span><strong>{copy.price}</strong></aside>
+    </section>
+
+    <section class="section-shell service-faq">
+      <div class="section-heading" data-reveal><p class="section-kicker">FAQ</p><h2>{copy.faqTitle}</h2></div>
+      <div class="faq-list">
+        {copy.faq.map((item, index) => <details data-reveal open={index === 0}><summary>{item.question}</summary><p>{item.answer}</p></details>)}
+      </div>
+    </section>
+
+    <section class="service-cta" data-analytics-placement="service_footer">
+      <div class="section-shell" data-reveal><p class="section-kicker">{copy.eyebrow}</p><h2>{copy.ctaTitle}</h2><p>{copy.ctaBody}</p><a class="button button-primary" href={mailto} data-analytics-event="site.cta_click" data-analytics-cta-id={ctaId} data-analytics-placement="service_footer">{copy.ctaLabel}</a></div>
+    </section>
+  </main>
+
+  <SiteFooter locale={locale} />
+</BaseLayout>
