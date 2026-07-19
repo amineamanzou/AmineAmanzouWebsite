@@ -210,22 +210,29 @@ img {
 
 .brand-mark {
   display: grid;
-  flex: 0 0 46px;
-  width: 46px;
+  flex: 0 0 68px;
+  width: 68px;
   height: 46px;
   place-items: center;
-  overflow: hidden;
-  border: 2px solid var(--topbar-bg);
-  border-radius: var(--radius);
-  background: var(--navy);
-  box-shadow: 0 0 0 1px rgb(17 24 39 / 16%), 0 10px 24px rgb(180 35 24 / 20%);
 }
 
-.brand-mark img {
+.brand-mark-image {
+  grid-area: 1 / 1;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: 54% 28%;
+  object-fit: contain;
+}
+
+.brand-mark-image-dark {
+  display: none;
+}
+
+html[data-theme="dark"] .brand-mark-image-light {
+  display: none;
+}
+
+html[data-theme="dark"] .brand-mark-image-dark {
+  display: block;
 }
 
 .brand strong,
@@ -1757,13 +1764,13 @@ h3 {
     min-height: 72px;
   }
 
-  .brand small {
+  .brand-copy {
     display: none;
   }
 
   .brand-mark {
-    flex-basis: 42px;
-    width: 42px;
+    flex-basis: 58px;
+    width: 58px;
     height: 42px;
   }
 }
