@@ -53,7 +53,10 @@ export const profile = {
   location: "Lyon, France",
   email: "amineamanzou@gmail.com",
   portrait: "/images/amine-amanzou-profile-960.webp",
-  brandMark: "/images/amine-amanzou-profile-front-96.webp",
+  brandMark: {
+    light: "/images/brand/amine-amanzou-mark-light.png",
+    dark: "/images/brand/amine-amanzou-mark-dark.png",
+  },
   links: [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/amineamanzou/" },
     { label: "GitHub", href: "https://github.com/amineamanzou" },

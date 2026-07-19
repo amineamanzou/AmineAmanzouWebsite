@@ -23,15 +23,25 @@ const localePersistScript = `try{localStorage.setItem('amineamanzou-locale','${l
   <a class="brand" href={locale === "fr" ? "/" : "/en/"} aria-label={locale === "fr" ? "Retour à l'accueil" : "Back to home"}>
     <span class="brand-mark" aria-hidden="true">
       <img
-        src={profile.brandMark}
-        width="96"
-        height="96"
+        class="brand-mark-image brand-mark-image-light"
+        src={profile.brandMark.light}
+        width="640"
+        height="400"
+        alt=""
+        loading="eager"
+        decoding="async"
+      />
+      <img
+        class="brand-mark-image brand-mark-image-dark"
+        src={profile.brandMark.dark}
+        width="640"
+        height="400"
         alt=""
         loading="eager"
         decoding="async"
       />
     </span>
-    <span>
+    <span class="brand-copy">
       <strong>{profile.name}</strong>
       <small>{copy.brandSubtitle}</small>
     </span>
@@ -105,6 +115,7 @@ const localePersistScript = `try{localStorage.setItem('amineamanzou-locale','${l
 
     const setTheme = (theme, persist) => {
       document.documentElement.dataset.theme = theme;
+      document.dispatchEvent(new CustomEvent("site-theme-change", { detail: { theme } }));
       if (persist) writeStorage(themeStorageKey, theme);
       syncThemeButton();
     };
