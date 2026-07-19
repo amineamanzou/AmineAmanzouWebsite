@@ -9,6 +9,13 @@ readTime: "7 min"
 excerpt: "Pour séparer le marketing de la réalité, j'ai comparé cinq chemins de fleet management OpenTelemetry dans un lab logs-only: OpAMP ouvert, Elastic Fleet OTel-only, Bindplane BDOT, opamp-server-py et OpenLit Fleet Hub."
 sourceUrl: "https://www.linkedin.com/pulse/comment-jai-benchmark%25C3%25A9-5-approches-de-fleet-amine-amanzou-dvp9e/"
 heroImage: "/blog/opamp-fleet-management-benchmark/cover.png"
+heroImageAlt: "Comparatif de cinq approches de fleet management OpenTelemetry testées en laboratoire"
+pillar: "fleet-management"
+intent: "comparative"
+primaryQuery: "comparatif fleet management OpenTelemetry"
+relatedOffer: "fractional_lead"
+keywords: ["OpAMP", "benchmark", "fleet management", "OpenTelemetry"]
+proofLevel: "lab"
 ---
 
 Après les deux premiers articles, je pouvais facilement rester au niveau du marché.

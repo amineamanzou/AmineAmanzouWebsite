@@ -10,6 +10,8 @@ import {
   isAnalyticsPlacement,
   normalizeArticleId,
   normalizePagePath,
+  serviceIdFromCtaId,
+  serviceIdFromPagePath,
   type AnalyticsEventName,
   type AnalyticsEventPayloads,
   type AnalyticsPageType,
@@ -168,7 +170,13 @@ function captureFromElement(element: HTMLElement): void {
 
   if (name === "site.cta_click") {
     const value = element.dataset.analyticsCtaId ?? "";
-    if (isOneOf(value, analyticsCtaIds)) capture(name, { cta_id: value as AnalyticsEventPayloads[typeof name]["cta_id"] }, placement);
+    const articleId = normalizeArticleId(element.dataset.analyticsArticleId ?? "");
+    const serviceId = serviceIdFromCtaId(value);
+    if (isOneOf(value, analyticsCtaIds)) capture(name, {
+      cta_id: value as AnalyticsEventPayloads[typeof name]["cta_id"],
+      ...(serviceId ? { service_id: serviceId } : {}),
+      ...(articleId ? { article_id: articleId } : {}),
+    }, placement);
   } else if (name === "site.asset_download") {
     const value = element.dataset.analyticsAssetId ?? "";
     if (isOneOf(value, analyticsAssetIds)) capture(name, { asset_id: value as AnalyticsEventPayloads[typeof name]["asset_id"] }, placement);
@@ -297,7 +305,8 @@ export async function initProductAnalytics(config: ProductAnalyticsConfig): Prom
   if (!client) throw new Error("PostHog did not initialize");
 
   bindListeners();
-  capture("$pageview", {}, "page");
+  const serviceId = serviceIdFromPagePath(window.location.pathname);
+  capture("$pageview", serviceId ? { service_id: serviceId } : {}, "page");
   if (config.pageType === "article") {
     const articleId = normalizeArticleId(normalizePagePath(window.location.pathname).split("/").filter(Boolean).at(-1) ?? "");
     if (articleId) capture("site.article_open", { article_id: articleId }, "article_body");

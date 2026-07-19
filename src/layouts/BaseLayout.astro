@@ -69,6 +69,8 @@ const analyticsPageType: AnalyticsPageType = analyticsPath === "/"
         ? "blog_index"
         : analyticsPath.startsWith("/blog/")
           ? "article"
+          : ["/audit-observabilite/", "/observability-audit/", "/consultant-opentelemetry/", "/opentelemetry-consulting/", "/fractional-observability-lead/"].includes(analyticsPath)
+            ? "service"
           : analyticsPath === "/privacy/"
             ? "privacy"
             : "other";
@@ -80,6 +82,18 @@ const AnalyticsConsent = productAnalyticsEnabled
 <!doctype html>
 <html lang={locale}>
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      id="site-favicon"
+      rel="icon"
+      type="image/png"
+      href="/favicon-light.png?v=20260719"
+      data-light-href="/favicon-light.png?v=20260719"
+      data-dark-href="/favicon-dark.png?v=20260719"
+    />
+    <link rel="shortcut icon" href="/favicon.ico?v=20260719" />
+    <link rel="apple-touch-icon" href="/favicon-light.png?v=20260719" />
     <script is:inline>
       (() => {
         const themeStorageKey = "amineamanzou-theme";
@@ -107,7 +121,21 @@ const AnalyticsConsent = productAnalyticsEnabled
             ? "dark"
             : "light";
 
+        const syncFavicon = (theme) => {
+          const favicon = document.querySelector("#site-favicon");
+          if (!(favicon instanceof HTMLLinkElement)) return;
+
+          favicon.href = theme === "dark"
+            ? favicon.dataset.darkHref
+            : favicon.dataset.lightHref;
+        };
+
         root.dataset.theme = initialTheme;
+        syncFavicon(initialTheme);
+        document.addEventListener("site-theme-change", (event) => {
+          const theme = event instanceof CustomEvent ? event.detail?.theme : undefined;
+          if (theme === "light" || theme === "dark") syncFavicon(theme);
+        });
 
         if (window.location.pathname === "/") {
           const storedLocale = readStorage(localeStorageKey);
@@ -129,8 +157,6 @@ const AnalyticsConsent = productAnalyticsEnabled
         }, true);
       })();
     </script>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, follow" />}

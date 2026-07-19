@@ -12,16 +12,18 @@
     "preview": "astro preview",
     "check": "astro check",
     "check:seo": "node scripts/checks/seo-output.mjs",
+    "check:content": "node scripts/checks/content-inventory.mjs",
     "check:seo:production": "node scripts/checks/production-seo.mjs",
     "check:browser-observability": "node scripts/checks/browser-observability.mjs",
     "check:product-analytics": "node scripts/checks/product-analytics.mjs",
     "review:site": "node scripts/qa/review-site.mjs",
+    "review:commercial": "node scripts/qa/commercial-pages-smoke.mjs",
     "review:product-analytics": "node scripts/qa/product-analytics-smoke.mjs",
     "review:observability": "node scripts/qa/browser-observability-actions-smoke.mjs"
   },
   "dependencies": {
-    "@hyperdx/browser": "0.24.0",
-    "posthog-js": "1.399.0"
+    "@hyperdx/browser": "0.25.1",
+    "posthog-js": "1.402.3"
   },
   "overrides": {
     "@posthog/core": "1.40.0",
@@ -29,7 +31,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
-    "astro": "^7.0.3",
+    "astro": "^7.0.9",
     "playwright-core": "^1.61.1",
     "typescript": "^6.0.3"
   }

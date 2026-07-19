@@ -26,6 +26,15 @@ const articleSchema = z
     excerpt: z.string(),
     sourceUrl: z.url().optional(),
     heroImage: z.string().optional(),
+    heroImageAlt: z.string().min(8),
+    pillar: z.enum(["observability", "opentelemetry", "fleet-management", "agentic-sre", "reliability"]),
+    intent: z.enum(["informational", "comparative", "commercial", "case-study"]),
+    primaryQuery: z.string().min(3),
+    relatedOffer: z.enum(["diagnostic", "otel_sprint", "fractional_lead"]),
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
+    keywords: z.array(z.string()).min(1),
+    proofLevel: z.enum(["documentation", "lab", "experience", "hypothesis"]),
   })
   .superRefine((article, context) => {
     if (article.modifiedAt && article.modifiedAt < article.publishedAt) {

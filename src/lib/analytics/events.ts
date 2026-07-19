@@ -1,4 +1,4 @@
-export const ANALYTICS_SCHEMA_VERSION = "1.0.0" as const;
+export const ANALYTICS_SCHEMA_VERSION = "1.2.0" as const;
 
 export const analyticsEventNames = [
   "$pageview",
@@ -19,11 +19,15 @@ export const analyticsPageTypes = [
   "contact",
   "blog_index",
   "article",
+  "service",
   "privacy",
   "other",
 ] as const;
 
 export type AnalyticsPageType = (typeof analyticsPageTypes)[number];
+
+export const analyticsServiceIds = ["diagnostic", "otel_sprint", "fractional_lead"] as const;
+export type AnalyticsServiceId = (typeof analyticsServiceIds)[number];
 
 export const analyticsPlacements = [
   "page",
@@ -36,6 +40,10 @@ export const analyticsPlacements = [
   "blog_index",
   "article_body",
   "article_footer",
+  "service_hero",
+  "service_proof",
+  "service_footer",
+  "article_offer_cta",
   "contact_panel",
   "dossier_page",
   "terminal",
@@ -51,6 +59,9 @@ export const analyticsCtaIds = [
   "open_contact",
   "clarification_call",
   "source_article",
+  "start_observability_diagnostic",
+  "discuss_otel_sprint",
+  "discuss_fractional_lead",
 ] as const;
 
 export type AnalyticsCtaId = (typeof analyticsCtaIds)[number];
@@ -74,8 +85,8 @@ export type AnalyticsBlogCommand = (typeof analyticsBlogCommands)[number];
 export type AnalyticsLengthBucket = "0" | "1-8" | "9-24" | "25-64" | "65+";
 
 export type AnalyticsEventPayloads = {
-  "$pageview": Record<string, never>;
-  "site.cta_click": { cta_id: AnalyticsCtaId };
+  "$pageview": { service_id?: AnalyticsServiceId };
+  "site.cta_click": { cta_id: AnalyticsCtaId; service_id?: AnalyticsServiceId; article_id?: string };
   "site.asset_download": { asset_id: AnalyticsAssetId };
   "site.outbound_click": { destination: AnalyticsOutboundDestination };
   "site.locale_change": { target_locale: "fr" | "en" };
@@ -89,8 +100,8 @@ export type AnalyticsEventPayloads = {
 };
 
 export const eventPropertyAllowlist: Record<AnalyticsEventName, readonly string[]> = {
-  "$pageview": [],
-  "site.cta_click": ["cta_id"],
+  "$pageview": ["service_id"],
+  "site.cta_click": ["cta_id", "service_id", "article_id"],
   "site.asset_download": ["asset_id"],
   "site.outbound_click": ["destination"],
   "site.locale_change": ["target_locale"],
@@ -107,10 +118,25 @@ export function isAnalyticsPlacement(value: string): value is AnalyticsPlacement
   return (analyticsPlacements as readonly string[]).includes(value);
 }
 
+export function serviceIdFromCtaId(value: string): AnalyticsServiceId | null {
+  if (value === "start_observability_diagnostic") return "diagnostic";
+  if (value === "discuss_otel_sprint") return "otel_sprint";
+  if (value === "discuss_fractional_lead") return "fractional_lead";
+  return null;
+}
+
 export function normalizePagePath(value: string): string {
   const path = value.split(/[?#]/, 1)[0] || "/";
   const normalized = path.replace(/\/{2,}/g, "/").slice(0, 180);
   return normalized.startsWith("/") ? normalized : `/${normalized}`;
+}
+
+export function serviceIdFromPagePath(value: string): AnalyticsServiceId | null {
+  const path = normalizePagePath(value).replace(/^\/en(?=\/|$)/, "");
+  if (["/audit-observabilite/", "/observability-audit/"].includes(path)) return "diagnostic";
+  if (["/consultant-opentelemetry/", "/opentelemetry-consulting/"].includes(path)) return "otel_sprint";
+  if (path === "/fractional-observability-lead/") return "fractional_lead";
+  return null;
 }
 
 export function normalizeArticleId(value: string): string | null {

@@ -9,6 +9,13 @@ readTime: "5 min"
 excerpt: "Players use trackers to understand a match. Engineers use logs, metrics and traces to understand a system."
 sourceUrl: "https://www.linkedin.com/pulse/lobservabilit%25C3%25A9-le-deck-tracker-du-d%25C3%25A9veloppeur-amine-amanzou--66iqc/"
 heroImage: "/blog/observabilite-deck-tracker-developpeur/cover.jpg"
+heroImageAlt: "Deck tracker interface used as a metaphor for application observability"
+pillar: "observability"
+intent: "informational"
+primaryQuery: "observability for developers"
+relatedOffer: "diagnostic"
+keywords: ["observability", "developers", "logs", "metrics", "traces"]
+proofLevel: "experience"
 ---
 
 When I explain observability to developers, I sometimes like to start from a slightly unexpected place: Hearthstone.

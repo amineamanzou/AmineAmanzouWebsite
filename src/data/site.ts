@@ -48,12 +48,15 @@ export type Education = {
 
 export const profile = {
   name: "Amine Amanzou",
-  role: "Site Reliability Engineer · Expert Observabilité",
-  roleEn: "Freelance Site Reliability Engineer · Observability Expert",
+  role: "Consultant Observabilité · SRE · Agentic SRE",
+  roleEn: "Observability Consultant · SRE · Agentic SRE",
   location: "Lyon, France",
   email: "amineamanzou@gmail.com",
   portrait: "/images/amine-amanzou-profile-960.webp",
-  brandMark: "/images/amine-amanzou-profile-front-96.webp",
+  brandMark: {
+    light: "/images/brand/amine-amanzou-mark-light.png",
+    dark: "/images/brand/amine-amanzou-mark-dark.png",
+  },
   links: [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/amineamanzou/" },
     { label: "GitHub", href: "https://github.com/amineamanzou" },
@@ -78,12 +81,14 @@ export const downloads: Record<Locale, Download> = {
 export const navigation: Record<Locale, NavItem[]> = {
   fr: [
     { label: "Accueil", href: "/" },
+    { label: "Offres", href: "/#offres" },
     { label: "Dossier", href: "/dossier/" },
     { label: "Blog", href: "/blog/" },
     { label: "Contact", href: "/contact/" },
   ],
   en: [
     { label: "Home", href: "/en/" },
+    { label: "Services", href: "/en/#services" },
     { label: "Profile", href: "/en/dossier/" },
     { label: "Blog", href: "/en/blog/" },
     { label: "Contact", href: "/en/contact/" },
@@ -97,12 +102,12 @@ export const languageSwitch: Record<Locale, { label: string; flag: string; aria:
 
 export const home = {
   meta: {
-    title: "Amine Amanzou | Site Reliability Engineer & Expert Observabilité",
+    title: "Amine Amanzou | Consultant Observabilité, SRE & Agentic SRE",
     description:
-      "Portfolio d'Amine Amanzou, Site Reliability Engineer spécialisé en observabilité, fiabilité, DevOps, cloud et plateformes de production.",
+      "Consultant observabilité, SRE et Agentic SRE : diagnostic, OpenTelemetry et pilotage de trajectoires de fiabilité pour systèmes critiques.",
   },
   hero: {
-    title: "Observabilité actionnable pour systèmes critiques.",
+    title: "Réduire le bruit, le MTTR et le coût de l’observabilité.",
     body:
       "Je rends vos systèmes critiques observables, fiables et décidables pour réduire les incidents, sécuriser les déploiements et piloter la production avec le bon signal.",
     proofLine:
@@ -170,13 +175,13 @@ export const localized = {
     role: profile.role,
     brandSubtitle: "SRE · Observabilité",
     hero: {
-      title: home.hero.title,
+      title: "Réduire le bruit, le MTTR et le coût de l’observabilité.",
       body:
-        "Freelance SRE et observabilité, j'interviens sur vos systèmes critiques pour réduire les incidents, sécuriser les déploiements et rendre la production pilotable avec le bon signal.",
+        "J’interviens quand les alertes s’empilent, que le diagnostic ralentit et que la facture de télémétrie n’explique plus la couverture obtenue.",
       proofLine:
-        "Missions grands comptes, cloud hybride, OpenTelemetry, Dynatrace, SRE et industrialisation DevOps.",
-      primaryCta: "Voir le dossier",
-      secondaryCta: "Discuter d'une mission",
+        "Enedis, Orange, Odigo et Ylio : gouvernance, migrations critiques, OpenTelemetry et réduction d’incidents en production.",
+      primaryCta: "Réserver un échange de cadrage",
+      secondaryCta: "Voir les missions",
     },
     proof: {
       title: "Des systèmes critiques, des résultats mesurables.",
@@ -184,9 +189,9 @@ export const localized = {
         "Les preuves viennent de contextes réels: production, énergie, télécom, SaaS, e-commerce et migration cloud.",
     },
     observability: {
-      title: "Transformer l'observabilité en fiabilité opérationnelle.",
+      title: "Le signal doit aider l’équipe qui prend l’incident.",
       body:
-        "Je ne me contente pas d'installer des outils. Je relie instrumentation, pratiques d'équipe et décisions d'exploitation pour rendre le signal actionnable.",
+        "Instrumentation, exploitation et décisions d’architecture restent liées. Les outils viennent après le parcours critique, le risque et l’usage attendu du signal.",
     },
     workPreview: {
       title: "Missions récentes",
@@ -196,7 +201,7 @@ export const localized = {
     blogPreview: {
       title: "Écrire pour clarifier la production.",
       body:
-        "Articles sur Observabilité, Fleet Management, OpAMP et pratiques SRE, repris du travail éditorial The Unreliable Engineer.",
+        "Des retours terrain sur l’observabilité, le Fleet Management, OpAMP et les pratiques SRE qui tiennent en production.",
       cta: "Lire les articles",
     },
     downloadBand: {
@@ -234,7 +239,7 @@ export const localized = {
       kicker: "Blog",
       heading: "Observabilité, SRE et Fleet Management.",
       body:
-        "Une sélection d'articles publiés sur The Unreliable Engineer, un média où je fais de la création de contenu et où je partage sur des sujets plus Tech, IA, etc.",
+        "J’y documente ce que je teste, ce que j’observe sur le terrain et ce qui reste à vérifier : observabilité, OpenTelemetry, Fleet Management, fiabilité et Agentic SRE.",
       listLabel: "Liste des articles",
       backLabel: "Retour aux articles",
       sourceLabel: "Source LinkedIn",
@@ -245,20 +250,20 @@ export const localized = {
   },
   en: {
     meta: {
-      title: "Amine Amanzou | Freelance SRE & Observability Expert",
+      title: "Amine Amanzou | Observability Consultant, SRE & Agentic SRE",
       description:
-        "Portfolio of Amine Amanzou, freelance Site Reliability Engineer specialized in observability, reliability, DevOps, cloud and production platforms.",
+        "Observability consultant, SRE and Agentic SRE offering audits, OpenTelemetry delivery and fractional leadership for critical production systems.",
     },
     role: profile.roleEn,
     brandSubtitle: "SRE · Observability",
     hero: {
-      title: "Actionable observability for critical systems.",
+      title: "Reduce alert noise, MTTR and observability cost.",
       body:
-        "As a freelance SRE and observability expert, I help teams reduce incidents, secure deployments and operate production with the right signals.",
+        "I step in when alerts pile up, diagnosis slows down and telemetry spend no longer explains the coverage teams receive.",
       proofLine:
-        "Enterprise missions, hybrid cloud, OpenTelemetry, Dynatrace, SRE practices and DevOps industrialization.",
-      primaryCta: "View profile",
-      secondaryCta: "Discuss a mission",
+        "Enedis, Orange, Odigo and Ylio: governance, critical migrations, OpenTelemetry and fewer production incidents.",
+      primaryCta: "Book a scoping call",
+      secondaryCta: "View missions",
     },
     proof: {
       title: "Critical systems, measurable outcomes.",
@@ -266,9 +271,9 @@ export const localized = {
         "Proof points come from real production contexts: energy, telecom, SaaS, e-commerce, cloud migration and support operations.",
     },
     observability: {
-      title: "Turning observability into operational reliability.",
+      title: "The signal has to help the team holding the incident.",
       body:
-        "I do not just install tools. I connect instrumentation, team practices and operating decisions so the signal becomes actionable.",
+        "Instrumentation, operations and architecture decisions stay connected. Tools follow the critical journey, the risk and the expected use of each signal.",
     },
     workPreview: {
       title: "Recent missions",
@@ -278,7 +283,7 @@ export const localized = {
     blogPreview: {
       title: "Writing to clarify production.",
       body:
-        "Articles about Observability, Fleet Management, OpAMP and SRE practices, carried over from The Unreliable Engineer editorial work.",
+        "Field notes on observability, Fleet Management, OpAMP and SRE practices that hold up in production.",
       cta: "Read the articles",
     },
     downloadBand: {
@@ -316,7 +321,7 @@ export const localized = {
       kicker: "Blog",
       heading: "Observability, SRE and Fleet Management.",
       body:
-        "A selection of articles published on The Unreliable Engineer, a media project where I create content and share ideas on deeper tech, AI and adjacent topics.",
+        "I use this space to document what I test, what I observe in the field and what still needs validation: observability, OpenTelemetry, Fleet Management, reliability and Agentic SRE.",
       listLabel: "Article list",
       backLabel: "Back to articles",
       sourceLabel: "LinkedIn source",
@@ -334,10 +339,16 @@ export const alternatePath = (path: string, locale: Locale) => {
     "/dossier/": "/en/dossier/",
     "/blog/": "/en/blog/",
     "/contact/": "/en/contact/",
+    "/audit-observabilite/": "/en/observability-audit/",
+    "/consultant-opentelemetry/": "/en/opentelemetry-consulting/",
+    "/fractional-observability-lead/": "/en/fractional-observability-lead/",
     "/en/": "/",
     "/en/dossier/": "/dossier/",
     "/en/blog/": "/blog/",
     "/en/contact/": "/contact/",
+    "/en/observability-audit/": "/audit-observabilite/",
+    "/en/opentelemetry-consulting/": "/consultant-opentelemetry/",
+    "/en/fractional-observability-lead/": "/fractional-observability-lead/",
   };
 
   return map[normalized] ?? (locale === "fr" ? "/en/" : "/");

@@ -6,55 +6,38 @@ import { getArticleCards } from "../data/articles";
 import { localized, type Locale } from "../data/site";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-type Props = {
-  locale?: Locale;
-  articles: CollectionEntry<"articles">[];
-};
+type Props = { locale?: Locale; articles: CollectionEntry<"articles">[] };
 
 const { locale = "fr", articles } = Astro.props;
 const copy = localized[locale];
 const pagePath = locale === "fr" ? "/blog/" : "/en/blog/";
 const cards = getArticleCards(articles, locale);
+const pillarOrder = ["observability", "opentelemetry", "fleet-management", "agentic-sre", "reliability"] as const;
+const pillarLabels = {
+  fr: { observability: "Observabilité", opentelemetry: "OpenTelemetry", "fleet-management": "Fleet management", "agentic-sre": "Agentic SRE", reliability: "Fiabilité" },
+  en: { observability: "Observability", opentelemetry: "OpenTelemetry", "fleet-management": "Fleet management", "agentic-sre": "Agentic SRE", reliability: "Reliability" },
+}[locale];
+const groups = pillarOrder.map((pillar) => ({ pillar, cards: cards.filter((card) => card.pillar === pillar) })).filter((group) => group.cards.length > 0);
 ---
 
-<BaseLayout
-  title={copy.blog.title}
-  description={copy.blog.description}
-  canonicalPath={pagePath}
-  alternates={[
-    { locale: "fr", path: "/blog/" },
-    { locale: "en", path: "/en/blog/" },
-  ]}
-  bodyClass="blog-page"
-  locale={locale}
->
+<BaseLayout title={copy.blog.title} description={copy.blog.description} canonicalPath={pagePath} alternates={[{ locale: "fr", path: "/blog/" }, { locale: "en", path: "/en/blog/" }]} bodyClass="blog-page" locale={locale}>
   <Topbar currentPath={pagePath} locale={locale} />
-
   <main class="page-main">
-    <section class="page-hero section-shell blog-hero">
-      <div data-reveal>
-        <p class="role-line">{copy.blog.kicker}</p>
-        <h1>{copy.blog.heading}</h1>
-        <p>{copy.blog.body}</p>
-      </div>
-    </section>
-
-    <section class="section-shell article-list-section" aria-label={copy.blog.listLabel}>
-      <div class="article-grid">
-        {cards.map((article, index) => (
-          <a class="article-card" href={article.href} data-reveal style={`--i: ${index}`} data-analytics-event="site.article_open" data-analytics-article-id={article.slug} data-analytics-placement="blog_index">
-            {article.heroImage && (
-              <img src={article.heroImage} alt="" loading={index === 0 ? "eager" : "lazy"} decoding="async" />
-            )}
-            <span>{article.label}</span>
-            <h2>{article.title}</h2>
-            <p>{article.excerpt}</p>
-            <small>{article.date} · {article.readTime}</small>
+    <section class="page-hero section-shell blog-hero"><div data-reveal><p class="role-line">{copy.blog.kicker}</p><h1>{copy.blog.heading}</h1><p>{copy.blog.body}</p></div></section>
+    <nav class="section-shell pillar-nav" aria-label={locale === "fr" ? "Piliers éditoriaux" : "Editorial pillars"}>{groups.map((group) => <a href={`#${group.pillar}`}>{pillarLabels[group.pillar]} <span>{group.cards.length}</span></a>)}</nav>
+    <div class="section-shell pillar-groups">
+      {groups.map((group) => {
+        const [guide, ...rest] = group.cards;
+        return <section class="pillar-section" id={group.pillar} aria-labelledby={`${group.pillar}-title`}>
+          <div class="pillar-heading" data-reveal><p class="section-kicker">{locale === "fr" ? "Pilier" : "Pillar"}</p><h2 id={`${group.pillar}-title`}>{pillarLabels[group.pillar]}</h2></div>
+          <a class="pillar-guide" href={guide.href} data-reveal data-analytics-event="site.article_open" data-analytics-article-id={guide.slug} data-analytics-placement="blog_index">
+            {guide.heroImage && <img src={guide.heroImage} alt={guide.heroImageAlt} loading="eager" decoding="async" />}
+            <div><span>{locale === "fr" ? "Guide du cluster" : "Cluster guide"}</span><h3>{guide.title}</h3><p>{guide.excerpt}</p><small>{guide.date} · {guide.readTime}</small></div>
           </a>
-        ))}
-      </div>
-    </section>
+          {rest.length > 0 && <div class="article-grid">{rest.map((article, index) => <a class="article-card" href={article.href} data-reveal style={`--i: ${index}`} data-analytics-event="site.article_open" data-analytics-article-id={article.slug} data-analytics-placement="blog_index">{article.heroImage && <img src={article.heroImage} alt={article.heroImageAlt} loading="lazy" decoding="async" />}<span>{article.label}</span><h3>{article.title}</h3><p>{article.excerpt}</p><small>{article.date} · {article.readTime}</small></a>)}</div>}
+        </section>;
+      })}
+    </div>
   </main>
-
   <SiteFooter locale={locale} />
 </BaseLayout>

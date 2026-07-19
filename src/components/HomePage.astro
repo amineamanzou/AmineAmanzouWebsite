@@ -3,12 +3,11 @@ import { getCollection } from "astro:content";
 import SiteFooter from "./SiteFooter.astro";
 import Topbar from "./Topbar.astro";
 import { getArticleCards } from "../data/articles";
-import { downloads, home, localized, profile, experiences, type Locale } from "../data/site";
+import { downloads, home, localized, profile, experiences, experiencesEn, type Locale } from "../data/site";
+import { services, serviceBookingUrl, serviceCtaId } from "../data/services";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-type Props = {
-  locale?: Locale;
-};
+type Props = { locale?: Locale };
 
 const { locale = "fr" } = Astro.props;
 const copy = localized[locale];
@@ -16,22 +15,58 @@ const download = downloads[locale];
 const path = locale === "fr" ? "/" : "/en/";
 const dossierPath = locale === "fr" ? "/dossier/" : "/en/dossier/";
 const blogPath = locale === "fr" ? "/blog/" : "/en/blog/";
-const articleCards = getArticleCards(await getCollection("articles"), locale);
+const contactPath = locale === "fr" ? "/contact/" : "/en/contact/";
+const articleCards = getArticleCards(await getCollection("articles"), locale).slice(0, 3);
+const selectedExperiences = (locale === "fr" ? experiences : experiencesEn).slice(0, 4);
+const diagnostic = services[0];
+
+const homeCopy = locale === "fr" ? {
+  offersKicker: "Trois offres, un périmètre explicite",
+  offersTitle: "Commencer par le problème qui bloque la production.",
+  offersBody: "Chaque intervention annonce sa durée, ses livrables et ses limites avant la liste d’outils.",
+  offers: [
+    { id: "diagnostic", label: "Diagnostic Observabilité", number: "01", summary: "Cinq jours pour cartographier le signal, le bruit, les coûts et construire un plan 30/60/90 jours.", meta: "5 jours · dès 4 500 € HT", action: "Voir le diagnostic" },
+    { id: "otel_sprint", label: "OpenTelemetry & Reliability Sprint", number: "02", summary: "Deux à six semaines pour faire tenir instrumentation, Collector, sampling, sécurité et SLO sur un chemin critique.", meta: "2 à 6 semaines · sur devis", action: "Voir le sprint" },
+    { id: "fractional_lead", label: "Fractional Observability Lead", number: "03", summary: "Un propriétaire à temps partagé pour la roadmap, les standards, les coûts, les incidents et les arbitrages vendors.", meta: "2 à 8 jours / mois · 3 mois minimum", action: "Voir le rôle" },
+  ],
+  agenticKicker: "Agentic SRE · Support et opérations",
+  agenticTitle: "Réduire le temps de résolution du support sans rendre l’agent invisible.",
+  agenticBody: "J’instrumente un agent comme un système de production : appels de modèles et d’outils, contexte utilisé, latence, coût, résultat et erreurs. Les traces servent ensuite à comprendre une réponse, évaluer un changement et reprendre un dossier sans repartir de zéro.",
+  agenticObserve: "Observer", agenticObserveBody: "Tracer le ticket, les recherches, les appels d’outils, les décisions et la réponse proposée.",
+  agenticEvaluate: "Évaluer", agenticEvaluateBody: "Construire des datasets et des évaluations offline ou sur traces de production avec Langfuse ou LangSmith.",
+  agenticGuard: "Limiter", agenticGuardBody: "Tester en sandbox, borner les données et les outils accessibles, puis placer des validations humaines aux actions sensibles.",
+  agenticSupport: "Aider le support", agenticSupportBody: "Préparer le contexte, les hypothèses et la prochaine action pour réduire le temps passé à qualifier et résoudre un ticket.",
+  agenticLimit: "L’agent prépare et documente. Les guardrails, les droits minimaux, les checkpoints et le rollback restent des contraintes d’exploitation, pas une option ajoutée après le déploiement.",
+  casesKicker: "Cas sélectionnés", casesTitle: "La preuve avant la stack.", casesBody: "Des contextes où le signal devait soutenir une décision, une migration ou une équipe en incident.",
+  expertiseKicker: "Expertise technique",
+  blogKicker: "Guides et retours terrain", blogTitle: "Des articles reliés aux décisions de production.", blogBody: "OpenTelemetry, fleet management, observabilité et pratiques SRE documentés à partir de sources, de tests et de missions.",
+  finalTitle: "Qualifier le besoin sans réunion de découverte à rallonge.", finalBody: "Le dossier donne le parcours complet. Le créneau de cadrage demande le contexte utile avant la réunion.", contact: "Écrire directement",
+} : {
+  offersKicker: "Three services, explicit scope",
+  offersTitle: "Start with the problem blocking production.",
+  offersBody: "Each engagement states duration, deliverables and limits before listing tools.",
+  offers: [
+    { id: "diagnostic", label: "Observability Audit", number: "01", summary: "Five days to map signal, noise and cost, then build a 30/60/90-day action plan.", meta: "5 days · from €4,500 excl. VAT", action: "View the audit" },
+    { id: "otel_sprint", label: "OpenTelemetry & Reliability Sprint", number: "02", summary: "Two to six weeks to make instrumentation, Collector, sampling, security and SLOs hold up on a critical path.", meta: "2 to 6 weeks · on request", action: "View the sprint" },
+    { id: "fractional_lead", label: "Fractional Observability Lead", number: "03", summary: "A fractional owner for roadmap, standards, cost, incidents and vendor trade-offs.", meta: "2 to 8 days / month · 3-month minimum", action: "View the role" },
+  ],
+  agenticKicker: "Agentic SRE · Support and operations",
+  agenticTitle: "Reduce support resolution time without turning the agent into a black box.",
+  agenticBody: "I instrument an agent like a production system: model and tool calls, context, latency, cost, outcomes and errors. Those traces help explain an answer, evaluate a change and resume a case without starting from scratch.",
+  agenticObserve: "Observe", agenticObserveBody: "Trace the ticket, retrieval steps, tool calls, decisions and proposed answer.",
+  agenticEvaluate: "Evaluate", agenticEvaluateBody: "Build datasets and offline or production-trace evaluations with Langfuse or LangSmith.",
+  agenticGuard: "Constrain", agenticGuardBody: "Test in a sandbox, limit accessible data and tools, then require human approval for sensitive actions.",
+  agenticSupport: "Assist support", agenticSupportBody: "Prepare context, hypotheses and the next action to reduce time spent qualifying and resolving a ticket.",
+  agenticLimit: "The agent prepares and documents. Guardrails, least privilege, checkpoints and rollback remain operating constraints, not an afterthought added after deployment.",
+  casesKicker: "Selected work", casesTitle: "Proof before the stack.", casesBody: "Production contexts where signal had to support a decision, a migration or an incident team.",
+  expertiseKicker: "Technical expertise",
+  blogKicker: "Guides and field notes", blogTitle: "Articles tied to production decisions.", blogBody: "OpenTelemetry, fleet management, observability and SRE practices documented through sources, tests and delivery experience.",
+  finalTitle: "Qualify the work without a drawn-out discovery call.", finalBody: "The profile covers the full track record. The scoping call collects the useful context before the meeting.", contact: "Email directly",
+};
 ---
 
-<BaseLayout
-  title={copy.meta.title}
-  description={copy.meta.description}
-  canonicalPath={path}
-  alternates={[
-    { locale: "fr", path: "/" },
-    { locale: "en", path: "/en/" },
-  ]}
-  bodyClass="home-page"
-  locale={locale}
->
+<BaseLayout title={copy.meta.title} description={copy.meta.description} canonicalPath={path} alternates={[{ locale: "fr", path: "/" }, { locale: "en", path: "/en/" }]} bodyClass="home-page" locale={locale}>
   <Topbar currentPath={path} locale={locale} />
-
   <main>
     <section class="hero section-shell">
       <div class="hero-copy" data-reveal>
@@ -40,130 +75,60 @@ const articleCards = getArticleCards(await getCollection("articles"), locale);
         <p class="hero-lede">{copy.hero.body}</p>
         <p class="hero-proof">{copy.hero.proofLine}</p>
         <div class="hero-actions">
-          <a class="button button-primary" href={dossierPath} data-analytics-event="site.cta_click" data-analytics-cta-id="open_dossier" data-analytics-placement="hero">{copy.hero.primaryCta}</a>
-          <a class="button button-secondary" href={`mailto:${profile.email}`} data-analytics-event="site.cta_click" data-analytics-cta-id="contact_mission" data-analytics-placement="hero">{copy.hero.secondaryCta}</a>
+          <a class="button button-primary" href={serviceBookingUrl(diagnostic)} target="_blank" rel="noreferrer" data-analytics-event="site.cta_click" data-analytics-cta-id="start_observability_diagnostic" data-analytics-placement="hero">{copy.hero.primaryCta}</a>
+          <a class="button button-secondary" href="#missions">{copy.hero.secondaryCta}</a>
         </div>
       </div>
       <aside class="portrait-card" aria-label={locale === "fr" ? "Profil d'Amine Amanzou" : "Amine Amanzou profile"} data-reveal>
-        <img
-          src={profile.portrait}
-          srcset="/images/amine-amanzou-profile-480.webp 480w, /images/amine-amanzou-profile-960.webp 960w, /images/amine-amanzou-profile-1440.webp 1440w"
-          sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1100px) 42vw, 600px"
-          width="960"
-          height="884"
-          alt={locale === "fr" ? "Portrait d'Amine Amanzou" : "Portrait of Amine Amanzou"}
-          loading="eager"
-          decoding="async"
-          fetchpriority="high"
-        />
-        <div>
-          <strong>{profile.name}</strong>
-          <span>{profile.location}</span>
-        </div>
+        <img src={profile.portrait} srcset="/images/amine-amanzou-profile-480.webp 480w, /images/amine-amanzou-profile-960.webp 960w, /images/amine-amanzou-profile-1440.webp 1440w" sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1100px) 42vw, 600px" width="960" height="884" alt={locale === "fr" ? "Portrait d'Amine Amanzou" : "Portrait of Amine Amanzou"} loading="eager" decoding="async" fetchpriority="high" />
+        <div><strong>{profile.name}</strong><span>{profile.location}</span></div>
       </aside>
     </section>
 
     <section class="proof-band" id="preuves" aria-labelledby="proof-title">
       <div class="section-shell">
-        <div class="section-heading" data-reveal>
-          <h2 id="proof-title">{copy.proof.title}</h2>
-          <p>{copy.proof.body}</p>
-        </div>
-        <div class="metric-grid">
-          {home.metrics.map((metric, index) => (
-            <article class="metric-card" data-reveal style={`--i: ${index}`}>
-              <span>{metric.label}</span>
-              <strong
-                class="metric-value"
-                data-count-to={metric.countTo}
-                data-prefix={metric.prefix ?? ""}
-                data-suffix={metric.suffix ?? ""}
-              >
-                {metric.value}
-              </strong>
-              <p>{metric.detail}</p>
-            </article>
-          ))}
-        </div>
+        <div class="section-heading" data-reveal><h2 id="proof-title">{copy.proof.title}</h2><p>{copy.proof.body}</p></div>
+        <div class="metric-grid">{home.metrics.map((metric, index) => <article class="metric-card" data-reveal style={`--i: ${index}`}><span>{metric.label}</span><strong class="metric-value" data-count-to={metric.countTo} data-prefix={metric.prefix ?? ""} data-suffix={metric.suffix ?? ""}>{metric.value}</strong><p>{metric.detail}</p></article>)}</div>
       </div>
+    </section>
+
+    <section class="section-shell offers-section" id={locale === "fr" ? "offres" : "services"}>
+      <div class="section-heading" data-reveal><p class="section-kicker">{homeCopy.offersKicker}</p><h2>{homeCopy.offersTitle}</h2><p>{homeCopy.offersBody}</p></div>
+      <div class="offer-grid">
+        {homeCopy.offers.map((card, index) => {
+          const service = services.find((item) => item.id === card.id)!;
+          return <article class="offer-card" data-reveal style={`--i: ${index}`}><span class="offer-number">{card.number}</span><h3>{card.label}</h3><p>{card.summary}</p><strong>{card.meta}</strong><a href={service.copy[locale].path} data-analytics-event="site.cta_click" data-analytics-cta-id={serviceCtaId[service.id]} data-analytics-placement="service_hero">{card.action}<span aria-hidden="true"> →</span></a></article>;
+        })}
+      </div>
+    </section>
+
+    <section class="agentic-section home-agentic">
+      <div class="section-shell agentic-layout">
+        <div data-reveal><p class="section-kicker">{homeCopy.agenticKicker}</p><h2>{homeCopy.agenticTitle}</h2><p class="section-lede">{homeCopy.agenticBody}</p></div>
+        <div class="agentic-home-details" data-reveal><article><h3>{homeCopy.agenticObserve}</h3><p>{homeCopy.agenticObserveBody}</p></article><article><h3>{homeCopy.agenticEvaluate}</h3><p>{homeCopy.agenticEvaluateBody}</p></article><article><h3>{homeCopy.agenticGuard}</h3><p>{homeCopy.agenticGuardBody}</p></article><article><h3>{homeCopy.agenticSupport}</h3><p>{homeCopy.agenticSupportBody}</p></article><p class="agentic-limit">{homeCopy.agenticLimit}</p></div>
+      </div>
+    </section>
+
+    <section class="section-shell work-preview" id="missions">
+      <div class="section-heading" data-reveal><p class="section-kicker">{homeCopy.casesKicker}</p><h2>{homeCopy.casesTitle}</h2><p>{homeCopy.casesBody}</p></div>
+      <div class="preview-timeline">{selectedExperiences.map((experience, index) => <article data-reveal style={`--i: ${index}`}><span>{experience.period}</span><h3>{experience.role}</h3><strong>{experience.company}</strong><p>{experience.summary}</p></article>)}</div>
+      <div class="center-actions"><a class="button button-primary" href={dossierPath} data-analytics-event="site.cta_click" data-analytics-cta-id="view_full_dossier" data-analytics-placement="work_preview">{copy.workPreview.cta}</a></div>
     </section>
 
     <section class="section-shell split-section">
-      <div class="section-heading sticky-heading" data-reveal>
-        <h2>{copy.observability.title}</h2>
-        <p>{copy.observability.body}</p>
-      </div>
-      <div class="expertise-list">
-        {home.expertise.map((item, index) => (
-          <article class="expertise-card" data-reveal style={`--i: ${index}`}>
-            <h3>{item.title}</h3>
-            <p>{item.body}</p>
-            <ul>
-              {item.items.map((skill) => <li>{skill}</li>)}
-            </ul>
-          </article>
-        ))}
-      </div>
-    </section>
-
-    <section class="section-shell work-preview">
-      <div class="section-heading" data-reveal>
-        <h2>{copy.workPreview.title}</h2>
-        <p>{copy.workPreview.body}</p>
-      </div>
-      <div class="preview-timeline">
-        {experiences.slice(0, 3).map((experience, index) => (
-          <article data-reveal style={`--i: ${index}`}>
-            <span>{experience.period}</span>
-            <h3>{experience.role}</h3>
-            <strong>{experience.company}</strong>
-            <p>{experience.summary}</p>
-          </article>
-        ))}
-      </div>
-      <div class="center-actions">
-        <a class="button button-primary" href={dossierPath} data-analytics-event="site.cta_click" data-analytics-cta-id="view_full_dossier" data-analytics-placement="work_preview">{copy.workPreview.cta}</a>
-      </div>
-    </section>
-
-    <section class="download-band">
-      <div class="section-shell download-layout">
-        <div data-reveal>
-          <h2>{copy.downloadBand.title}</h2>
-          <p>{copy.downloadBand.body}</p>
-        </div>
-        <div class="download-actions">
-          <a class="download-link" href={download.href} target="_blank" rel="noreferrer" data-reveal data-analytics-event="site.asset_download" data-analytics-asset-id={locale === "fr" ? "dossier_fr_pdf" : "dossier_en_pdf"} data-analytics-placement="download_band">
-            <strong>{download.label}</strong>
-            <span>{download.meta}</span>
-          </a>
-        </div>
-      </div>
+      <div class="section-heading sticky-heading" data-reveal><p class="section-kicker">{homeCopy.expertiseKicker}</p><h2>{copy.observability.title}</h2><p>{copy.observability.body}</p></div>
+      <div class="expertise-list">{home.expertise.map((item, index) => <article class="expertise-card" data-reveal style={`--i: ${index}`}><h3>{item.title}</h3><p>{item.body}</p><ul>{item.items.map((skill) => <li>{skill}</li>)}</ul></article>)}</div>
     </section>
 
     <section class="section-shell blog-preview" aria-labelledby="blog-preview-title">
-      <div class="section-heading" data-reveal>
-        <h2 id="blog-preview-title">{copy.blogPreview.title}</h2>
-        <p>{copy.blogPreview.body}</p>
-      </div>
-      <div class="article-grid article-grid-preview">
-        {articleCards.map((article, index) => (
-          <a class="article-card" href={article.href} data-reveal style={`--i: ${index}`} data-analytics-event="site.article_open" data-analytics-article-id={article.slug} data-analytics-placement="blog_preview">
-            {article.heroImage && (
-              <img src={article.heroImage} alt="" loading="lazy" decoding="async" />
-            )}
-            <span>{article.label}</span>
-            <h3>{article.title}</h3>
-            <p>{article.excerpt}</p>
-            <small>{article.date} · {article.readTime}</small>
-          </a>
-        ))}
-      </div>
-      <div class="center-actions">
-        <a class="button button-secondary" href={blogPath} data-analytics-event="site.cta_click" data-analytics-cta-id="read_blog" data-analytics-placement="blog_preview">{copy.blogPreview.cta}</a>
-      </div>
+      <div class="section-heading" data-reveal><p class="section-kicker">{homeCopy.blogKicker}</p><h2 id="blog-preview-title">{homeCopy.blogTitle}</h2><p>{homeCopy.blogBody}</p></div>
+      <div class="article-grid article-grid-preview">{articleCards.map((article, index) => <a class="article-card" href={article.href} data-reveal style={`--i: ${index}`} data-analytics-event="site.article_open" data-analytics-article-id={article.slug} data-analytics-placement="blog_preview">{article.heroImage && <img src={article.heroImage} alt={article.heroImageAlt ?? ""} loading="lazy" decoding="async" />}<span>{article.label}</span><h3>{article.title}</h3><p>{article.excerpt}</p><small>{article.date} · {article.readTime}</small></a>)}</div>
+      <div class="center-actions"><a class="button button-secondary" href={blogPath} data-analytics-event="site.cta_click" data-analytics-cta-id="read_blog" data-analytics-placement="blog_preview">{copy.blogPreview.cta}</a></div>
+    </section>
+
+    <section class="download-band home-final-band">
+      <div class="section-shell download-layout"><div data-reveal><p class="section-kicker">{copy.downloadBand.title}</p><h2>{homeCopy.finalTitle}</h2><p>{homeCopy.finalBody}</p></div><div class="download-actions"><a class="download-link" href={download.href} target="_blank" rel="noreferrer" data-reveal data-analytics-event="site.asset_download" data-analytics-asset-id={locale === "fr" ? "dossier_fr_pdf" : "dossier_en_pdf"} data-analytics-placement="download_band"><strong>{download.label}</strong><span>{download.meta}</span></a><a class="button button-secondary" href={contactPath}>{homeCopy.contact}</a></div></div>
     </section>
   </main>
-
   <SiteFooter locale={locale} />
 </BaseLayout>

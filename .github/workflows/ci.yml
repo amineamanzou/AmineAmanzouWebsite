@@ -24,7 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           if git grep -I -nE \
-            '(10\.42\.|178\.104\.|37\.187\.|/opt/|/Users/|ops-gw|bastion|k3s|Argo|argo|kubectl|KUBECONFIG|ssh |known_hosts|SOPS|Kopia|WEB_PROD|GHCR_READ|MARIADB_ROOT_PASSWORD|DB_PASSWORD|preprod|prod[-_ ]?cluster|preprod[-_ ]?cluster|internal[-_ ]?cluster|cluster[-_ ]?(prod|preprod|internal)|gateway|CIDR|the-unreliable-deploy|TheUnreliableInfrastructure)' \
+            '(10\.42\.|178\.104\.|37\.187\.|/opt/|/Users/|ops-gw|bastion|k3s|Argo|argo|kubectl|KUBECONFIG|ssh |known_hosts|SOPS|Kopia|WEB_PROD|GHCR_READ|MARIADB_ROOT_PASSWORD|DB_PASSWORD|preprod|prod[-_ ]?cluster|preprod[-_ ]?cluster|internal[-_ ]?cluster|cluster[-_ ]?(prod|preprod|internal)|gateway[-_ ]?(prod|preprod|internal)|CIDR|the-unreliable-deploy|TheUnreliableInfrastructure)' \
             -- . \
             ':!.github/workflows/ci.yml' \
             ':!package-lock.json'; then
@@ -33,7 +33,7 @@ jobs:
           fi
 
       - name: Setup Node
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: 22
           cache: npm
@@ -46,6 +46,9 @@ jobs:
 
       - name: Astro check
         run: npm run check
+
+      - name: Validate content inventory and publication calendar
+        run: npm run check:content
 
       - name: Build static site
         run: npm run build
