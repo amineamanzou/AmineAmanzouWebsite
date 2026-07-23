@@ -48,7 +48,7 @@ for (const [key, entries] of translations) {
   if (entries.length !== 2 || locales !== "en,fr") failures.push(`translationKey ${key} must have one fr and one en article; found ${locales || "none"}`);
 }
 
-if (calendar.topics.length !== 26) failures.push(`editorial calendar must contain 26 topics; found ${calendar.topics.length}`);
+if (calendar.topics.length !== 30) failures.push(`editorial calendar must contain 30 topics; found ${calendar.topics.length}`);
 for (const [index, topic] of calendar.topics.entries()) {
   if (topic.id !== index + 1) failures.push(`editorial calendar topic at index ${index} must have id ${index + 1}`);
   if (new Date(`${topic.frDate}T00:00:00Z`).getUTCDay() !== 2) failures.push(`topic ${topic.id}: frDate must be a Tuesday`);

@@ -1,9 +1,9 @@
 {
-  "version": "2026-07-18",
+  "version": "2026-07-23",
   "status": "planned",
   "timezone": "Europe/Paris",
   "cadence": { "fr": "Tuesday", "en": "Thursday", "briefLeadTimeDays": 14 },
-  "publicationWindow": { "start": "2026-09-01", "end": "2027-02-25" },
+  "publicationWindow": { "start": "2026-07-28", "end": "2027-02-25" },
   "rules": {
     "oneArtifactPerTopic": true,
     "oneRelatedOfferPerArticle": true,
@@ -38,12 +38,20 @@
     { "id": 23, "frDate": "2027-02-02", "enDate": "2027-02-04", "frTitle": "Lire les spans OpenTelemetry d’un agent GenAI", "enTitle": "Read the OpenTelemetry spans of a GenAI agent", "primaryQuery": "OpenTelemetry GenAI agent spans", "artifact": "Exemple de span tree", "pillar": "agentic-sre", "intent": "informational", "relatedOffer": "otel_sprint" },
     { "id": 24, "frDate": "2027-02-09", "enDate": "2027-02-11", "frTitle": "Prompts, PII et résultats d’outils : quoi ne pas enregistrer", "enTitle": "Prompts, PII and tool results: what not to record", "primaryQuery": "GenAI observability PII security", "artifact": "Matrice de classification", "pillar": "agentic-sre", "intent": "informational", "relatedOffer": "diagnostic" },
     { "id": 25, "frDate": "2027-02-16", "enDate": "2027-02-18", "frTitle": "Construire ou acheter sa plateforme d’observabilité ?", "enTitle": "Build or buy an observability platform?", "primaryQuery": "build vs buy observability platform", "artifact": "Modèle TCO", "pillar": "observability", "intent": "comparative", "relatedOffer": "diagnostic" },
-    { "id": 26, "frDate": "2027-02-23", "enDate": "2027-02-25", "frTitle": "Cas terrain : migration Dynatrace et baisse de 40 % des incidents", "enTitle": "Field case: Dynatrace migration and 40% fewer incidents", "primaryQuery": "Dynatrace migration case study", "artifact": "Architecture avant / après", "pillar": "reliability", "intent": "case-study", "relatedOffer": "otel_sprint" }
+    { "id": 26, "frDate": "2027-02-23", "enDate": "2027-02-25", "frTitle": "Cas terrain : migration Dynatrace et baisse de 40 % des incidents", "enTitle": "Field case: Dynatrace migration and 40% fewer incidents", "primaryQuery": "Dynatrace migration case study", "artifact": "Architecture avant / après", "pillar": "reliability", "intent": "case-study", "relatedOffer": "otel_sprint" },
+    { "id": 27, "series": "observability-2-response", "status": "scheduled", "frDate": "2026-07-28", "enDate": "2026-07-30", "frTitle": "Observabilité 2.0 : ClickHouse change-t-il vraiment les règles ?", "enTitle": "Observability 2.0: does ClickHouse really change the rules?", "primaryQuery": "observabilité 2.0", "artifact": "Réaction sourcée et captures des articles", "pillar": "observability", "intent": "informational", "relatedOffer": "fractional_lead" },
+    { "id": 28, "series": "observability-2-response", "status": "scheduled", "frDate": "2026-08-04", "enDate": "2026-08-06", "frTitle": "Wide events : instrumenter une requête sans détruire son contexte", "enTitle": "Wide events: instrument a request without destroying its context", "primaryQuery": "wide events observabilité", "artifact": "Anatomie localisée d’un wide event", "pillar": "opentelemetry", "intent": "informational", "relatedOffer": "otel_sprint" },
+    { "id": 29, "series": "observability-2-response", "status": "scheduled", "frDate": "2026-08-11", "enDate": "2026-08-13", "frTitle": "ClickHouse pour l’observabilité : pourquoi ça scale et où ça casse", "enTitle": "ClickHouse for observability: why it scales and where it breaks", "primaryQuery": "ClickHouse observabilité", "artifact": "Capture LogHouse et configurations d’ingestion", "pillar": "observability", "intent": "comparative", "relatedOffer": "diagnostic" },
+    { "id": 30, "series": "observability-2-response", "status": "scheduled", "frDate": "2026-08-18", "enDate": "2026-08-20", "frTitle": "Migrer vers une observabilité unifiée sans remplacer toute sa stack", "enTitle": "Migrate to unified observability without replacing your entire stack", "primaryQuery": "migration observabilité unifiée", "artifact": "Configuration de double export et capture GitHub", "pillar": "opentelemetry", "intent": "informational", "relatedOffer": "otel_sprint" }
   ],
   "primarySources": [
     "https://opentelemetry.io/docs/specs/opamp/",
     "https://opentelemetry.io/blog/2026/genai-observability/",
     "https://opentelemetry.io/docs/specs/semconv/",
-    "https://www.cncf.io/blog/2026/05/26/how-jaeger-is-evolving-to-trace-ai-agents-with-opentelemetry/"
+    "https://www.cncf.io/blog/2026/05/26/how-jaeger-is-evolving-to-trace-ai-agents-with-opentelemetry/",
+    "https://matduggan.com/clickhouse-is-winning-the-observability-wars/",
+    "https://charity.wtf/p/have-you-heard-clickhouse-is-winning",
+    "https://clickhouse.com/blog/a-quadrillion-rows-across-the-three-cloud-scaling-loghouse",
+    "https://opentelemetry.io/docs/specs/otel/logs/data-model/"
   ]
 }
