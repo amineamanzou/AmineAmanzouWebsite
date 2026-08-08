@@ -4,7 +4,7 @@
 
 **Goal:** Remove every vulnerable `@opentelemetry/core` resolution below `2.8.0` while preserving the existing HyperDX browser telemetry contract.
 
-**Architecture:** A small Node check inspects npm's installed dependency tree and enforces the patched version floor. A root npm override pins `@opentelemetry/core` to `2.9.0`; CI and production deployment run the policy check after `npm ci`.
+**Architecture:** A small Node check inspects npm's installed dependency tree and enforces the patched version floor. A root npm override pins `@opentelemetry/core` to `2.9.0`; the existing `npm run check` gate runs the policy after `npm ci` in both CI and production deployment.
 
 **Tech Stack:** npm overrides and lockfile v3, Node.js ESM, GitHub Actions, Astro, HyperDX Browser SDK, Playwright.
 
@@ -22,8 +22,6 @@
 **Files:**
 - Create: `scripts/checks/opentelemetry-core-version.mjs`
 - Modify: `package.json`
-- Modify: `.github/workflows/ci.yml`
-- Modify: `.github/workflows/deploy-production.yml`
 
 **Interfaces:**
 - Consumes: `npm ls @opentelemetry/core --all --json` output.
@@ -31,7 +29,7 @@
 
 - [ ] **Step 1: Write the failing dependency policy check**
 
-Implement an ESM script that runs `npm ls @opentelemetry/core --all --json`, recursively visits dependency nodes, compares strict three-part semantic versions numerically, and throws when it finds a version below `2.8.0`. Add `"check:otel-core": "node scripts/checks/opentelemetry-core-version.mjs"` to `package.json`, and invoke it after `npm ci` in both CI and deployment workflows.
+Implement an ESM script that runs `npm ls @opentelemetry/core --all --json`, recursively visits dependency nodes, compares strict three-part semantic versions numerically, and throws when it finds a version below `2.8.0`. Add `"check:otel-core": "node scripts/checks/opentelemetry-core-version.mjs"` to `package.json`, and make the existing `check` script run it before `astro check`. Both CI and deployment already run `npm run check` after `npm ci`.
 
 - [ ] **Step 2: Verify the policy fails on the vulnerable tree**
 
@@ -44,7 +42,7 @@ Expected: exit 1 with one or more paths resolving `@opentelemetry/core@2.7.1`.
 Run:
 
 ```bash
-git add scripts/checks/opentelemetry-core-version.mjs package.json .github/workflows/ci.yml .github/workflows/deploy-production.yml
+git add scripts/checks/opentelemetry-core-version.mjs package.json
 git commit -m "test: enforce patched OpenTelemetry core"
 ```
 

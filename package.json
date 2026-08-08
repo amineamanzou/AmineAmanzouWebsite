@@ -10,7 +10,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check",
+    "check": "npm run check:otel-core && astro check",
     "check:seo": "node scripts/checks/seo-output.mjs",
     "check:content": "node scripts/checks/content-inventory.mjs",
     "check:seo:production": "node scripts/checks/production-seo.mjs",
