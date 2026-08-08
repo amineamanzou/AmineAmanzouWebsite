@@ -15,6 +15,7 @@
     "check:content": "node scripts/checks/content-inventory.mjs",
     "check:seo:production": "node scripts/checks/production-seo.mjs",
     "check:browser-observability": "node scripts/checks/browser-observability.mjs",
+    "check:otel-core": "node scripts/checks/opentelemetry-core-version.mjs",
     "check:product-analytics": "node scripts/checks/product-analytics.mjs",
     "review:site": "node scripts/qa/review-site.mjs",
     "review:commercial": "node scripts/qa/commercial-pages-smoke.mjs",
