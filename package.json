@@ -27,6 +27,7 @@
     "posthog-js": "1.413.2"
   },
   "overrides": {
+    "@opentelemetry/core": "2.9.0",
     "@posthog/core": "1.40.0",
     "protobufjs": "7.6.5"
   },
