@@ -26,6 +26,7 @@ backups/
 # Local tooling output.
 .cache/
 tmp/
+.worktrees/
 
 # Local benchmark research and generated reports.
 /benchmark/
