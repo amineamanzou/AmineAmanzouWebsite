@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Topologie comparée du lab ViaQ et OpenTelemetry</title>
+  <desc id="desc">Deux branches indépendantes partent de la même source. La branche ViaQ traverse CLF et Vector, Kafka ViaQ, Data Prepper puis OpenSearch. La branche OpenTelemetry traverse un collector producteur, Kafka en OTLP JSON, un collector consommateur puis OpenSearch.</desc>
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#d9e2ec" opacity=".55"/></pattern>
+    <marker id="blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0l10 5-10 5z" fill="#2563eb"/></marker>
+    <marker id="green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0l10 5-10 5z" fill="#059669"/></marker>
+  </defs>
+  <rect width="1600" height="900" fill="#f7f9fc"/><rect width="1600" height="900" fill="url(#grid)"/>
+  <g font-family="Inter, Arial, sans-serif">
+    <text x="90" y="96" fill="#121821" font-size="54" font-weight="800">SAME SOURCE. TWO COMPLETE PIPELINES.</text>
+    <text x="92" y="145" fill="#667085" font-size="25">Compare the paths end to end; do not attribute a pipeline result to one component.</text>
+
+    <g font-weight="700" text-anchor="middle">
+      <g transform="translate(50 350)"><rect width="175" height="150" rx="8" fill="#111827"/><path d="M46 48h83M46 72h83M46 96h52" stroke="#fff" stroke-width="8"/><text x="87.5" y="132" fill="#fff" font-size="24">Log source</text></g>
+
+      <text x="335" y="215" fill="#2563eb" font-size="22" text-anchor="start">VIAQ PATH</text>
+      <g transform="translate(335 240)"><rect width="220" height="135" rx="8" fill="#fff" stroke="#2563eb" stroke-width="4"/><text x="110" y="58" fill="#121821" font-size="27">CLF / Vector</text><text x="110" y="96" fill="#667085" font-size="20">ViaQ</text></g>
+      <g transform="translate(625 240)"><rect width="210" height="135" rx="8" fill="#111827"/><path d="M52 42h106M52 66h106M52 90h106" stroke="#fff" stroke-width="8"/><text x="105" y="120" fill="#fff" font-size="22">Kafka ViaQ</text></g>
+      <g transform="translate(905 240)"><rect width="220" height="135" rx="8" fill="#fff" stroke="#b8c7d8" stroke-width="3"/><path d="M56 38h108l-36 50H92z" fill="#2563eb" opacity=".18"/><text x="110" y="119" fill="#121821" font-size="21">Data Prepper</text></g>
+      <g transform="translate(1195 240)"><rect width="210" height="135" rx="8" fill="#111827"/><circle cx="105" cy="58" r="30" fill="none" stroke="#60a5fa" stroke-width="8"/><path d="M128 81l30 30" stroke="#60a5fa" stroke-width="8"/><text x="105" y="120" fill="#fff" font-size="21">OpenSearch</text></g>
+
+      <text x="335" y="485" fill="#059669" font-size="22" text-anchor="start">OTEL PATH</text>
+      <g transform="translate(335 510)"><rect width="230" height="135" rx="8" fill="#fff" stroke="#059669" stroke-width="4"/><text x="115" y="53" fill="#121821" font-size="24">OTel collector</text><text x="115" y="91" fill="#667085" font-size="20">producer</text></g>
+      <g transform="translate(635 510)"><rect width="220" height="135" rx="8" fill="#111827"/><path d="M54 38h112M54 62h112M54 86h112" stroke="#fff" stroke-width="8"/><text x="110" y="116" fill="#fff" font-size="20">Kafka OTLP JSON</text></g>
+      <g transform="translate(925 510)"><rect width="230" height="135" rx="8" fill="#fff" stroke="#059669" stroke-width="4"/><text x="115" y="53" fill="#121821" font-size="24">OTel collector</text><text x="115" y="91" fill="#667085" font-size="20">consumer</text></g>
+      <g transform="translate(1225 510)"><rect width="210" height="135" rx="8" fill="#111827"/><circle cx="105" cy="58" r="30" fill="none" stroke="#34d399" stroke-width="8"/><path d="M128 81l30 30" stroke="#34d399" stroke-width="8"/><text x="105" y="120" fill="#fff" font-size="21">OpenSearch</text></g>
+    </g>
+
+    <g fill="none" stroke-width="8">
+      <path d="M225 405C275 405 275 308 335 308" stroke="#2563eb" marker-end="url(#blue)"/>
+      <path d="M555 308h70" stroke="#2563eb" marker-end="url(#blue)"/>
+      <path d="M835 308h70" stroke="#2563eb" marker-end="url(#blue)"/>
+      <path d="M1125 308h70" stroke="#2563eb" marker-end="url(#blue)"/>
+      <path d="M225 445C275 445 275 578 335 578" stroke="#059669" marker-end="url(#green)"/>
+      <path d="M565 578h70" stroke="#059669" marker-end="url(#green)"/>
+      <path d="M855 578h70" stroke="#059669" marker-end="url(#green)"/>
+      <path d="M1155 578h70" stroke="#059669" marker-end="url(#green)"/>
+    </g>
+
+    <g transform="translate(335 725)"><rect width="1100" height="88" rx="8" fill="#eef3f8" stroke="#d9e2ec"/><text x="36" y="36" fill="#344054" font-size="22" font-weight="700">Compare at every boundary</text><text x="36" y="65" fill="#667085" font-size="20">expected → captured in Kafka → decoded → indexed in OpenSearch</text></g>
+  </g>
+</svg>

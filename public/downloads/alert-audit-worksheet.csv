@@ -1,0 +1,2 @@
+service,alert_name,first_seen,last_seen,pages,distinct_incidents,actionable_pages,auto_resolved,duplicate_pages,incidents_found_outside_alerting,median_ack_minutes,owner,expected_immediate_action,route,page_ticket_or_dashboard,runbook_url,notes
+example-service,ExampleHighErrorRate,,,,,,,,,,,,,,,
