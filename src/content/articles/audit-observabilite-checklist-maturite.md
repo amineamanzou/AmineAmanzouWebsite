@@ -19,15 +19,17 @@ keywords: ["audit observabilité", "observability maturity assessment", "checkli
 proofLevel: "documentation"
 ---
 
-Une plateforme peut avoir des agents sur tous les serveurs, des dashboards par équipe et un contrat APM assez cher pour mériter sa propre ligne budgétaire.
+« On a déjà des agents partout, des dashboards par équipe et un contrat APM conséquent. Qu’est-ce que vous voulez auditer de plus ? »
 
-Pendant l’incident, quelqu’un copie encore un identifiant depuis le support vers trois moteurs de recherche.
+Je comprends la réaction. Tout cela représente du travail, parfois plusieurs années de déploiement. Mais prenons une situation simple : pendant un incident, une personne copie encore l’identifiant envoyé par le support dans trois moteurs de recherche, sans savoir lequel contient la suite du parcours.
 
-C’est généralement le moment où l’inventaire d’outils cesse d’être une mesure crédible de maturité.
+Les outils sont bien là. L’enquête reste fragile. C’est généralement le moment où l’inventaire cesse d’être une mesure crédible de maturité.
 
 La grille ci-dessous assemble des questions opérationnelles dérivées des principes publics du SRE et des modèles de données OpenTelemetry. Elle ne constitue ni une norme Google, ni une certification CNCF. C’est une checklist à vérifier sur le terrain.
 
 Chaque point doit être vérifié avec une preuve : requête, alerte, trace, configuration, historique d’incident, règle de rétention, propriétaire ou décision. Une réponse « l’outil sait le faire » ne vaut pas encore une capacité opérationnelle.
+
+Vous n’allez probablement pas cocher les 35 cases au premier passage. Tant mieux si la grille fait apparaître les compromis et les angles morts au lieu de produire une note rassurante. Le but est de choisir les prochaines améliorations, pas de distribuer un certificat.
 
 ## 1. Partir de l’expérience réellement rendue
 
@@ -37,7 +39,9 @@ Chaque point doit être vérifié avec une preuve : requête, alerte, trace, con
 4. **Les objectifs ont un propriétaire.** Une personne ou une équipe peut arbitrer entre fiabilité, coût et vitesse de livraison.
 5. **Les données métier et techniques se rejoignent.** L’équipe peut relier une dégradation à une population, une version ou une opération importante sans exposer inutilement des données personnelles.
 
-Une équipe qui ne sait pas décrire le service rendu produira surtout des métriques de composants. Elles peuvent être exactes tout en ratant l’impact qui compte.
+Une équipe qui ne sait pas encore décrire le service rendu produira surtout des métriques de composants. Elles peuvent être exactes tout en ratant l’impact qui compte.
+
+Si les parcours critiques ne sont pas formalisés chez vous, commencez par celui qui revient le plus souvent dans les incidents ou les tickets support. Un premier résultat imparfait donne déjà une base de discussion.
 
 ## 2. Conserver le contexte pendant l’instrumentation
 
@@ -49,6 +53,8 @@ Une équipe qui ne sait pas décrire le service rendu produira surtout des métr
 
 Installer une instrumentation automatique peut couvrir beaucoup de bibliothèques. Elle ne connaît pas automatiquement le résultat métier, l’identité d’un tenant ou la décision qu’une application vient de prendre.
 
+Et si la propagation de contexte se casse au milieu du parcours, inutile de culpabiliser l’équipe avec un grand score de maturité. Prenez une transaction réelle, trouvez la première rupture et réparez celle-là. La couverture progressera passage après passage.
+
 ## 3. Traiter le pipeline comme un service de production
 
 11. **Les chemins de télémétrie sont cartographiés.** Receivers, processors, queues, exporters et destinations sont visibles de bout en bout.
@@ -58,6 +64,8 @@ Installer une instrumentation automatique peut couvrir beaucoup de bibliothèque
 15. **La capacité est reliée au volume.** Lignes de logs, spans, datapoints, taille moyenne et pics permettent d’estimer CPU, mémoire, réseau et stockage.
 
 Le pipeline d’observabilité est souvent considéré comme le tuyau qui regarde les autres services. Il reste pourtant un système distribué avec ses propres files, limites, dépendances et modes de panne.
+
+Vous n’avez peut-être jamais coupé volontairement le backend pour voir ce qui arrive. C’est compréhensible sur une plateforme déjà tendue. On peut commencer dans un environnement borné, mesurer le buffering et documenter ce qu’on ignore encore, plutôt que déclarer la résilience sur la seule présence d’une queue.
 
 ## 4. Savoir ce qui est stocké et ce que cela coûte
 
@@ -69,15 +77,17 @@ Le pipeline d’observabilité est souvent considéré comme le tuyau qui regard
 
 Le coût n’est pas seulement le prix d’ingestion affiché par le fournisseur. Il inclut la collecte, le transport, les buffers, le stockage, les requêtes, la rétention et le temps humain passé à maintenir les exceptions.
 
+Si personne ne sait encore attribuer chaque euro, je commencerais par les plus gros volumes et les duplications visibles. Le premier objectif est de rendre une décision possible, pas de construire une comptabilité parfaite de chaque span.
+
 ## 5. Détecter moins de bruit et mieux enquêter
 
-21. **Les pages correspondent à une action immédiate.** Si la personne d’astreinte ne peut rien faire, le signal appartient plutôt à un ticket ou à un dashboard.
+21. **Les appels d’astreinte correspondent à une action immédiate.** Si la personne d’astreinte ne peut rien faire, le signal appartient plutôt à un ticket ou à un dashboard.
 22. **Les alertes suivent un symptôme ou un budget.** Les seuils internes ne réveillent pas quelqu’un sans lien clair avec un impact ou une panne imminente.
 23. **Les doublons sont regroupés.** Un incident ne déclenche pas quinze notifications décrivant la même cause.
 24. **L’alerte fournit le contexte de départ.** Service, impact, runbook, fenêtre, changement récent et propriétaire sont accessibles sans chasse au trésor.
 25. **Les trous de détection sont suivis.** Les incidents découverts par le support ou les utilisateurs deviennent des signaux pour améliorer les SLIs et l’alerting.
 
-Google SRE recommande des alertes actionnables et un ratio signal/bruit assez élevé pour préserver l’astreinte. La cible n’est pas un nombre magique d’alertes. Elle consiste à garder assez de capacité cognitive pour traiter la prochaine page sérieuse.
+Google SRE recommande des alertes actionnables et un ratio signal/bruit assez élevé pour préserver l’astreinte. La cible n’est pas un nombre magique d’alertes. Elle consiste à garder assez de capacité cognitive pour traiter le prochain appel sérieux.
 
 ## 6. Rendre la gouvernance visible
 
@@ -88,6 +98,8 @@ Google SRE recommande des alertes actionnables et un ratio signal/bruit assez é
 30. **Les changements sont auditables.** L’équipe peut retrouver qui a modifié une règle, un pipeline, une rétention ou un dashboard critique.
 
 La gouvernance devient visible quand une question opérationnelle trouve un propriétaire et une preuve. Un document RACI oublié dans un espace partagé ne suffit pas.
+
+Dans une grande organisation, le propriétaire unique n’existe pas toujours. On peut au moins nommer la personne qui porte la prochaine décision et celle qui accepte le risque si elle reste ouverte. C’est moins élégant qu’un organigramme parfaitement aligné, mais beaucoup plus utile pendant l’incident.
 
 ## 7. Transformer les incidents en amélioration
 
@@ -104,6 +116,8 @@ Je classe chaque point dans quatre états simples : absent, partiel, opérationn
 `Opérationnel` signifie que le processus existe et qu’une équipe sait l’utiliser. `Vérifié récemment` demande une preuve datée : exercice, incident, requête rejouée, restauration ou test de charge.
 
 Je ne calcule pas immédiatement une moyenne sur 100. Une absence sur la propagation de contexte, la sécurité des données ou la capacité de rollback peut compter davantage que dix dashboards bien documentés.
+
+Vous pouvez très bien être avancé sur les métriques et faible sur la gouvernance, ou l’inverse. La restitution doit raconter cette forme-là. Réduire le tout à 62 % recrée précisément le dashboard rassurant que l’audit essaie de dépasser.
 
 La restitution doit donc montrer :
 
