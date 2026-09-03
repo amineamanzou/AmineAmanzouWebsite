@@ -5,8 +5,8 @@ articleSlug: "reduire-fatigue-alerte"
 translationKey: "reduce-alert-fatigue"
 publishedAt: "2026-09-29"
 label: "SRE / Alerting"
-readTime: "9 min"
-excerpt: "Réduire le bruit ne consiste pas à supprimer des règles au hasard. Il faut relier les pages à une action, regrouper les doublons et vérifier quels incidents échappent encore à la détection."
+readTime: "10 min"
+excerpt: "Chez Orange, une semaine d’appels d’astreinte à 4 h du matin pour un excès de logs m’a rappelé qu’un seuil dépassé ne suffit pas à justifier de réveiller quelqu’un."
 heroImage: "/blog/reduire-fatigue-alerte/hero-alert-signal-funnel.svg"
 heroImageAlt: "Une astreinte sépare une alerte actionnable d’un flux de notifications dupliquées"
 pillar: "reliability"
@@ -14,128 +14,109 @@ intent: "informational"
 primaryQuery: "alert fatigue reduction"
 relatedOffer: "diagnostic"
 seoTitle: "Réduire la fatigue d’alerte sans perdre les incidents"
-seoDescription: "Méthode pour auditer les alertes, réduire les doublons, pager sur l’impact et préserver la détection des incidents importants."
-keywords: ["alert fatigue reduction", "fatigue d’alerte", "on-call", "SLO alerting", "incident response"]
-proofLevel: "documentation"
+seoDescription: "Retour d’astreinte chez Orange : relier les appels à une action, régler les seuils, réduire les doublons et préserver la détection des incidents."
+keywords: ["alert fatigue reduction", "fatigue d’alerte", "astreinte", "SLO alerting", "incident response"]
+proofLevel: "experience"
 ---
 
-La quatrième notification de la nuit ne me rend pas quatre fois plus informé.
+Chez Orange, j’ai fait de l’astreinte. Je me souviens d’une semaine où le téléphone sonnait à 4 h du matin, toujours au même moment, pour un excès de logs sur un composant critique.
 
-Elle décrit souvent le même incident depuis une autre couche : le endpoint échoue, le service redémarre, le pool de connexions se vide, la queue monte et le probe devient rouge.
+Un de ces composants dont tout le monde a un peu peur. Le genre de nom qui suffit à mettre l’équipe en alerte, avant même de regarder ce qui se passe. Les seuils étaient mal adaptés à son comportement : le volume de logs dépassait la règle, et bim, appel d’astreinte.
 
-En pleine astreinte, il faut encore décider laquelle de ces informations demande une action.
+Sauf que ce volume ne justifiait pas de nous appeler.
 
-La fatigue d’alerte commence rarement par un manque de données. Elle vient d’un système qui délègue trop de tri à la personne réveillée.
+Ce qui m’agace dans cette situation, c’est le travail qu’on laisse à la personne réveillée. À elle de refaire la différence entre « ce composant produit beaucoup de logs » et « il faut intervenir maintenant ». Pendant une semaine, à la même heure. On finit par connaître le rendez-vous.
 
-## Une page doit acheter une action humaine immédiate
+Un excès de lignes peut mériter une investigation, un réglage ou un ticket. Il ne suffit pas, à lui seul, à justifier un appel à 4 h du matin. Il manque encore quelque chose : l’impact, le risque imminent, et ce qu’une personne peut réellement faire à cette heure-là.
 
-Google SRE distingue trois sorties utiles du monitoring : une alerte qui demande une action immédiate, un ticket qui demande une action sans urgence, et une information conservée pour l’analyse.
+Quand je regarde une règle d’alerte aujourd’hui, je repense à cette semaine. Derrière le seuil, il y a quelqu’un qui va devoir répondre au téléphone.
 
-Cette séparation paraît évidente. Beaucoup de plateformes envoient pourtant les trois vers le même canal.
+## Qu’est-ce que je peux faire maintenant ?
 
-Pour chaque page, je pose quatre questions :
+J’avoue que « le composant est critique » ne me suffit plus comme explication. Justement parce qu’il est critique, j’ai besoin de savoir ce qui exige une intervention, et avec quelle urgence.
 
-1. quel impact ou risque imminent déclenche la notification ;
-2. quelle action la personne peut prendre maintenant ;
-3. combien de temps cette action peut attendre ;
-4. ce que le système pourrait automatiser avant de réveiller quelqu’un.
+Le [chapitre monitoring de Google SRE](https://sre.google/sre-book/monitoring-distributed-systems/) distingue les notifications qui interrompent immédiatement une personne des tickets et des informations utiles à l’analyse. Cette distinction aide à décider où envoyer un signal.
 
-Si aucune action n’existe, ajouter un runbook vide ne rend pas l’alerte actionnable. Le signal peut rester dans un dashboard, créer un ticket ou nourrir une analyse de capacité.
+Pour chaque règle qui appelle l’astreinte, je veux pouvoir répondre à quatre questions :
 
-## Pager sur les symptômes, explorer les causes
+1. quel impact ou risque imminent a été détecté ;
+2. quelle action est possible maintenant ;
+3. ce qui se passe si cette action attend le matin ;
+4. ce que le système pourrait automatiser avant d’appeler.
 
-Une métrique interne décrit parfois une cause utile. Elle ne décrit pas toujours un incident.
+Dans l’exemple des logs, compter les lignes ne répond à aucune de ces questions. Il faut comprendre ce que leur augmentation signifie pour le service.
 
-Un CPU à 90 % peut être normal pendant un batch. Une queue de 50 000 messages peut se vider avant d’affecter un utilisateur. Un pod redémarré peut être remplacé sans conséquence.
+Et si la seule consigne du runbook est « regarder les logs », on a surtout documenté le travail de tri laissé à l’astreinte.
 
-À l’inverse, un parcours de paiement peut échouer alors que chaque composant reste sous son seuil local.
+## Un seuil dépassé ne raconte pas encore l’incident
 
-Le guide d’incident de Google recommande de baser les alertes sur des symptômes et sur les fonctions visibles par les utilisateurs. L’alerting SLO ajoute une mesure du budget d’erreur : une page se déclenche lorsque le service consomme assez vite sa marge de fiabilité pour demander une réponse immédiate.
+Je comprends la prudence autour d’un composant sensible. On préfère parfois appeler pour rien que rater une panne. Mais cette prudence finit par coûter cher quand chaque variation du composant prend le même chemin que l’incident.
 
-Les métriques de causes restent nécessaires. Elles servent à l’enquête après le déclenchement, ou à prévenir une panne brutale lorsqu’une limite dure approche.
+Prenons des exemples simples : un CPU à 90 % peut correspondre à un traitement attendu. Une file peut grossir puis se vider dans le délai prévu. Un pod peut redémarrer sans interrompre le service. Ces signaux demandent du contexte.
 
-## Mesurer le bruit avant de le nettoyer
+À l’inverse, un parcours utilisateur peut échouer alors que les seuils de chaque composant restent au vert.
 
-Je commence l’audit avec l’historique des notifications, pas avec la liste des règles.
+Le [guide d’incident de Google](https://sre.google/resources/practices-and-processes/incident-management-guide/) recommande d’alerter à partir des symptômes et des fonctions visibles par les utilisateurs. Les métriques internes restent utiles pour chercher la cause, ou pour anticiper une limite dure.
 
-Pour chaque service, je mesure :
+Un volume de logs qui menace de remplir le disque avant le matin peut donc justifier une intervention. « Trop de lignes » sans conséquence identifiée ne dit toujours pas pourquoi il faut réveiller quelqu’un. C’est ce lien que je veux retrouver dans la règle, au lieu de le reconstruire à chaque appel.
 
-- le nombre de pages par rotation ;
-- le nombre d’incidents distincts ;
-- le ratio alertes/incidents ;
-- les pages sans action ;
-- les alertes fermées automatiquement avant investigation ;
-- les doublons arrivés dans les mêmes minutes ;
-- les incidents découverts par le support ou les utilisateurs ;
-- le délai entre le premier impact et la première notification utile.
+## Repartir des nuits passées, pas seulement du fichier de règles
 
-Google propose de tendre vers une relation proche de 1:1 entre alerte et incident. Ce n’est pas une règle mathématique universelle. C’est une direction qui oblige à regarder le fan-out : combien de fois le même événement mobilise-t-il l’attention ?
+Pour remettre de l’ordre, je préfère commencer par l’historique des appels. Un fichier de configuration montre ce qu’on a prévu. L’historique montre ce que l’astreinte a réellement subi.
 
-Un système avec peu de pages mais beaucoup d’incidents découverts ailleurs n’est pas mature. Il est silencieux.
+La répétition à 4 h serait déjà un point de départ : combien d’appels, combien d’incidents distincts, quelles actions ont suivi ? Est-ce que le même signal revient chaque nuit ? Est-ce qu’il disparaît avant même le début de l’investigation ?
 
-## Regrouper avant de supprimer
+Je regarde aussi l’autre côté : les incidents découverts par le support ou les utilisateurs, et le délai avant qu’une notification utile nous parvienne. Faire baisser le compteur d’appels ne prouve pas qu’on détecte mieux.
 
-Plusieurs alertes peuvent rester utiles pendant l’enquête sans toutes déclencher une notification.
+Dans [Being On-Call](https://sre.google/sre-book/being-on-call/), Google propose de rapprocher le nombre d’alertes du nombre d’incidents, avec un objectif de l’ordre de 1:1 pour les alertes systématiquement dupliquées. Je le prends comme une invitation à examiner chaque interruption, pas comme un ratio magique à afficher dans un dashboard.
 
-L’Alertmanager de Prometheus, comme d’autres systèmes, sait grouper, dédupliquer et inhiber. Une alerte de disponibilité peut inhiber les symptômes secondaires du même service. Plusieurs replicas peuvent être regroupés dans une notification. Une alerte source peut inhiber les alertes cibles qui partagent les labels configurés.
+## Garder les détails sans faire sonner le téléphone pour chacun
 
-Je conserve les signaux détaillés dans l’outil. Je réduis le nombre de fois où ils traversent la frontière humaine.
+Une fois l’historique posé, je résiste à l’envie de tout désactiver. Je veux encore avoir les logs et les symptômes sous la main si le service tombe vraiment.
 
-Cette nuance évite un nettoyage brutal où l’équipe supprime des règles puis découvre, au prochain incident, qu’elle a aussi supprimé les seules traces du début de la panne.
+L’[Alertmanager de Prometheus](https://prometheus.io/docs/alerting/latest/configuration/) permet de regrouper, dédupliquer et inhiber des notifications. Plusieurs instances concernées peuvent apparaître ensemble. Une alerte source peut empêcher l’envoi d’autres alertes dont les labels correspondent à la règle d’inhibition.
 
-## Utiliser plusieurs vitesses
+Prenons un service indisponible : les échecs du point d’entrée, les redémarrages et la file qui monte peuvent tous aider au diagnostic. Ils n’ont pas forcément besoin de provoquer trois appels supplémentaires.
 
-Tous les incidents ne brûlent pas la fiabilité à la même vitesse.
+Je garde donc la possibilité de descendre dans le détail pendant l’enquête. Ce que je cherche à réduire, c’est le nombre de fois où la personne doit interrompre ce qu’elle fait pour qualifier le même événement.
 
-Une panne totale mérite une détection rapide. Une dégradation légère pendant plusieurs jours demande une autre fenêtre. Un seul seuil produit souvent un compromis médiocre : trop sensible pour les petites variations, trop lent pour les grosses pannes.
+## Donner une urgence différente à des situations différentes
 
-Les alertes multi-fenêtres et multi-burn-rate du SRE Workbook combinent une fenêtre courte et une fenêtre longue. La fenêtre courte détecte l’accélération. La longue confirme que le phénomène n’est pas un point isolé.
+Après plusieurs nuits interrompues, monter un seuil jusqu’à retrouver le silence peut être tentant. J’ai du mal avec ce réglage quand personne ne peut expliquer quelle panne il détectera encore.
 
-On peut ensuite router :
+L’[alerting sur les SLO du SRE Workbook](https://sre.google/workbook/alerting-on-slos/) permet de raisonner sur la vitesse de consommation du budget d’erreur. Les approches multi-fenêtres vérifient un dépassement sur une fenêtre longue et sur une fenêtre courte : on évite de réagir à un point isolé tout en vérifiant que la dégradation est encore en cours.
 
-- consommation rapide du budget vers le pager ;
-- consommation lente vers un ticket prioritaire ;
-- tendance de capacité vers le backlog ;
-- information de diagnostic vers le dashboard.
+L’équipe peut alors réserver l’appel d’astreinte à une consommation rapide, ouvrir un ticket pour une dégradation plus lente et suivre une tendance de capacité dans le backlog.
 
-La sévérité devient une politique de temps et d’action, pas une couleur choisie dans un fichier YAML.
+Ça oblige à discuter du délai acceptable et de la réponse attendue. Le réglage dépend du service ; recopier les fenêtres d’un exemple ne remplace pas cette discussion. Et pour un excès de logs, il faut d’abord établir son lien avec un risque réel avant de lui coller une alerte SLO.
 
-## Donner un point de départ exploitable
+## À 4 h du matin, le contexte compte
 
-Une alerte correcte peut encore être épuisante si elle arrive sans contexte.
+Même quand l’appel est justifié, je n’ai pas envie de commencer une chasse aux liens pour comprendre ce qu’on attend de moi.
 
-Je veux retrouver dans la notification ou à un clic :
+La notification devrait me donner le service et le parcours concernés, l’impact mesuré, le début du problème, puis un accès direct aux traces, aux logs et au runbook. Si un changement récent est affiché, je veux savoir qu’il s’agit d’une piste à vérifier, pas d’une cause déjà démontrée.
 
-- le service et le parcours concernés ;
-- l’impact mesuré ;
-- le début de la fenêtre ;
-- le changement récent le plus plausible ;
-- des liens vers le SLO, les traces et les logs ;
-- le propriétaire ;
-- le runbook et l’escalade ;
-- la façon de confirmer que le service est revenu.
+Le runbook doit m’aider à décider : comment qualifier l’impact, quelle mesure sûre essayer, comment vérifier son effet et à qui demander de l’aide. Une capture de dashboard ne répond pas à tout ça.
 
-Le runbook doit contenir des décisions, pas une capture du dashboard. Il explique comment qualifier l’impact, vérifier les dépendances, appliquer une mitigation sûre et demander de l’aide.
+Cette préparation ne supprime pas la difficulté d’un incident. Elle évite d’ajouter à l’urgence la recherche d’informations que l’équipe connaissait déjà.
 
-## Traiter les pages répétées comme un défaut de production
+## Le rendez-vous de 4 h doit revenir dans le travail de la journée
 
-Une alerte bruyante devient parfois un folklore : « elle se déclenche toujours, on la connaît ».
+Le passage qui m’inquiète, c’est le moment où une alerte récurrente devient familière. « Celle-là, on la connaît. » On comprend très bien pourquoi la personne finit par penser ça.
 
-Cette familiarité est précisément le danger. Une page ignorée apprend à l’équipe que le pager peut mentir. Le jour où le signal décrit un vrai incident, le cerveau applique le même raccourci.
+Google décrit aussi ce risque dans [Being On-Call](https://sre.google/sre-book/being-on-call/) : après plusieurs occurrences semblables, on peut supposer trop vite que la suivante a la même cause. Le jour où quelque chose change réellement, cette habitude complique le diagnostic.
 
-J’ajoute donc les pages répétées au travail de fiabilité avec un propriétaire et une échéance. La correction peut être un seuil, une meilleure agrégation, une automation, une suppression ou une modification du service qui produit le symptôme.
+Je veux donc que ces appels répétés reviennent dans le travail de fiabilité, avec quelqu’un pour porter la correction et une échéance. Le réglage peut concerner le seuil, la fenêtre, le regroupement, une automatisation ou le service lui-même.
 
-La solution ne vit pas toujours dans l’outil d’alerting.
+La criticité du composant justifie qu’on vérifie sérieusement la modification. Elle ne justifie pas de reconduire indéfiniment le même réveil. Si l’équipe craint de perdre une détection utile, il faut nommer le scénario redouté et tester la règle sur ce scénario.
 
-## Vérifier ce que le silence a coûté
+## Vérifier avant de confier la prochaine nuit au nouveau réglage
 
-Après le nettoyage, je rejoue les incidents connus.
+Avant de considérer le nettoyage terminé, je rejoue les incidents connus quand les données le permettent. Est-ce que les nouvelles règles auraient détecté l’impact ? À temps ? Avec quelles informations pour l’astreinte ?
 
-Les nouvelles règles auraient-elles détecté l’impact ? Avec quel délai ? Quelle notification aurait atteint l’astreinte ? Les informations de diagnostic seraient-elles encore disponibles ?
+Je continue aussi à suivre les incidents arrivés par le support sans appel préalable. Le silence peut cacher un trou de détection.
 
-Je suis aussi les incidents sans page : ils révèlent les trous de détection.
-
-Réduire la fatigue d’alerte consiste donc à retirer du travail de tri tout en conservant la capacité de détecter. Le bon résultat n’est pas un pager silencieux. C’est une astreinte qui croit la notification, comprend pourquoi elle arrive et possède encore assez d’attention pour agir.
+Pour mon histoire de logs, le critère reste très concret : garder de quoi comprendre ce qui se passe sur ce composant, et pouvoir expliquer pourquoi la prochaine augmentation demande soit un traitement dans la journée, soit un appel immédiat. La personne qui prend l’astreinte après moi ne devrait pas avoir à redécouvrir cette différence à 4 h du matin.
 
 ## Sources
 
@@ -144,3 +125,4 @@ Réduire la fatigue d’alerte consiste donc à retirer du travail de tri tout e
 - [Google SRE Workbook — Alerting on SLOs](https://sre.google/workbook/alerting-on-slos/)
 - [Google SRE — Incident Management Guide](https://sre.google/resources/practices-and-processes/incident-management-guide/)
 - [Prometheus — Alertmanager configuration](https://prometheus.io/docs/alerting/latest/configuration/)
+
