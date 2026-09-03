@@ -25,9 +25,11 @@ Si c’est ce que vous vous dites en lisant le titre, je comprends. Vous avez pe
 
 Je garderais les dashboards qui servent. Quand je parle de définir les SLO avant de construire les écrans, je parle d’abord de l’ordre des questions : qu’est-ce que le service doit réussir pour ses utilisateurs, comment peut-on le vérifier, et que fera-t-on si ça se dégrade ?
 
-Je repense à mes astreintes chez Orange, avec ces appels à 4 h du matin pour un excès de logs sur un composant critique. Le volume avait déclenché une alerte, mais ne justifiait pas cet appel. Cette expérience me rappelle pourquoi je me méfie d’un seuil dont on ne sait plus expliquer la conséquence.
+Dans une précédente mission, j’ai connu une autre forme de pression. Le management était oppressant, la culture « delivery first » occupait tout l’espace et les négligences s’accumulaient derrière les dates à tenir. La fiabilité devenait un sujet qu’on repoussait au prochain jalon, puis au suivant.
 
-Un SLO n’aurait pas corrigé cette règle tout seul. Il aurait fallu comprendre le signal, discuter du risque et modifier le fonctionnement de l’alerte. C’est aussi du travail d’équipe, avec les contraintes qui vont avec.
+Dans ce contexte, arriver avec une recette SRE parfaite aurait surtout braqué les personnes qui essayaient déjà de maintenir le système. Je ne l’avais d’ailleurs pas, cette recette. C’est en revenant récemment sur le SRE Workbook de Google que j’ai mieux compris la place laissée à une première définition imparfaite, puis à son amélioration.
+
+Un SLO n’aurait pas corrigé la culture de cette mission à lui seul. Il pouvait en revanche créer un endroit précis pour discuter : quel résultat sommes-nous en train de sacrifier pour tenir la date, comment le voyons-nous et qui accepte ce compromis ?
 
 ## Se mettre d’accord sur un premier résultat
 
@@ -113,7 +115,7 @@ Un CPU élevé pendant un traitement attendu peut être sans conséquence pour l
 
 Il reste aussi des risques à anticiper avant qu’un utilisateur soit touché, comme une ressource sur le point d’être épuisée. Les alertes préventives ont leur place quand elles décrivent un risque concret et une action possible.
 
-Revenir à ma semaine d’astreinte ne me donne donc pas envie de supprimer les métriques internes. Ça me donne envie de mieux expliquer lesquelles justifient un appel, lesquelles aident au diagnostic, et lesquelles peuvent attendre qu’on les regarde dans la journée.
+Revenir à cette mission ne me donne donc pas envie de supprimer les métriques internes ou de juger les équipes qui ont construit les dashboards existants. Ça me donne envie de mieux expliquer lesquelles justifient un appel, lesquelles aident au diagnostic, et lesquelles peuvent attendre qu’on les regarde dans la journée.
 
 ## Commencer assez petit pour pouvoir apprendre
 
