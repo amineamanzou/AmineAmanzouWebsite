@@ -19,15 +19,17 @@ keywords: ["monitoring vs observabilité", "observabilité", "monitoring", "prod
 proofLevel: "documentation"
 ---
 
-Une review peut afficher un inventaire complet de dashboards, plusieurs outils d’APM et une page entière d’alertes.
+« On a déjà du monitoring. Vous voulez juste lui donner un nouveau nom et nous vendre des traces ? »
 
-Puis je demande pourquoi une transaction précise a ralenti après le dernier déploiement.
+Si vous pensez ça en voyant le mot observabilité, je comprends. Le marché a beaucoup aidé à rendre la frontière floue : un nouveau moteur de recherche, quelques agents et un écran de plus finissent vite présentés comme un changement de pratique.
 
-La réponse devient beaucoup moins visible que le symptôme.
+Alors je préfère partir d’une review très concrète. L’inventaire montre des dashboards par équipe, plusieurs outils d’APM et une page entière d’alertes. Puis quelqu’un demande pourquoi une transaction précise a ralenti après le dernier déploiement.
+
+À cet instant, le symptôme reste visible. La réponse, beaucoup moins.
 
 Le monitoring n’est pas absent. Il fonctionne même parfois très bien : CPU, mémoire, erreurs HTTP, saturation des pools, disponibilité des endpoints. L’équipe sait qu’un symptôme existe. Elle ne sait simplement pas encore reconstruire le chemin qui l’a produit.
 
-C’est à cet endroit que la différence entre monitoring et observabilité cesse d’être un débat de vocabulaire.
+C’est à cet endroit que la différence entre monitoring et observabilité cesse d’être un débat de vocabulaire. Et non, ça ne signifie pas que tout ce qui existe doit être remplacé.
 
 ## Le monitoring répond à des questions préparées
 
@@ -43,6 +45,8 @@ Le chapitre *Monitoring Distributed Systems* du livre SRE de Google sépare déj
 
 Le monitoring est particulièrement efficace pour la première question lorsque l’équipe a correctement choisi ce qu’elle voulait mesurer.
 
+Vous allez peut-être me dire que votre équipe ne dispose ni d’un SLO propre ni d’une sonde sur chaque parcours. C’est fréquent. On peut déjà prendre les alertes qui réveillent l’astreinte et demander, pour chacune, quel symptôme elle détecte et quelle action elle déclenche. La discussion commence avec l’existant.
+
 ## L’observabilité commence quand la question n’était pas prévue
 
 En production, les incidents respectent rarement le découpage des dashboards.
@@ -54,6 +58,8 @@ Le support possède pourtant dix tickets qui racontent le même symptôme.
 Pour enquêter, l’équipe doit pouvoir partir d’un résultat utilisateur et traverser les couches du système : requête, service, dépendance, déploiement, configuration, queue, base, réseau et événement métier. Elle a besoin de dimensions qui n’étaient pas toutes connues lors de la création du dashboard.
 
 Cette capacité correspond à ce que je cherche derrière le mot observabilité : poser une question nouvelle sur l’état interne d’un système à partir des signaux qu’il expose.
+
+Ça ne donne pas une enquête parfaite. Il manquera parfois un attribut, une portion de trace ou les données du navigateur. L’important est de voir à quel endroit la question se casse, puis d’améliorer ce passage au lieu d’ajouter de la télémétrie partout par réflexe.
 
 OpenTelemetry classe actuellement ces signaux en traces, métriques, logs et baggage, avec les profils qui progressent également dans l’écosystème. Aucun de ces formats ne garantit l’observabilité à lui seul.
 
@@ -76,6 +82,8 @@ Un écran de service devrait au minimum permettre de passer :
 - d’un SLO menacé vers les événements qui consomment le budget d’erreur.
 
 Si chaque transition demande d’ouvrir un autre outil, de changer manuellement la fenêtre temporelle et de recopier trois identifiants, l’équipe possède plusieurs produits de monitoring. Elle ne possède pas encore une expérience d’enquête cohérente.
+
+Et si c’est votre situation aujourd’hui, je ne commencerais pas par un programme de transformation de dix-huit mois. Je choisirais un incident récent et je noterais chaque rupture dans le parcours d’enquête. Corréler un identifiant entre le support et les logs peut produire plus de valeur qu’une nouvelle vue d’ensemble.
 
 ## Les logs, métriques et traces ne se remplacent pas
 
@@ -114,7 +122,7 @@ Elle révèle aussi ce qui fonctionne déjà. Une équipe n’a pas besoin de re
 
 ## Le passage à l’observabilité est un travail de système
 
-Acheter une plateforme peut accélérer la collecte, le stockage et l’exploration. Ce n’est pas la même chose que rendre une organisation observable.
+Acheter une plateforme peut accélérer la collecte, le stockage et l’exploration. L’organisation doit encore apprendre à produire le bon contexte et à prendre une décision avec ce qu’elle voit.
 
 Il faut encore décider :
 
@@ -128,7 +136,7 @@ Il faut encore décider :
 
 Dans le SRE Workbook, Google place les métriques SLI au premier plan du dashboard lorsqu’une alerte liée au SLO se déclenche. Ces métriques montrent que le service viole son objectif. Les autres signaux servent ensuite à comprendre pourquoi.
 
-Cette progression est plus utile qu’une opposition entre deux mots.
+Cette progression est plus utile qu’une opposition entre deux mots. Elle accepte aussi qu’une équipe avance par morceaux : un parcours mieux relié, une alerte plus explicable, un incident que l’on peut enfin reconstruire sans trois heures de copier-coller.
 
 Le monitoring garde les conditions connues sous surveillance. L’observabilité réduit le coût des questions qui arrivent sans avoir été prévues. Une plateforme de production sérieuse a besoin des deux, reliés par le même contexte et par des décisions que l’équipe sait réellement prendre.
 
