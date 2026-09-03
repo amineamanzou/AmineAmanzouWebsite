@@ -5,8 +5,8 @@ articleSlug: "slo-avant-dashboards"
 translationKey: "define-slos-before-dashboards"
 publishedAt: "2026-09-22"
 label: "SRE / SLO"
-readTime: "9 min"
-excerpt: "Un dashboard sans objectif organise des mesures. Un SLO commence par le résultat utilisateur, définit ce qui est bon, puis donne au dashboard une décision à soutenir."
+readTime: "11 min"
+excerpt: "Les dashboards existent déjà, les données sont incomplètes et personne n’a le temps de tout refaire. On peut quand même commencer à définir ce que le service doit réussir, puis améliorer la mesure."
 heroImage: "/blog/slo-avant-dashboards/hero-slo-before-dashboard.svg"
 heroImageAlt: "Un objectif de fiabilité utilisateur structure les indicateurs et dashboards d’un service"
 pillar: "reliability"
@@ -14,127 +14,118 @@ intent: "informational"
 primaryQuery: "SLO implementation"
 relatedOffer: "diagnostic"
 seoTitle: "Définir des SLO avant les dashboards"
-seoDescription: "Méthode pratique pour définir des SLIs et SLOs orientés utilisateur avant de construire dashboards, alertes et budgets d’erreur."
+seoDescription: "Définir des SLI et SLO dans une organisation imparfaite : partir de l’existant, discuter les compromis et améliorer progressivement mesure et décisions."
 keywords: ["SLO implementation", "SLO", "SLI", "error budget", "dashboard observabilité"]
 proofLevel: "documentation"
 ---
 
-Certains dashboards donnent un seuil à chaque composant.
+« On a déjà des dashboards partout, et on peine à maintenir les alertes. On va trouver quand le temps de définir des SLO ? »
 
-CPU à 80 %. Mémoire à 85 %. Latence en jaune au-dessus de 500 ms. Queue en rouge à partir de 10 000 messages.
+Si c’est ce que vous vous dites en lisant le titre, je comprends. Vous avez peut-être une plateforme héritée, plusieurs équipes qui se partagent un service et un calendrier de livraison sur lequel vous avez peu de prise. Repartir de zéro serait un chantier de plus.
 
-La question la plus difficile restait sans réponse : à partir de quel moment le service rendu devient-il insuffisant pour ses utilisateurs ?
+Je garderais les dashboards qui servent. Quand je parle de définir les SLO avant de construire les écrans, je parle d’abord de l’ordre des questions : qu’est-ce que le service doit réussir pour ses utilisateurs, comment peut-on le vérifier, et que fera-t-on si ça se dégrade ?
 
-Les seuils avaient été choisis composant par composant. Le dashboard était propre, mais aucune décision produit ou opérationnelle ne reliait l’ensemble.
+Je repense à mes astreintes chez Orange, avec ces appels à 4 h du matin pour un excès de logs sur un composant critique. Le volume avait déclenché une alerte, mais ne justifiait pas cet appel. Cette expérience me rappelle pourquoi je me méfie d’un seuil dont on ne sait plus expliquer la conséquence.
 
-C’est pour ça que je préfère définir les SLO avant de dessiner les écrans.
+Un SLO n’aurait pas corrigé cette règle tout seul. Il aurait fallu comprendre le signal, discuter du risque et modifier le fonctionnement de l’alerte. C’est aussi du travail d’équipe, avec les contraintes qui vont avec.
 
-## Commencer par un résultat, pas par une métrique disponible
+## Se mettre d’accord sur un premier résultat
 
-Un SLO fixe un niveau cible de fiabilité pour un service. Son SLI mesure le résultat observé.
+Pour poser les termes : le SLI mesure un résultat du service, et le SLO fixe le niveau cible attendu sur une période.
 
-Le point de départ peut tenir dans une phrase :
+Prenons un exemple fictif de confirmation de commande. On pourrait commencer par cette définition :
 
-> Une tentative de confirmation est considérée comme réussie lorsqu’un utilisateur reçoit une réponse valide en moins de deux secondes.
+> Une tentative est considérée comme réussie si l’utilisateur reçoit une confirmation valide en moins de deux secondes.
 
-Cette phrase oblige l’équipe à préciser l’unité de travail, le résultat attendu et la limite acceptable.
+Le SLI serait alors la proportion de tentatives éligibles qui remplissent ces conditions. Le SLO pourrait être de 99,9 % sur 28 jours. Ces nombres servent à illustrer le calcul ; ils ne sont pas une recommandation pour tous les services.
 
-On peut ensuite construire un SLI sous la forme recommandée dans le SRE Workbook : le nombre d’événements bons divisé par le nombre total d’événements éligibles.
+Et là, la discussion devient intéressante. Qu’est-ce qu’une tentative éligible ? Une commande refusée parce que le stock est épuisé représente-t-elle une erreur du service ? Est-ce que deux secondes conviennent réellement à cet usage ?
 
-```text
-SLI de disponibilité = commandes confirmées correctement / commandes éligibles
-```
+Si l’équipe n’est pas d’accord immédiatement, ça ne m’inquiète pas. Le désaccord existait probablement déjà, simplement personne n’avait encore eu besoin de le traduire dans un calcul. On peut commencer par un parcours assez précis pour pouvoir trancher ces questions, sans définir d’un coup la fiabilité de tout le système d’information.
 
-Le SLO ajoute une cible et une fenêtre : 99,9 % sur 28 jours, par exemple.
+## « On n’a pas les données pour mesurer ça correctement »
 
-Le dashboard arrive après. Il affiche le ratio, le budget restant, la vitesse de consommation et les dimensions utiles à l’enquête.
+C’est une objection que je trouve tout à fait recevable. Décrire une expérience utilisateur ne fait pas apparaître magiquement l’instrumentation nécessaire.
 
-## La source du SLI change ce que l’on mesure
+Le [SRE Workbook distingue la spécification du SLI de son implémentation](https://sre.google/workbook/implementing-slos/) : le résultat recherché d’un côté, la manière de l’estimer de l’autre.
 
-Deux métriques qui portent le même nom peuvent décrire des expériences différentes.
+Dans notre exemple, les logs applicatifs peuvent fournir une première mesure. Mais ils ne voient que les tentatives qui atteignent l’application. Une panne de DNS ou du point d’entrée peut empêcher un utilisateur d’arriver jusque-là.
 
-Un compteur dans l’application voit les requêtes qui l’atteignent. Il ne voit pas toujours celles qui échouent avant : DNS, CDN, load balancer, réseau ou démarrage du client.
+Une mesure au load balancer et une instrumentation côté navigateur ont d’autres périmètres, d’autres coûts et d’autres limites. Je n’attendrais pas que tout soit disponible pour commencer.
 
-Une mesure au load balancer couvre davantage de trafic, mais elle connaît moins bien le résultat métier. Une instrumentation côté navigateur se rapproche de l’utilisateur, tout en introduisant ses propres problèmes de sampling, de consentement et de qualité de données.
+On peut écrire à côté du premier indicateur : « Cette mesure couvre les confirmations traitées par l’application. Elle ne couvre pas les échecs en amont. » Puis comparer ce signal aux incidents connus et aux retours du support.
 
-Je sépare donc la spécification du SLI de son implémentation.
+J’aime bien revenir à ce passage du Workbook : Google y laisse explicitement de la place à une première définition imparfaite, à condition de prévoir comment l’améliorer. Ça me semble bien plus praticable que d’attendre une mesure irréprochable avant d’avoir la moindre discussion.
 
-- **Spécification :** ce que le service doit réussir pour l’utilisateur.
-- **Implémentation :** le signal et le calcul utilisés pour l’estimer.
+Le compromis devient dangereux quand sa limite disparaît du document et que tout le monde finit par croire qu’on mesure le parcours complet.
 
-Cette distinction évite de transformer une métrique déjà disponible en objectif par facilité.
+## Choisir une cible qu’on peut défendre
 
-## Un SLO à 100 % retire tout espace de décision
+Vous allez peut-être me dire que, chez vous, la seule réponse acceptable à la question de la disponibilité est « 100 % ».
 
-Une cible parfaite paraît rassurante. Elle transforme surtout chaque échec en violation.
+Je comprends l’intention. Personne n’a envie d’annoncer à un utilisateur que son problème tient dans une marge acceptable. Pourtant, une cible de 100 % ne laisse aucun budget d’erreur : le moindre échec suffit à la manquer.
 
-Le SRE Workbook rappelle qu’un SLO de 100 % laisse l’équipe en réaction permanente. Aucun système distribué réel ne tient une perfection absolue, et les utilisateurs ne demandent pas toujours la même fiabilité pour chaque parcours.
+Avec une cible de 99,9 %, le budget représente 0,1 % des événements éligibles sur la période choisie. Dans un SLO fondé sur les requêtes, ce pourcentage ne se convertit pas automatiquement en un nombre de minutes d’indisponibilité.
 
-Une cible inférieure à 100 % crée un budget d’erreur.
+La discussion porte alors sur les conséquences d’un échec et sur l’effort nécessaire pour réduire le risque. Un résultat qui arrive en retard dans un traitement de nuit n’a pas nécessairement les mêmes conséquences qu’une opération interactive bloquée. Le choix dépend de l’usage.
 
-Avec un SLO de 99,9 % sur 30 jours, l’équipe accepte au maximum 0,1 % d’événements mauvais sur la population mesurée. Ce budget permet d’arbitrer : continuer les releases, ralentir un rollout, investir dans la fiabilité ou corriger une dépendance dangereuse.
+Si vous n’avez pas assez de recul pour défendre une cible, une première période d’observation peut aider. On regarde le niveau actuel, les plaintes, les incidents et ce que la mesure manque. On propose ensuite un objectif à discuter, avec une date de révision.
 
-Le budget ne donne pas une permission de casser la production. Il rend explicite le risque que l’organisation accepte déjà, souvent sans le mesurer.
+Je serais prudent avec une cible choisie uniquement parce que le système la tient déjà. Elle peut être trop facile, ou imposer une exigence coûteuse que personne n’a demandée. Mais avoir besoin de temps pour clarifier ça ne signifie pas que la démarche est ratée.
 
-## Le propriétaire compte autant que la cible
+## Un budget d’erreur ne donne pas le pouvoir d’arrêter une release
 
-Un SLO parfaitement calculé peut rester sans effet.
+C’est probablement là que la théorie se heurte le plus vite à l’organisation.
 
-Ils apparaissent dans un dashboard mensuel. Ils passent au rouge. L’équipe plateforme en parle. Le produit continue son calendrier. Personne ne possède l’arbitrage.
+Sur le papier, le budget se consomme, l’équipe adapte les releases et investit dans la fiabilité. Dans votre contexte, la plateforme ne décide peut-être pas du calendrier produit. Le fournisseur peut avoir ses propres échéances. Et le responsable du parcours n’est pas forcément la personne qui possède le composant en cause.
 
-Google indique qu’un SLO utile doit être approuvé par les parties prenantes et associé à une politique de budget d’erreur. Les personnes responsables doivent aussi considérer l’objectif atteignable dans des conditions normales.
+Écrire « les releases sont bloquées quand le budget est épuisé » dans une page que personne n’a approuvée ne crée pas ce pouvoir.
 
-Une politique simple peut préciser :
+Le [Workbook insiste sur l’accord des parties prenantes et sur une politique de budget d’erreur](https://sre.google/workbook/implementing-slos/). C’est une condition pour que la mesure serve réellement aux arbitrages.
 
-- qui reçoit l’information lorsque la consommation du budget accélère ;
-- quand un ticket devient prioritaire ;
-- quand les releases sont limitées ;
-- quelles exceptions demandent une décision explicite ;
-- comment l’objectif est révisé lorsqu’il ne reflète plus l’expérience.
+À mon sens, on peut préparer cet accord avec une décision plus limitée : qui examine une consommation anormale du budget, dans quel délai, et avec quels éléments ? Est-ce que cette personne peut prioriser un correctif, demander une revue du déploiement ou faire remonter une décision ?
 
-Sans cette politique, le SLO rejoint la collection des KPI que l’on regarde en réunion sans modifier le travail.
+Ça ne remplace pas une politique complète. Ça permet de tester un premier fonctionnement sans prétendre que toute l’organisation a adopté la méthode.
 
-## Construire le dashboard autour des décisions
+Ensuite, on peut préciser ensemble les conditions de limitation des releases, les exceptions, la personne qui les assume et la façon de réviser l’objectif. Si personne ne veut encore s’engager sur un arbitrage, on a identifié une limite organisationnelle. Le dashboard ne la résoudra pas à notre place.
 
-Une fois le SLO choisi, le premier écran devient plus facile à organiser.
+## Faire évoluer l’écran qui existe déjà
 
-Je veux voir :
+À ce stade, je ne demanderais pas forcément à quelqu’un de refaire tous les dashboards.
 
-1. le SLI actuel et la cible ;
-2. le budget d’erreur restant sur la fenêtre ;
-3. la vitesse de consommation sur une fenêtre courte et une fenêtre longue ;
-4. les changements récents ;
-5. les principales dimensions qui expliquent les événements mauvais ;
-6. quelques traces ou logs représentatifs ;
-7. le propriétaire et la politique associée.
+On peut ajouter à l’écran du service le SLI, sa cible, la fenêtre observée et la limite de couverture. C’est déjà utile si cela permet à deux personnes de parler du même résultat avec la même définition.
 
-La vitesse de consommation, ou *burn rate*, évite d’attendre la fin de la période pour découvrir que le budget est perdu. Une consommation très rapide peut déclencher une page. Une dérive lente peut devenir un ticket et un travail planifié.
+Lorsque le calcul est assez fiable, on peut y faire apparaître le budget restant et sa vitesse de consommation, ou burn rate. Le [chapitre consacré aux alertes sur les SLO](https://sre.google/workbook/alerting-on-slos/) explique comment combiner des fenêtres courtes et longues pour adapter la réponse à cette consommation.
 
-Le même écran ne doit pas tout expliquer. Il doit conduire du constat vers les bons outils d’enquête.
+Une dégradation rapide peut justifier un appel d’astreinte ; une dérive plus lente peut laisser le temps de traiter un ticket. Les seuils et le routage demandent encore une validation sur votre trafic. Ils ne deviennent pas justes simplement parce qu’ils viennent d’un exemple du livre.
 
-## Les dashboards de causes viennent ensuite
+Pour l’enquête, je garderais à portée de main les changements récents, les dimensions qui permettent d’examiner les échecs, quelques traces ou logs, ainsi que le responsable et la décision attendue.
 
-Le SLO montre qu’un résultat utilisateur se dégrade. Il n’explique pas automatiquement pourquoi.
+On peut construire cet écran par étapes. L’important est de savoir quelle information manque encore, plutôt que de donner une impression de couverture complète avec des cases vides.
 
-Les dashboards de service gardent donc leur place : latence par dépendance, taux d’erreur par version, saturation, queues, retries, pool de connexions, garbage collection, changements de configuration.
+## Et les dashboards CPU, mémoire et dépendances ?
 
-La différence vient de l’ordre de lecture.
+Je les garde aussi. Quand le parcours se dégrade, il faut bien chercher ce qui se passe.
 
-On part du symptôme qui menace le résultat, puis on descend vers les causes plausibles. Une métrique interne devient prioritaire parce qu’elle explique un impact observé, pas seulement parce qu’elle dépasse un seuil historique.
+La [distinction entre symptômes et causes du livre SRE](https://sre.google/sre-book/monitoring-distributed-systems/) aide à organiser cette enquête. Le résultat utilisateur donne un point de départ ; les métriques internes permettent ensuite de tester des explications.
 
-Cette hiérarchie réduit aussi l’alerting fragile. Un CPU élevé peut être normal pendant un batch. Une latence utilisateur qui brûle rapidement le budget demande une attention même lorsque les CPU restent verts.
+Un CPU élevé pendant un traitement attendu peut être sans conséquence pour le parcours. À l’inverse, celui-ci peut échouer pendant que les CPU restent au vert. C’est pour ça que la couleur d’un composant ne suffit pas à résumer le service.
 
-## Démarrer avec peu d’objectifs
+Il reste aussi des risques à anticiper avant qu’un utilisateur soit touché, comme une ressource sur le point d’être épuisée. Les alertes préventives ont leur place quand elles décrivent un risque concret et une action possible.
 
-Une première implémentation n’a pas besoin de couvrir cinquante parcours.
+Revenir à ma semaine d’astreinte ne me donne donc pas envie de supprimer les métriques internes. Ça me donne envie de mieux expliquer lesquelles justifient un appel, lesquelles aident au diagnostic, et lesquelles peuvent attendre qu’on les regarde dans la journée.
 
-Je choisis un service et deux ou trois résultats : disponibilité, latence et éventuellement fraîcheur ou correction selon le produit. Je calcule les SLIs sur les données existantes, puis je compare leurs variations aux incidents, tickets support et retours utilisateurs connus.
+## Commencer assez petit pour pouvoir apprendre
 
-Les écarts sont utiles.
+Si votre équipe manque de temps, je commencerais par un parcours qu’elle connaît et un ou deux résultats qu’elle peut déjà observer. La disponibilité et la latence sont des candidats possibles ; pour un pipeline, la fraîcheur ou la correction des données peuvent être plus pertinentes.
 
-Si un incident important ne touche aucun SLI, la couverture est insuffisante. Si le SLO chute sans impact perceptible, la mesure ou la cible mérite d’être revue. Google présente cette amélioration comme une boucle normale, pas comme l’échec de la première définition.
+On note la définition, les exclusions, les limites de la mesure, puis on choisit un moment pour revenir dessus avec les personnes concernées.
 
-Le dashboard devient alors le produit visible d’un accord plus important : ce que le service promet, comment on le mesure et quelle décision l’équipe prend lorsque cette promesse commence à dériver.
+Lors de cette revue, je rapprocherais les variations du SLI des incidents, tickets support et retours utilisateurs. Un incident important invisible dans le signal mérite qu’on revoie sa couverture. Une baisse sans effet apparent mérite une investigation avant de modifier la cible : peut-être que la mesure est trompeuse, peut-être qu’on ne voit pas encore les utilisateurs affectés.
+
+On garde alors une trace de ce qu’on change et de ce qu’on ne sait toujours pas mesurer. Cette trace évite de redécouvrir les mêmes compromis à la revue suivante.
+
+Je trouve ce point de départ plus accessible qu’un programme SRE complet à faire accepter d’un bloc. Un parcours, une mesure dont on connaît les limites, quelqu’un avec qui discuter du résultat et une prochaine date de revue : l’équipe peut déjà apprendre quelque chose, puis choisir l’amélioration suivante sans attendre que toute l’entreprise fonctionne parfaitement.
 
 ## Sources
 
