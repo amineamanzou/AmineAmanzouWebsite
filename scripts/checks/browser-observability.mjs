@@ -18,8 +18,8 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-assert(packageJson.dependencies?.["@hyperdx/browser"] === "0.25.1", "@hyperdx/browser must be pinned exactly to 0.25.1");
-assert(packageJson.overrides?.protobufjs === "7.6.5", "Patched protobufjs override must stay pinned to 7.6.5");
+assert(packageJson.dependencies?.["@hyperdx/browser"] === "0.26.0", "@hyperdx/browser must be pinned exactly to 0.26.0");
+assert(packageJson.overrides?.["@hyperdx/otel-web-session-recorder"]?.fflate === "0.7.5", "Patched HyperDX recorder fflate override must stay pinned to 0.7.5");
 assert(source.includes('await import("@hyperdx/browser")'), "HyperDX must stay behind a dynamic import");
 assert(source.indexOf("validateConfig(config)") < source.indexOf('await import("@hyperdx/browser")'), "Configuration must be validated before loading the SDK chunk");
 assert(source.includes("disableReplay: true"), "Session replay must be disabled");
