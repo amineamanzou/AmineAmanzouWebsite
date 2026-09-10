@@ -55,8 +55,9 @@ replay, console capture, network instrumentation, DOM text and input capture are
 disabled. Consent can be withdrawn from the persistent privacy control, which
 removes the `__rum_sid` cookie and reloads the page.
 
-The lockfile overrides `protobufjs` to the patched `7.6.5` release because the
-disabled replay dependency otherwise resolves a vulnerable `7.5.x` version.
+HyperDX `0.26.0` now resolves patched OpenTelemetry and `protobufjs` releases
+without project-wide overrides. A recorder-scoped override keeps `fflate` on
+the patched `0.7.5` release until HyperDX lifts its exact `0.7.4` dependency.
 CI and production reject high or critical production dependency advisories.
 
 ## Product analytics
