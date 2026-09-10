@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@hyperdx/browser": "0.26.0",
-    "posthog-js": "1.413.2"
+    "posthog-js": "1.428.6"
   },
   "overrides": {
     "@hyperdx/otel-web-session-recorder": {
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "astro": "^7.3.2",
-    "playwright-core": "^1.62.1",
-    "typescript": "^6.0.3"
+    "playwright-core": "^1.63.0",
+    "typescript": "^7.0.2"
   }
 }
