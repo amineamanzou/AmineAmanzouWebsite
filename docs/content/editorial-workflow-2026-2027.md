@@ -1,6 +1,8 @@
 # Calendrier SEO bilingue — septembre 2026 à février 2027
 
-La source de vérité est [`src/data/editorial-calendar.json`](../../src/data/editorial-calendar.json). Ce document décrit son mode d’emploi ; il ne duplique pas les 26 briefs.
+La source de vérité est [`src/data/editorial-calendar.json`](../../src/data/editorial-calendar.json). Ce document décrit son mode d’emploi ; il ne duplique pas les 30 briefs.
+
+Les sujets 27 à 30 constituent une série de réaction rapide ajoutée en juillet 2026. Leurs identifiants restent après les 26 sujets du calendrier initial afin de préserver les références déjà utilisées dans le suivi éditorial.
 
 ## Statuts
 

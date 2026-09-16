@@ -1163,6 +1163,71 @@ h3 {
   box-shadow: var(--card-shadow);
 }
 
+.article-content pre {
+  position: relative;
+  max-width: 100%;
+  margin: 32px 0;
+  overflow-x: auto;
+  padding: 58px 22px 24px;
+  border: 1px solid #303a48;
+  border-radius: var(--radius);
+  background:
+    linear-gradient(rgb(255 255 255 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px),
+    #0d1219 !important;
+  background-size: 28px 28px;
+  box-shadow: 0 18px 45px rgb(17 24 39 / 18%);
+  color: #eef2f7;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+.article-content pre::before {
+  position: absolute;
+  top: 21px;
+  left: 22px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #d84a42;
+  box-shadow:
+    18px 0 0 #f2bd3e,
+    36px 0 0 #35a66f;
+  content: "";
+}
+
+.article-content pre::after {
+  position: absolute;
+  top: 13px;
+  right: 18px;
+  color: #93a4b8;
+  content: "CONFIG / CODE";
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.article-content pre code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.article-content :not(pre) > code {
+  padding: 0.14em 0.38em;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-muted);
+  color: var(--ink);
+  font-size: 0.9em;
+}
+
 .site-footer {
   display: flex;
   flex-wrap: wrap;

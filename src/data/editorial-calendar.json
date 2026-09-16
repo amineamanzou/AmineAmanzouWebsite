@@ -8,7 +8,7 @@
     "briefLeadTimeDays": 14
   },
   "publicationWindow": {
-    "start": "2026-09-22",
+    "start": "2026-07-28",
     "end": "2027-03-25"
   },
   "rules": {
@@ -22,20 +22,6 @@
   "topics": [
     {
       "id": 1,
-      "series": "k3s-opensearch-poc",
-      "status": "scheduled",
-      "frDate": "2026-09-22",
-      "enDate": "2026-09-24",
-      "frTitle": "ViaQ, OpenTelemetry et OpenSearch : ce que notre lab mesure vraiment",
-      "enTitle": "ViaQ, OpenTelemetry and OpenSearch: what our lab actually measures",
-      "primaryQuery": "OpenTelemetry vs ViaQ OpenShift logging",
-      "artifact": "Dépôt reproductible, dataset et simulateur de capacité",
-      "pillar": "opentelemetry",
-      "intent": "case-study",
-      "relatedOffer": "otel_sprint"
-    },
-    {
-      "id": 2,
       "frDate": "2026-09-29",
       "enDate": "2026-10-01",
       "frTitle": "Monitoring vs observabilité en production",
@@ -48,7 +34,7 @@
       "status": "scheduled"
     },
     {
-      "id": 3,
+      "id": 2,
       "frDate": "2026-10-06",
       "enDate": "2026-10-08",
       "frTitle": "Audit observabilité : checklist de maturité en 35 points",
@@ -61,7 +47,7 @@
       "status": "scheduled"
     },
     {
-      "id": 4,
+      "id": 3,
       "frDate": "2026-10-13",
       "enDate": "2026-10-15",
       "frTitle": "Définir des SLO avant les dashboards",
@@ -74,7 +60,7 @@
       "status": "scheduled"
     },
     {
-      "id": 5,
+      "id": 4,
       "frDate": "2026-10-20",
       "enDate": "2026-10-22",
       "frTitle": "Réduire la fatigue d’alerte sans perdre les incidents utiles",
@@ -87,7 +73,7 @@
       "status": "scheduled"
     },
     {
-      "id": 6,
+      "id": 5,
       "frDate": "2026-10-27",
       "enDate": "2026-10-29",
       "frTitle": "Observabilité métier d’un tunnel de vente",
@@ -99,7 +85,7 @@
       "relatedOffer": "diagnostic"
     },
     {
-      "id": 7,
+      "id": 6,
       "frDate": "2026-11-03",
       "enDate": "2026-11-05",
       "frTitle": "Collector : agent, gateway ou hybride ?",
@@ -111,7 +97,7 @@
       "relatedOffer": "otel_sprint"
     },
     {
-      "id": 8,
+      "id": 7,
       "frDate": "2026-11-10",
       "enDate": "2026-11-12",
       "frTitle": "Queues, retries et buffering quand le backend tombe",
@@ -123,7 +109,7 @@
       "relatedOffer": "otel_sprint"
     },
     {
-      "id": 9,
+      "id": 8,
       "frDate": "2026-11-17",
       "enDate": "2026-11-19",
       "frTitle": "Cardinalité et budget de télémétrie",
@@ -135,7 +121,7 @@
       "relatedOffer": "otel_sprint"
     },
     {
-      "id": 10,
+      "id": 9,
       "frDate": "2026-11-24",
       "enDate": "2026-11-26",
       "frTitle": "Gouverner les semantic conventions à l’échelle",
@@ -147,7 +133,7 @@
       "relatedOffer": "otel_sprint"
     },
     {
-      "id": 11,
+      "id": 10,
       "frDate": "2026-12-01",
       "enDate": "2026-12-03",
       "frTitle": "Migrer de Dynatrace vers OpenTelemetry sans perdre la visibilité",
@@ -159,7 +145,7 @@
       "relatedOffer": "otel_sprint"
     },
     {
-      "id": 12,
+      "id": 11,
       "frDate": "2026-12-08",
       "enDate": "2026-12-10",
       "frTitle": "Sécuriser un pipeline OTel : TLS, secrets et PII",
@@ -171,7 +157,7 @@
       "relatedOffer": "otel_sprint"
     },
     {
-      "id": 13,
+      "id": 12,
       "frDate": "2026-12-15",
       "enDate": "2026-12-17",
       "frTitle": "Sampling : quoi garder quand tout ne peut pas être stocké",
@@ -183,7 +169,7 @@
       "relatedOffer": "otel_sprint"
     },
     {
-      "id": 14,
+      "id": 13,
       "frDate": "2026-12-22",
       "enDate": "2026-12-24",
       "frTitle": "Checklist de production-readiness OpenTelemetry",
@@ -195,7 +181,7 @@
       "relatedOffer": "otel_sprint"
     },
     {
-      "id": 15,
+      "id": 14,
       "frDate": "2026-12-29",
       "enDate": "2026-12-31",
       "frTitle": "Fleet management OpenTelemetry : guide opérationnel 2026",
@@ -207,7 +193,7 @@
       "relatedOffer": "fractional_lead"
     },
     {
-      "id": 16,
+      "id": 15,
       "frDate": "2027-01-05",
       "enDate": "2027-01-07",
       "frTitle": "Déployer une configuration Collector avec canary et rollback",
@@ -219,7 +205,7 @@
       "relatedOffer": "otel_sprint"
     },
     {
-      "id": 17,
+      "id": 16,
       "frDate": "2027-01-12",
       "enDate": "2027-01-14",
       "frTitle": "Définir des SLO pour sa pipeline d’observabilité",
@@ -231,7 +217,7 @@
       "relatedOffer": "fractional_lead"
     },
     {
-      "id": 18,
+      "id": 17,
       "frDate": "2027-01-19",
       "enDate": "2027-01-21",
       "frTitle": "Control plane indisponible : ce que le Collector continue de faire",
@@ -243,7 +229,7 @@
       "relatedOffer": "fractional_lead"
     },
     {
-      "id": 19,
+      "id": 18,
       "frDate": "2027-01-26",
       "enDate": "2027-01-28",
       "frTitle": "Écrire un RFP observabilité sans benchmark marketing",
@@ -255,7 +241,7 @@
       "relatedOffer": "fractional_lead"
     },
     {
-      "id": 20,
+      "id": 19,
       "frDate": "2027-02-02",
       "enDate": "2027-02-04",
       "frTitle": "Agentic SRE pendant un incident : capacités et limites",
@@ -267,7 +253,7 @@
       "relatedOffer": "fractional_lead"
     },
     {
-      "id": 21,
+      "id": 20,
       "frDate": "2027-02-09",
       "enDate": "2027-02-11",
       "frTitle": "De la suggestion à la remédiation : niveaux d’autonomie",
@@ -279,7 +265,7 @@
       "relatedOffer": "fractional_lead"
     },
     {
-      "id": 22,
+      "id": 21,
       "frDate": "2027-02-16",
       "enDate": "2027-02-18",
       "frTitle": "Tracer un agent SRE : contexte, outils, décisions et coût",
@@ -291,7 +277,7 @@
       "relatedOffer": "otel_sprint"
     },
     {
-      "id": 23,
+      "id": 22,
       "frDate": "2027-02-23",
       "enDate": "2027-02-25",
       "frTitle": "Évaluer un agent d’incident",
@@ -303,7 +289,7 @@
       "relatedOffer": "fractional_lead"
     },
     {
-      "id": 24,
+      "id": 23,
       "frDate": "2027-03-02",
       "enDate": "2027-03-04",
       "frTitle": "Lire les spans OpenTelemetry d’un agent GenAI",
@@ -315,7 +301,7 @@
       "relatedOffer": "otel_sprint"
     },
     {
-      "id": 25,
+      "id": 24,
       "frDate": "2027-03-09",
       "enDate": "2027-03-11",
       "frTitle": "Prompts, PII et résultats d’outils : quoi ne pas enregistrer",
@@ -327,7 +313,7 @@
       "relatedOffer": "diagnostic"
     },
     {
-      "id": 26,
+      "id": 25,
       "frDate": "2027-03-16",
       "enDate": "2027-03-18",
       "frTitle": "Construire ou acheter sa plateforme d’observabilité ?",
@@ -339,7 +325,7 @@
       "relatedOffer": "diagnostic"
     },
     {
-      "id": 27,
+      "id": 26,
       "frDate": "2027-03-23",
       "enDate": "2027-03-25",
       "frTitle": "Cas terrain : migration Dynatrace et baisse de 40 % des incidents",
@@ -347,6 +333,76 @@
       "primaryQuery": "Dynatrace migration case study",
       "artifact": "Architecture avant / après",
       "pillar": "reliability",
+      "intent": "case-study",
+      "relatedOffer": "otel_sprint"
+    },
+    {
+      "id": 27,
+      "series": "observability-2-response",
+      "status": "scheduled",
+      "frDate": "2026-07-28",
+      "enDate": "2026-07-30",
+      "frTitle": "Observabilité 2.0 : ClickHouse change-t-il vraiment les règles ?",
+      "enTitle": "Observability 2.0: does ClickHouse really change the rules?",
+      "primaryQuery": "observabilité 2.0",
+      "artifact": "Réaction sourcée et captures des articles",
+      "pillar": "observability",
+      "intent": "informational",
+      "relatedOffer": "fractional_lead"
+    },
+    {
+      "id": 28,
+      "series": "observability-2-response",
+      "status": "scheduled",
+      "frDate": "2026-08-04",
+      "enDate": "2026-08-06",
+      "frTitle": "Wide events : instrumenter une requête sans détruire son contexte",
+      "enTitle": "Wide events: instrument a request without destroying its context",
+      "primaryQuery": "wide events observabilité",
+      "artifact": "Anatomie localisée d’un wide event",
+      "pillar": "opentelemetry",
+      "intent": "informational",
+      "relatedOffer": "otel_sprint"
+    },
+    {
+      "id": 29,
+      "series": "observability-2-response",
+      "status": "scheduled",
+      "frDate": "2026-08-11",
+      "enDate": "2026-08-13",
+      "frTitle": "ClickHouse pour l’observabilité : pourquoi ça scale et où ça casse",
+      "enTitle": "ClickHouse for observability: why it scales and where it breaks",
+      "primaryQuery": "ClickHouse observabilité",
+      "artifact": "Capture LogHouse et configurations d’ingestion",
+      "pillar": "observability",
+      "intent": "comparative",
+      "relatedOffer": "diagnostic"
+    },
+    {
+      "id": 30,
+      "series": "observability-2-response",
+      "status": "scheduled",
+      "frDate": "2026-08-18",
+      "enDate": "2026-08-20",
+      "frTitle": "Migrer vers une observabilité unifiée sans remplacer toute sa stack",
+      "enTitle": "Migrate to unified observability without replacing your entire stack",
+      "primaryQuery": "migration observabilité unifiée",
+      "artifact": "Configuration de double export et capture GitHub",
+      "pillar": "opentelemetry",
+      "intent": "informational",
+      "relatedOffer": "otel_sprint"
+    },
+    {
+      "id": 31,
+      "series": "k3s-opensearch-poc",
+      "status": "scheduled",
+      "frDate": "2026-09-22",
+      "enDate": "2026-09-24",
+      "frTitle": "ViaQ, OpenTelemetry et OpenSearch : ce que notre lab mesure vraiment",
+      "enTitle": "ViaQ, OpenTelemetry and OpenSearch: what our lab actually measures",
+      "primaryQuery": "OpenTelemetry vs ViaQ OpenShift logging",
+      "artifact": "Dépôt reproductible, dataset et simulateur de capacité",
+      "pillar": "opentelemetry",
       "intent": "case-study",
       "relatedOffer": "otel_sprint"
     }
