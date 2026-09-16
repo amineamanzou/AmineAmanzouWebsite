@@ -8,11 +8,11 @@ Ce lot insère le retour d’expérience `k3s-opensearch-poc` au début du calen
 
 | FR | EN | Slug | Sujet | Preuve dominante |
 |---|---|---|---|---|
-| 2026-09-01 | 2026-09-03 | `clf-viaq-opentelemetry-opensearch-lab` | ViaQ/CLF et OTel dans un pipeline Kafka, Data Prepper et OpenSearch | lab |
-| 2026-09-08 | 2026-09-10 | `monitoring-vs-observabilite-production` | Monitoring vs observabilité en production | documentation + experience |
-| 2026-09-15 | 2026-09-17 | `audit-observabilite-checklist-maturite` | Audit observabilité : checklist de maturité en 35 points | experience + documentation |
-| 2026-09-22 | 2026-09-24 | `slo-avant-dashboards` | Définir des SLO avant les dashboards | documentation + experience |
-| 2026-09-29 | 2026-10-01 | `reduire-fatigue-alerte` | Réduire la fatigue d’alerte sans perdre les incidents utiles | documentation + experience |
+| 2026-09-22 | 2026-09-24 | `clf-viaq-opentelemetry-opensearch-lab` | ViaQ/CLF et OTel dans un pipeline Kafka, Data Prepper et OpenSearch | lab |
+| 2026-09-29 | 2026-10-01 | `monitoring-vs-observabilite-production` | Monitoring vs observabilité en production | documentation + experience |
+| 2026-10-06 | 2026-10-08 | `audit-observabilite-checklist-maturite` | Audit observabilité : checklist de maturité en 35 points | experience + documentation |
+| 2026-10-13 | 2026-10-15 | `slo-avant-dashboards` | Définir des SLO avant les dashboards | documentation + experience |
+| 2026-10-20 | 2026-10-22 | `reduire-fatigue-alerte` | Réduire la fatigue d’alerte sans perdre les incidents utiles | documentation + experience |
 
 ## Contrats de preuve
 

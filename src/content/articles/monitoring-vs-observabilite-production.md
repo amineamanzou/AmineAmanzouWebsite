@@ -3,7 +3,7 @@ title: "Monitoring ou observabilité : ce que la différence change en productio
 locale: "fr"
 articleSlug: "monitoring-vs-observabilite-production"
 translationKey: "monitoring-vs-observability-production"
-publishedAt: "2026-09-08"
+publishedAt: "2026-09-29"
 label: "Observabilité / Production"
 readTime: "9 min"
 excerpt: "Le monitoring détecte et suit des conditions connues. L’observabilité devient utile quand l’équipe doit expliquer un comportement qu’elle n’avait pas prévu de mettre dans un dashboard."

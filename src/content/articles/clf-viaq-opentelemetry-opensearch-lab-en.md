@@ -3,7 +3,7 @@ title: "ViaQ or OpenTelemetry on OpenShift: what my HyperShift lab actually meas
 locale: "en"
 articleSlug: "clf-viaq-opentelemetry-opensearch-lab"
 translationKey: "clf-viaq-opentelemetry-opensearch-lab"
-publishedAt: "2026-09-01"
+publishedAt: "2026-09-24"
 label: "OpenShift / OpenTelemetry"
 readTime: "11 min"
 excerpt: "I compared two OpenShift log paths through Kafka to OpenSearch. CPU, memory and batching differences are measured; the OTel counting discrepancy remains unexplained."

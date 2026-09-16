@@ -3,7 +3,7 @@ title: "Réduire la fatigue d’alerte sans masquer le prochain incident"
 locale: "fr"
 articleSlug: "reduire-fatigue-alerte"
 translationKey: "reduce-alert-fatigue"
-publishedAt: "2026-09-29"
+publishedAt: "2026-10-20"
 label: "SRE / Alerting"
 readTime: "10 min"
 excerpt: "Chez Orange, une semaine d’appels d’astreinte à 4 h du matin pour un excès de logs m’a rappelé qu’un seuil dépassé ne suffit pas à justifier de réveiller quelqu’un."
@@ -125,4 +125,3 @@ Pour mon histoire de logs, le critère reste très concret : garder de quoi comp
 - [Google SRE Workbook — Alerting on SLOs](https://sre.google/workbook/alerting-on-slos/)
 - [Google SRE — Incident Management Guide](https://sre.google/resources/practices-and-processes/incident-management-guide/)
 - [Prometheus — Alertmanager configuration](https://prometheus.io/docs/alerting/latest/configuration/)
-

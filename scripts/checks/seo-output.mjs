@@ -523,14 +523,18 @@ if (
 for (const [sourceUrl, entry] of inventory) {
   const alternates = normalizeAlternates(entry.alternates, `sitemap.xml entry ${sourceUrl}`);
   const page = pageDetails.get(sourceUrl);
+  const requiredLanguages = expectedStaticUrls.has(sourceUrl)
+    ? allowedHreflangs
+    : new Set([page?.htmlLang, "x-default"].filter(Boolean));
 
-  for (const requiredLanguage of allowedHreflangs) {
+  for (const requiredLanguage of requiredLanguages) {
     if (!alternates.has(requiredLanguage)) {
       fail(`sitemap.xml entry ${sourceUrl} must declare hreflang ${requiredLanguage}`);
     }
   }
-  if (alternates.get("x-default") !== alternates.get("fr")) {
-    fail(`sitemap.xml entry ${sourceUrl} x-default must target its French URL ${alternates.get("fr")}`);
+  const expectedDefault = alternates.get("fr") ?? sourceUrl;
+  if (alternates.get("x-default") !== expectedDefault) {
+    fail(`sitemap.xml entry ${sourceUrl} x-default must target ${expectedDefault}`);
   }
   if (page?.htmlLang && alternates.get(page.htmlLang) !== sourceUrl) {
     fail(
