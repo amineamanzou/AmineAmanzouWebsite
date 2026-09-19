@@ -2,12 +2,16 @@
 import SiteFooter from "./SiteFooter.astro";
 import Topbar from "./Topbar.astro";
 import {
-  downloads,
+  resumeDownloads,
   education,
   educationEn,
   experiences,
   experiencesEn,
+  languages,
+  languagesEn,
   localized,
+  skills,
+  skillsEn,
   type Locale,
 } from "../data/site";
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -18,10 +22,12 @@ type Props = {
 
 const { locale = "fr" } = Astro.props;
 const copy = localized[locale];
-const download = downloads[locale];
+const pageDownloads = resumeDownloads[locale];
 const pagePath = locale === "fr" ? "/dossier/" : "/en/dossier/";
 const pageExperiences = locale === "fr" ? experiences : experiencesEn;
 const pageEducation = locale === "fr" ? education : educationEn;
+const pageSkills = locale === "fr" ? skills : skillsEn;
+const pageLanguages = locale === "fr" ? languages : languagesEn;
 ---
 
 <BaseLayout
@@ -42,13 +48,31 @@ const pageEducation = locale === "fr" ? education : educationEn;
       <div data-reveal>
         <p class="role-line">{copy.role}</p>
         <h1>{copy.dossier.heading}</h1>
+        <p><strong>{copy.dossier.subtitle}</strong></p>
         <p>{copy.dossier.intro}</p>
       </div>
       <div class="download-actions compact" data-reveal>
-        <a class="download-link" href={download.href} target="_blank" rel="noreferrer" data-analytics-event="site.asset_download" data-analytics-asset-id={locale === "fr" ? "dossier_fr_pdf" : "dossier_en_pdf"} data-analytics-placement="dossier_page">
-          <strong>{download.label}</strong>
-          <span>{download.meta}</span>
-        </a>
+        {pageDownloads.map((download) => (
+          <a class="download-link" href={download.href} target="_blank" rel="noreferrer" data-analytics-event="site.asset_download" data-analytics-asset-id={download.href.includes("CVFR") ? "dossier_fr_pdf" : "dossier_en_pdf"} data-analytics-placement="dossier_page">
+            <strong>{download.label}</strong>
+            <span>{download.meta}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="section-shell split-section" aria-labelledby="domains-title">
+      <div class="section-heading" data-reveal>
+        <h2 id="domains-title">{copy.dossier.domainsTitle}</h2>
+        <p>{copy.dossier.domainsBody}</p>
+      </div>
+      <div class="expertise-list">
+        {copy.dossier.domains.map((domain) => (
+          <article class="expertise-card" data-reveal>
+            <h3>{domain.title}</h3>
+            <p>{domain.body}</p>
+          </article>
+        ))}
       </div>
     </section>
 
@@ -75,8 +99,29 @@ const pageEducation = locale === "fr" ? education : educationEn;
                   </section>
                 ))}
               </div>
+              <p class="technical-environment"><em>{experience.environment}</em></p>
             </div>
           </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="section-shell education-section" aria-labelledby="skills-title">
+      <div class="section-heading" data-reveal>
+        <h2 id="skills-title">{copy.dossier.skillsTitle}</h2>
+        <p>{copy.dossier.skillsBody}</p>
+      </div>
+      <div class="education-grid skills-grid">
+        {pageSkills.map((skill, index) => (
+          <article class="education-card" data-reveal style={`--i: ${index}`}>
+            <h3>{skill.name}</h3>
+            <p>{skill.keywords}</p>
+          </article>
+        ))}
+      </div>
+      <div class="language-list" data-reveal>
+        {pageLanguages.map((language) => (
+          <p><strong>{language.name}</strong><span>{language.level}</span></p>
         ))}
       </div>
     </section>

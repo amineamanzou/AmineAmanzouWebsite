@@ -394,7 +394,7 @@
     },
     {
       "id": 31,
-      "series": "k3s-opensearch-poc",
+      "series": "clf-viaq-opentelemetry-opensearch-lab",
       "status": "scheduled",
       "frDate": "2026-09-22",
       "enDate": "2026-09-24",

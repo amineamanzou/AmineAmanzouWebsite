@@ -31,10 +31,21 @@ export type Experience = {
   company: string;
   period: string;
   summary: string;
+  environment: string;
   highlights: Array<{
     title: string;
     body: string;
   }>;
+};
+
+export type SkillGroup = {
+  name: string;
+  keywords: string;
+};
+
+export type Language = {
+  name: string;
+  level: string;
 };
 
 export type Education = {
@@ -67,15 +78,26 @@ export const profile = {
 
 export const downloads: Record<Locale, Download> = {
   fr: {
-    label: "Télécharger le dossier de compétence",
-    href: "/downloads/amine-amanzou-dossier-competence-fr.pdf",
+    label: "Télécharger le CV en français",
+    href: "/downloads/AmineAmanzouCVFR092026.pdf",
     meta: "PDF · français",
   },
   en: {
-    label: "Download the capability statement",
-    href: "/downloads/amine-amanzou-resume-en.pdf",
+    label: "Download the English resume",
+    href: "/downloads/AmineAmanzouCVEN092026.pdf",
     meta: "PDF · English",
   },
+};
+
+export const resumeDownloads: Record<Locale, Download[]> = {
+  fr: [
+    downloads.fr,
+    { label: "Télécharger le CV en anglais", href: downloads.en.href, meta: "PDF · English" },
+  ],
+  en: [
+    downloads.en,
+    { label: "Download the French resume", href: downloads.fr.href, meta: "PDF · français" },
+  ],
 };
 
 export const navigation: Record<Locale, NavItem[]> = {
@@ -104,7 +126,7 @@ export const home = {
   meta: {
     title: "Amine Amanzou | Consultant Observabilité, SRE & Agentic SRE",
     description:
-      "Consultant observabilité, SRE et Agentic SRE : diagnostic, OpenTelemetry et pilotage de trajectoires de fiabilité pour systèmes critiques.",
+      "Consultant Observabilité & Agentic SRE : stratégie d’observabilité, pipelines OpenTelemetry et investigation d’incidents, de la télémétrie au diagnostic.",
   },
   hero: {
     title: "Réduire le bruit, le MTTR et le coût de l’observabilité.",
@@ -131,12 +153,12 @@ export const home = {
       detail: "Réduction du volume d'incidents clients en 6 mois grâce à la détection proactive.",
     },
     {
-      label: "Ylio",
-      value: "-30%",
-      countTo: -30,
+      label: "KeyIA · Banque",
+      value: "2 axes",
+      countTo: 2,
       prefix: "",
-      suffix: "%",
-      detail: "Baisse des abandons de panier via une observabilité métier du tunnel de vente.",
+      suffix: " axes",
+      detail: "Pipeline OpenTelemetry sur OpenShift et agent SRE Python pour l'investigation VMware.",
     },
     {
       label: "Orange",
@@ -179,14 +201,14 @@ export const localized = {
       body:
         "J’interviens quand les alertes s’empilent, que le diagnostic ralentit et que la facture de télémétrie n’explique plus la couverture obtenue.",
       proofLine:
-        "Enedis, Orange, Odigo et Ylio : gouvernance, migrations critiques, OpenTelemetry et réduction d’incidents en production.",
+        "KeyIA, Enedis, Orange et Odigo : Agentic SRE, migrations critiques, OpenTelemetry et fiabilité en production.",
       primaryCta: "Réserver un échange de cadrage",
       secondaryCta: "Voir les missions",
     },
     proof: {
       title: "Des systèmes critiques, des résultats mesurables.",
       body:
-        "Les preuves viennent de contextes réels: production, énergie, télécom, SaaS, e-commerce et migration cloud.",
+        "Les preuves viennent de contextes réels: banque, énergie, télécom, SaaS, plateformes cloud et production critique.",
     },
     observability: {
       title: "Le signal doit aider l’équipe qui prend l’incident.",
@@ -212,13 +234,24 @@ export const localized = {
     dossier: {
       title: "Dossier de compétence | Amine Amanzou",
       description:
-        "Dossier de compétence d'Amine Amanzou: freelance SRE, observabilité, cloud, DevOps, production, formations et certifications.",
-      heading: "Dossier de compétence freelance SRE et observabilité.",
+      "Dossier de compétence d’Amine Amanzou : stratégie d’observabilité, pipelines OpenTelemetry et investigation d’incidents par agents SRE.",
+      heading: "De la télémétrie au diagnostic.",
+      subtitle: "Stratégie d’observabilité, pipelines OpenTelemetry et investigation d’incidents par agents SRE.",
       intro:
-        "Un parcours construit sur l'exploitation de systèmes critiques, l'industrialisation cloud, la gouvernance observabilité et la réduction concrète des incidents.",
+        "J’accompagne les équipes sur toute la chaîne d’observabilité : instrumentation et déploiement de la collecte, acheminement des logs, métriques et traces, choix des plateformes et exploitation des données pour le diagnostic. Mon approche associe stratégie, architecture et mise en œuvre avec les équipes internes. Pour l’Agentic SRE, elle intègre l’évaluation des approches de développement interne, des solutions du marché et de leur complémentarité.",
+      domainsTitle: "Trois domaines d’intervention",
+      domainsBody: "Intervenir sur une couche précise en tenant compte de ses conséquences sur toute la chaîne.",
+      domains: [
+        { title: "Instrumentation et pipelines", body: "Adapter la collecte et son déploiement aux environnements, organiser le traitement et l’acheminement des logs, métriques et traces jusqu’aux backends." },
+        { title: "Stratégie et plateformes d’observabilité", body: "Évaluer les solutions, définir la cible et la trajectoire de migration, accompagner l’adoption avec les équipes." },
+        { title: "Agentic SRE et investigation", body: "Développer ou intégrer les capacités d’investigation, connecter les outils et évaluer les diagnostics avec les équipes." },
+      ],
       experienceTitle: "Missions et expériences",
       experienceBody:
         "Les missions mettent en avant impact, responsabilité et contexte technique.",
+      skillsTitle: "Compétences et langues",
+      skillsBody:
+        "Le socle technique reprend exactement les domaines mis en avant dans le CV actuel.",
       educationTitle: "Formation et certifications",
       educationBody:
         "Socle académique MIAGE, pratique infrastructure et formation continue observabilité/cloud.",
@@ -252,7 +285,7 @@ export const localized = {
     meta: {
       title: "Amine Amanzou | Observability Consultant, SRE & Agentic SRE",
       description:
-        "Observability consultant, SRE and Agentic SRE offering audits, OpenTelemetry delivery and fractional leadership for critical production systems.",
+        "Observability & Agentic SRE consultant: observability strategy, OpenTelemetry pipelines and incident investigation, from telemetry to diagnosis.",
     },
     role: profile.roleEn,
     brandSubtitle: "SRE · Observability",
@@ -261,14 +294,14 @@ export const localized = {
       body:
         "I step in when alerts pile up, diagnosis slows down and telemetry spend no longer explains the coverage teams receive.",
       proofLine:
-        "Enedis, Orange, Odigo and Ylio: governance, critical migrations, OpenTelemetry and fewer production incidents.",
+        "KeyIA, Enedis, Orange and Odigo: Agentic SRE, critical migrations, OpenTelemetry and production reliability.",
       primaryCta: "Book a scoping call",
       secondaryCta: "View missions",
     },
     proof: {
       title: "Critical systems, measurable outcomes.",
       body:
-        "Proof points come from real production contexts: energy, telecom, SaaS, e-commerce, cloud migration and support operations.",
+        "Proof points come from real production contexts: banking, energy, telecom, SaaS, cloud platforms and critical operations.",
     },
     observability: {
       title: "The signal has to help the team holding the incident.",
@@ -294,13 +327,24 @@ export const localized = {
     dossier: {
       title: "Capability Statement | Amine Amanzou",
       description:
-        "Capability statement of Amine Amanzou: freelance SRE, observability, cloud, DevOps, production, training and certifications.",
-      heading: "Freelance SRE and observability capability statement.",
+        "Amine Amanzou’s capability statement: observability strategy, OpenTelemetry pipelines and incident investigation with SRE agents.",
+      heading: "From telemetry to diagnosis.",
+      subtitle: "Observability strategy, OpenTelemetry pipelines and incident investigation with SRE agents.",
       intro:
-        "A track record built on operating critical systems, industrializing cloud platforms, governing observability and reducing incidents in production.",
+        "I help teams across the observability chain: instrumentation and telemetry collection deployment, routing logs, metrics and traces, selecting platforms and using data for diagnosis. My approach combines strategy, architecture and hands-on delivery with internal teams. For Agentic SRE, it includes evaluating in-house development, market solutions and how they can work together.",
+      domainsTitle: "Three areas of engagement",
+      domainsBody: "Work on a specific layer while accounting for its impact across the full chain.",
+      domains: [
+        { title: "Instrumentation and pipelines", body: "Adapt telemetry collection and deployment to each environment, and organize processing and routing of logs, metrics and traces to the backends." },
+        { title: "Observability strategy and platforms", body: "Evaluate solutions, define the target architecture and migration roadmap, and support adoption with the teams." },
+        { title: "Agentic SRE and investigation", body: "Develop or integrate investigation capabilities, connect tools and evaluate diagnoses with the teams." },
+      ],
       experienceTitle: "Missions and experience",
       experienceBody:
         "Missions are framed around impact, responsibility and technical context.",
+      skillsTitle: "Skills and languages",
+      skillsBody:
+        "The technical foundation mirrors the domains highlighted in the current resume.",
       educationTitle: "Training and certifications",
       educationBody:
         "MIAGE academic background, infrastructure practice and continuous observability/cloud training.",
@@ -356,372 +400,358 @@ export const alternatePath = (path: string, locale: Locale) => {
 
 export const experiences: Experience[] = [
   {
-    role: "Expert Observabilité",
-    company: "Enedis",
-    period: "Mars 2024 - Nov 2025",
+    role: "Consultant Observabilité & Agentic SRE",
+    company: "KeyIA",
+    period: "Mai 2026 - Aujourd'hui",
     summary:
-      "Référent observabilité pour aligner les équipes SRE, Dev et Ops autour d'une trajectoire commune.",
+      "Architecture de pipelines OpenTelemetry et développement d’un agent SRE d’investigation pour une banque de financement et d’investissement.",
     highlights: [
       {
-        title: "Conduite du changement & gouvernance",
+        title: "Architecture OpenTelemetry",
         body:
-          "Animation d'ateliers collaboratifs et définition de règles d'exploitation pour aligner plus de 400 projets.",
+          "Architecture d’un pipeline d’ingestion OpenTelemetry sur OpenShift/HyperShift : formalisation de la cible, pilotage des arbitrages sur les agents et opérateurs ; routage des logs via Kafka, gestion des traces et des métriques.",
       },
       {
-        title: "Benchmark stratégique",
+        title: "Agent SRE Python / LangChain",
         body:
-          "Pilotage technique d'un RFP: environnements de test en IaC, benchmark de 7 solutions leaders, Chaos Engineering et AI Ops.",
+          "Développement d’un agent SRE en Python avec LangChain pour l’investigation de bout en bout, de la VM et son OS à la virtualisation VMware (ESXi, vCenter), au réseau et au stockage.",
       },
       {
-        title: "Stratégie hybride",
+        title: "Diagnostic et remédiation",
         body:
-          "Architecture cible pour superviser un paysage hétérogène mêlant Kubernetes, microservices et legacy.",
+          "Corrélation du contexte d’infrastructure, des logs Elasticsearch et des métriques Dynatrace pour évaluer la confiance du diagnostic et proposer des remédiations ciblées.",
+      },
+      {
+        title: "Évaluation et intégration MCP",
+        body:
+          "Évaluation de l’agent avec les équipes du SI : définition de scénarios de test, validation des capacités d’investigation et recommandations d’évolution des services MCP VMware.",
+      },
+      {
+        title: "Log as a Service",
+        body:
+          "Log as a Service : automatisation du déploiement de Fluent Bit en OTLP et de Data Prepper sur Kubernetes vers OpenSearch ; création d’un catalogue de parsing par profil technologique.",
       },
     ],
+    environment:
+      "Environnement : Python, LangChain, MCP, VMware, OpenTelemetry, OpenShift, Kafka, Elasticsearch, Dynatrace, OpenSearch.",
   },
   {
-    role: "Ingénieur Cloud DevOps",
-    company: "Ylio",
-    period: "Janv 2024 - Mars 2024",
-    summary: "Industrialisation et sécurisation cloud GCP pour une plateforme e-commerce.",
+    role: "Expert Observabilité",
+    company: "ENEDIS",
+    period: "Mars 2024 - Déc 2025",
+    summary:
+      "Pilotage de l’évaluation technique et de la stratégie cible de la future plateforme d’observabilité d’ENEDIS, au service de plus de 400 projets.",
     highlights: [
       {
-        title: "Observabilité business",
+        title: "Évaluation et choix de plateforme",
         body:
-          "Métriques métier OpenTelemetry pour monitorer le tunnel de vente et identifier les points de friction.",
+          "Pilotage du volet technique d’un appel d’offres de 15 M€ : évaluation de sept plateformes selon les critères métier, architecture, exploitation, sécurité et coûts, pour éclairer le choix de la solution.",
       },
       {
-        title: "Sécurité & architecture",
+        title: "Spécifications et SLO",
         body:
-          "Isolation réseau, gestion centralisée des secrets avec HashiCorp Vault et automatisation SSL.",
+          "Traduction des besoins des équipes de développement et d’infrastructure en critères d’évaluation, spécifications techniques, SLO et exigences de plateforme.",
       },
       {
-        title: "Infrastructure as Code",
+        title: "Preuve de concept hybride",
         body:
-          "Infrastructure GCP scriptée avec Terraform, CI/CD GitHub Actions / Ansible et POC Kubernetes GKE.",
+          "Architecture d’un PoC Kubernetes hybride cloud/on-premise pour valider la scalabilité, les performances, les pipelines de télémétrie et les solutions candidates.",
+      },
+      {
+        title: "Maintien en condition opérationnelle",
+        body:
+          "Maintien en condition opérationnelle de Dynatrace Managed et Elastic (logs), en collaboration avec les équipes responsables des plateformes existantes.",
+      },
+      {
+        title: "Architecture et trajectoire de migration",
+        body:
+          "Architecture du pipeline d’ingestion 100 % OpenTelemetry et planification de la migration vers Elasticsearch, solution retenue, en réutilisant au mieux l’existant.",
+      },
+      {
+        title: "Maturité et conduite du changement",
+        body:
+          "Amorce de la conduite du changement avec une matrice de maturité de l’observabilité couvrant les 400 projets, pour structurer leur trajectoire d’adoption.",
+      },
+      {
+        title: "Accompagnement OpenTelemetry",
+        body:
+          "Guides et formations OpenTelemetry pour accompagner l’adoption par les équipes SRE, développement et support.",
       },
     ],
+    environment:
+      "Environnement : OpenTelemetry, Dynatrace, Elasticsearch, AWS, OpenStack, Kafka, Kubernetes, GitLab.",
   },
   {
-    role: "Expert Observabilité - Dynatrace",
+    role: "Expert Observabilité",
     company: "Odigo",
     period: "Oct 2022 - Sept 2023",
     summary:
-      "Migration Dynatrace SaaS et industrialisation d'une observabilité proactive pour les équipes support et techniques.",
+      "Contribution à la réduction de 40 % des incidents clients en 6 mois grâce à la détection proactive et à l’adoption de Dynatrace SaaS.",
     highlights: [
       {
-        title: "Impact business & fiabilité",
+        title: "Migration Dynatrace SaaS",
         body:
-          "Baisse de 40% des incidents clients, amélioration MTTD/MTTR et désengorgement des équipes N1/N2.",
+          "Pilotage d'une migration de cinq mois vers Dynatrace SaaS et mise en place d'un socle standardisé de supervision haute disponibilité.",
       },
       {
-        title: "Architecture & migration",
+        title: "Fiabilité applicative",
         body:
-          "Migration complète vers Dynatrace SaaS en 5 mois et collecteurs Python conteneurisés pour KPIs spécifiques.",
+          "Collaboration avec les équipes QA et intégration pour identifier les goulets d'étranglement inter-systèmes et améliorer la fiabilité applicative grâce à l'observabilité de bout en bout.",
       },
       {
-        title: "Configuration as Code",
+        title: "Métriques personnalisées",
         body:
-          "Plugins d'inventaire dynamique, intégration CMDB et déploiement agent automatisé via Ansible/Jenkins.",
+          "Développement de collecteurs Python conteneurisés et de pipelines Jenkins pour l'ingestion de métriques spécifiques.",
+      },
+      {
+        title: "Automatisation Dynatrace",
+        body:
+          "Automatisation de la configuration et du déploiement des agents Dynatrace avec Ansible et un plugin d'inventaire dynamique, afin d'étendre la couverture et de simplifier l'onboarding ainsi que le diagnostic de premier niveau.",
       },
     ],
+    environment: "Environnement : Dynatrace, Python, Ansible, Jenkins, Docker, AWS, GitLab.",
   },
   {
-    role: "Lead SRE Data & Performance",
+    role: "Ingénieur DevOps",
     company: "Orange",
-    period: "Déc 2018 - Mai 2021",
+    period: "2014 - 2021",
     summary:
-      "Responsabilité technique sur le pôle data et observabilité pendant une migration critique de 30 millions de comptes mail.",
+      "Pilotage du domaine data et observabilité pendant la migration de 30 millions de comptes mail vers OpenStack.",
     highlights: [
       {
-        title: "Contexte critique",
+        title: "Exploitation et automatisation",
         body:
-          "Observabilité de migration pour éviter les pertes de mail et réduire les temps d'intervention en incident.",
-      },
-      {
-        title: "Lead technique data",
-        body:
-          "Pilotage Elasticsearch, Kafka et Grafana, coordination Ops et interface avec Build & Infra.",
-      },
-      {
-        title: "Performance deep tech",
-        body:
-          "Diagnostic JVM, OpenStack, noisy neighbors, overcommitting et optimisation Kafka pour logs à très haut volume.",
+          "Administration et optimisation d'Elasticsearch, Kafka, Grafana et MySQL ; analyse de logs, résolution d'incidents et automatisation des opérations récurrentes avec Ansible.",
       },
     ],
-  },
-  {
-    role: "System Engineer & DevOps",
-    company: "Orange",
-    period: "Déc 2016 - Déc 2018",
-    summary: "Exploitation critique des plateformes Mail Pro et introduction des pratiques DevOps.",
-    highlights: [
-      {
-        title: "Gestion de crise",
-        body:
-          "KPIs réseau pour démontrer le sous-dimensionnement fournisseur et résoudre des incidents critiques.",
-      },
-      {
-        title: "Architecture data",
-        body:
-          "MongoDB / GridFS pour transfert de fichiers lourds, procédures de purge et go-live d'un service à 100k clients.",
-      },
-      {
-        title: "Transition DevOps",
-        body:
-          "Premiers pipelines Jenkins, automatisation des déploiements et exploitation Red Hat Linux, Apache, MySQL.",
-      },
-    ],
+    environment:
+      "Environnement : Elasticsearch, Kafka, Grafana, MySQL, OpenStack, Python, Ansible, Terraform, RHEL.",
   },
 ];
 
 export const experiencesEn: Experience[] = [
   {
-    role: "Observability Expert",
-    company: "Enedis",
-    period: "Mar 2024 - Nov 2025",
+    role: "Observability & Agentic SRE Consultant",
+    company: "KeyIA",
+    period: "May 2026 - Present",
     summary:
-      "Observability referent aligning SRE, development and operations teams around a shared trajectory.",
+      "OpenTelemetry pipeline architecture and SRE investigation agent development for a corporate and investment bank.",
     highlights: [
       {
-        title: "Change management & governance",
+        title: "OpenTelemetry architecture",
         body:
-          "Facilitated collaborative workshops and defined operating rules to align more than 400 projects.",
+          "Architected an OpenTelemetry ingestion pipeline on OpenShift/HyperShift: defined the target architecture and led alignment on agents and operators; routed logs through Kafka and managed traces and metrics.",
       },
       {
-        title: "Strategic benchmark",
+        title: "Python / LangChain SRE agent",
         body:
-          "Led the technical RFP track: IaC test environments, benchmark of 7 leading solutions, Chaos Engineering and AI Ops.",
+          "Developed a Python SRE agent with LangChain for end-to-end investigation, from VMs and guest operating systems to VMware virtualization (ESXi, vCenter), networking and storage.",
       },
       {
-        title: "Hybrid strategy",
+        title: "Diagnosis and remediation",
         body:
-          "Target architecture for supervising a heterogeneous landscape combining Kubernetes, microservices and legacy systems.",
+          "Correlated infrastructure context, Elasticsearch logs and Dynatrace metrics to assess diagnostic confidence and recommend targeted remediation.",
+      },
+      {
+        title: "Evaluation and MCP integration",
+        body:
+          "Evaluated the agent with IT teams: defined test scenarios, validated investigation capabilities and recommended improvements to VMware MCP services.",
+      },
+      {
+        title: "Log as a Service",
+        body:
+          "Log as a Service: automated Fluent Bit deployment with OTLP and Kubernetes deployment of Data Prepper for OpenSearch ingestion; created a parsing catalog organized by technology profile.",
       },
     ],
+    environment:
+      "Environment: Python, LangChain, MCP, VMware, OpenTelemetry, OpenShift, Kafka, Elasticsearch, Dynatrace, OpenSearch.",
   },
   {
-    role: "Cloud DevOps Engineer",
-    company: "Ylio",
-    period: "Jan 2024 - Mar 2024",
-    summary: "Cloud industrialization and security on GCP for an e-commerce platform.",
+    role: "Observability Expert",
+    company: "ENEDIS",
+    period: "Mar 2024 - Dec 2025",
+    summary:
+      "Led the technical evaluation and target strategy for ENEDIS’s future observability platform serving 400+ projects.",
     highlights: [
       {
-        title: "Business observability",
+        title: "Platform evaluation and selection",
         body:
-          "OpenTelemetry business metrics to monitor the sales funnel and identify friction points.",
+          "Led the technical workstream of a €15M tender, evaluating seven observability platforms against business, architecture, operations, security and cost criteria to inform solution selection.",
       },
       {
-        title: "Security & architecture",
+        title: "Specifications and SLOs",
         body:
-          "Network isolation, centralized secret management with HashiCorp Vault and SSL automation.",
+          "Translated the needs of development and infrastructure teams into evaluation criteria, technical specifications, SLOs and platform requirements.",
       },
       {
-        title: "Infrastructure as Code",
+        title: "Hybrid proof of concept",
         body:
-          "GCP infrastructure scripted with Terraform, GitHub Actions / Ansible CI/CD and a Kubernetes GKE proof of concept.",
+          "Architected a hybrid cloud/on-premises Kubernetes proof of concept to validate scalability, performance, telemetry pipelines and candidate solutions.",
+      },
+      {
+        title: "Platform operations",
+        body:
+          "Maintained Dynatrace Managed and Elastic log platforms in operational condition, collaborating with the teams responsible for the existing platforms.",
+      },
+      {
+        title: "Architecture and migration roadmap",
+        body:
+          "Architected a fully OpenTelemetry-based ingestion pipeline and planned migration to Elasticsearch, the selected solution, maximizing reuse of existing capabilities.",
+      },
+      {
+        title: "Maturity and change management",
+        body:
+          "Initiated change management with an observability maturity matrix covering 400 projects to structure their adoption roadmap.",
+      },
+      {
+        title: "OpenTelemetry enablement",
+        body:
+          "Created OpenTelemetry guides and training to support SRE, development and support teams in adopting the new observability foundation.",
       },
     ],
+    environment:
+      "Environment: OpenTelemetry, Dynatrace, Elasticsearch, AWS, OpenStack, Kafka, Kubernetes, GitLab.",
   },
   {
-    role: "Dynatrace Observability Expert",
+    role: "Observability Expert",
     company: "Odigo",
     period: "Oct 2022 - Sep 2023",
     summary:
-      "Dynatrace SaaS migration and industrialization of proactive observability for support and engineering teams.",
+      "Contributed to a 40% reduction in customer incidents over six months through proactive detection and adoption of Dynatrace SaaS.",
     highlights: [
       {
-        title: "Business impact & reliability",
+        title: "Dynatrace SaaS migration",
         body:
-          "Reduced customer incidents by 40%, improved MTTD/MTTR and relieved N1/N2 support teams.",
+          "Led a five-month migration to Dynatrace SaaS and established a standardized high-availability monitoring foundation.",
       },
       {
-        title: "Architecture & migration",
+        title: "Application reliability",
         body:
-          "Completed migration to Dynatrace SaaS in 5 months and containerized Python collectors for specific KPIs.",
+          "Worked with QA and integration teams to identify cross-system bottlenecks and improve application reliability through end-to-end observability.",
       },
       {
-        title: "Configuration as Code",
+        title: "Custom metrics",
         body:
-          "Dynamic inventory plugins, CMDB integration and automated agent deployment through Ansible/Jenkins.",
+          "Developed containerized Python collectors and Jenkins pipelines for custom metrics ingestion.",
+      },
+      {
+        title: "Dynatrace automation",
+        body:
+          "Automated Dynatrace agent configuration and deployment with Ansible and a dynamic inventory plugin, expanding monitoring coverage and simplifying onboarding and first-line incident diagnosis.",
       },
     ],
+    environment: "Environment: Dynatrace, Python, Ansible, Jenkins, Docker, AWS, GitLab.",
   },
   {
-    role: "Lead SRE Data & Performance",
+    role: "DevOps Engineer",
     company: "Orange",
-    period: "Dec 2018 - May 2021",
+    period: "2014 - 2021",
     summary:
-      "Technical responsibility for data and observability during the critical migration of 30 million mail accounts.",
+      "Led the data and observability domain during the migration of 30 million email accounts to OpenStack.",
     highlights: [
       {
-        title: "Critical context",
+        title: "Operations and automation",
         body:
-          "Migration observability to avoid mail loss and reduce incident intervention time.",
-      },
-      {
-        title: "Technical data lead",
-        body:
-          "Led Elasticsearch, Kafka and Grafana, coordinated operations and interfaced with build and infrastructure teams.",
-      },
-      {
-        title: "Deep performance work",
-        body:
-          "Diagnosed JVM, OpenStack, noisy neighbors, overcommitting and Kafka optimization for very high-volume logs.",
+          "Managed and optimized Elasticsearch, Kafka, Grafana and MySQL; performed log analysis and troubleshooting, and automated recurring operations with Ansible.",
       },
     ],
-  },
-  {
-    role: "System Engineer & DevOps",
-    company: "Orange",
-    period: "Dec 2016 - Dec 2018",
-    summary: "Critical operations for Mail Pro platforms and introduction of DevOps practices.",
-    highlights: [
-      {
-        title: "Crisis management",
-        body:
-          "Network KPIs used to prove supplier under-sizing and resolve critical incidents.",
-      },
-      {
-        title: "Data architecture",
-        body:
-          "MongoDB / GridFS for large file transfer, purge procedures and go-live for a 100k customer service.",
-      },
-      {
-        title: "DevOps transition",
-        body:
-          "Early Jenkins pipelines, deployment automation and Red Hat Linux, Apache and MySQL operations.",
-      },
-    ],
+    environment:
+      "Environment: Elasticsearch, Kafka, Grafana, MySQL, OpenStack, Python, Ansible, Terraform, RHEL.",
   },
 ];
 
 export const education: Education[] = [
   {
-    title: "ClickHouse Observability Professional Certification",
-    period: "Décembre 2025",
+    title: "ClickHouse Observability Professional",
+    period: "2026",
     issuer: "ClickHouse",
     icon: "/images/certifications/clickhouse.svg",
+    href: "https://credly.com/badges/f69b7ad4-4c1f-40db-9401-69f8b159fd89/public_url",
   },
   {
-    title: "Kubernetes Administration Course - CKA",
-    period: "Janvier 2024",
-    issuer: "Mumshad Mannambeth, KodeKloud",
+    title: "OTCA - OpenTelemetry Certified Associate Course",
+    period: "2025",
+    issuer: "Udemy",
+    icon: "/images/certifications/informatique.svg",
+  },
+  {
+    title: "Formation CKA - Certified Kubernetes Administrator",
+    period: "2024",
+    issuer: "KodeKloud",
     icon: "/images/certifications/kubernetes.svg",
     href: "https://training.linuxfoundation.org/certification/certified-kubernetes-administrator-cka/",
   },
   {
-    title: "HashiCorp Terraform Associate Course - 003",
-    period: "Novembre 2023",
-    issuer: "Andrew Brown, ExamPro",
-    icon: "/images/certifications/terraform.svg",
-    href: "https://developer.hashicorp.com/certifications/infrastructure-automation",
-  },
-  {
-    title: "AWS Cloud Practitioner Course CLF-C02",
-    period: "Septembre 2023",
-    issuer: "Stephane Maarek, Udemy",
-    icon: "/images/certifications/aws.svg",
-    href: "https://aws.amazon.com/certification/certified-cloud-practitioner/",
-  },
-  {
-    title: "Introduction au machine learning",
-    period: "Juin 2021",
-    issuer: "Camille Van Hofflen - Jungle Program",
-    icon: "/images/certifications/machine-learning.svg",
-    body:
-      "Formation de 6 semaines sur la théorie, la manipulation de données et l'évaluation de modèles de machine learning.",
-  },
-  {
-    title: "Master 2 - Système d'information et de connaissance",
-    period: "2014 - 2016",
-    issuer: "MIAGE Sorbonne - Université Paris 1 Panthéon-Sorbonne",
-    icon: "/images/certifications/miage.svg",
-    body:
-      "Alternance autour du développement, de l'architecture, de la conduite de projet SI et de la maîtrise d'ouvrage.",
-  },
-  {
-    title: "Licence MIAGE Ingénierie des SI",
-    period: "2013 - 2014",
-    issuer: "MIAGE Sorbonne - Université Paris 1 Panthéon-Sorbonne",
+    title: "MIAGE - Méthodes informatiques appliquées à la gestion des entreprises",
+    period: "09.2013 - 10.2016",
+    issuer: "Université Paris 1 Panthéon-Sorbonne · Licence, Master",
     icon: "/images/certifications/miage.svg",
   },
   {
     title: "DUT Informatique",
-    period: "2011 - 2013",
-    issuer: "IUT Fontainebleau, Université Paris-Est Créteil",
+    period: "09.2011 - 08.2013",
+    issuer: "Université Paris-Est Créteil",
     icon: "/images/certifications/informatique.svg",
-  },
-  {
-    title: "Baccalauréat STG",
-    period: "2007 - 2011",
-    issuer: "Comptabilité et finance des entreprises",
-    icon: "/images/certifications/diploma.svg",
-    body: "Mention Bien.",
   },
 ];
 
 export const educationEn: Education[] = [
   {
-    title: "ClickHouse Observability Professional Certification",
-    period: "December 2025",
+    title: "ClickHouse Observability Professional",
+    period: "2026",
     issuer: "ClickHouse",
     icon: "/images/certifications/clickhouse.svg",
+    href: "https://credly.com/badges/f69b7ad4-4c1f-40db-9401-69f8b159fd89/public_url",
   },
   {
-    title: "Kubernetes Administration Course - CKA",
-    period: "January 2024",
-    issuer: "Mumshad Mannambeth, KodeKloud",
+    title: "OTCA - OpenTelemetry Certified Associate Course",
+    period: "2025",
+    issuer: "Udemy",
+    icon: "/images/certifications/informatique.svg",
+  },
+  {
+    title: "CKA Certification Course - Certified Kubernetes Administrator",
+    period: "2024",
+    issuer: "KodeKloud",
     icon: "/images/certifications/kubernetes.svg",
     href: "https://training.linuxfoundation.org/certification/certified-kubernetes-administrator-cka/",
   },
   {
-    title: "HashiCorp Terraform Associate Course - 003",
-    period: "November 2023",
-    issuer: "Andrew Brown, ExamPro",
-    icon: "/images/certifications/terraform.svg",
-    href: "https://developer.hashicorp.com/certifications/infrastructure-automation",
-  },
-  {
-    title: "AWS Cloud Practitioner Course CLF-C02",
-    period: "September 2023",
-    issuer: "Stephane Maarek, Udemy",
-    icon: "/images/certifications/aws.svg",
-    href: "https://aws.amazon.com/certification/certified-cloud-practitioner/",
-  },
-  {
-    title: "Introduction to machine learning",
-    period: "June 2021",
-    issuer: "Camille Van Hofflen - Jungle Program",
-    icon: "/images/certifications/machine-learning.svg",
-    body:
-      "Six-week training on machine learning theory, data manipulation and model evaluation.",
-  },
-  {
-    title: "Master 2 - Information and Knowledge Systems",
-    period: "2014 - 2016",
-    issuer: "MIAGE Sorbonne - Paris 1 Panthéon-Sorbonne University",
-    icon: "/images/certifications/miage.svg",
-    body:
-      "Work-study program covering software development, architecture, information-system project management and business analysis.",
-  },
-  {
-    title: "Bachelor's degree - Information Systems Engineering",
-    period: "2013 - 2014",
-    issuer: "MIAGE Sorbonne - Paris 1 Panthéon-Sorbonne University",
+    title: "MIAGE - Computer Science Methods Applied to Business Management",
+    period: "09.2013 - 10.2016",
+    issuer: "Paris 1 Panthéon-Sorbonne University · Bachelor, Master",
     icon: "/images/certifications/miage.svg",
   },
   {
-    title: "DUT Computer Science",
-    period: "2011 - 2013",
-    issuer: "IUT Fontainebleau, Paris-Est Créteil University",
+    title: "Computer Science",
+    period: "09.2011 - 08.2013",
+    issuer: "Paris-Est Créteil University · DUT (University Technical Diploma)",
     icon: "/images/certifications/informatique.svg",
   },
-  {
-    title: "French baccalaureate - STG",
-    period: "2007 - 2011",
-    issuer: "Accounting and corporate finance",
-    icon: "/images/certifications/diploma.svg",
-    body: "Graduated with honors.",
-  },
+];
+
+export const skills: SkillGroup[] = [
+  { name: "Observabilité", keywords: "OpenTelemetry, Dynatrace, Elasticsearch, Grafana, Kafka, Prometheus, Jaeger" },
+  { name: "Agentic SRE", keywords: "Python, LangChain, MCP, Deep Agents, analyse de cause racine" },
+  { name: "Plateformes", keywords: "Kubernetes, OpenShift, HyperShift, Docker, VMware vSphere" },
+  { name: "Automatisation & IaC", keywords: "Ansible, Terraform, Bash, GitLab CI, GitHub Actions" },
+  { name: "Cloud & infrastructure", keywords: "AWS, GCP, OpenStack, Linux, VMware" },
+];
+
+export const skillsEn: SkillGroup[] = [
+  { name: "Observability", keywords: "OpenTelemetry, Dynatrace, Elasticsearch, Grafana, Kafka, Prometheus, Jaeger" },
+  { name: "Agentic SRE", keywords: "Python, LangChain, MCP, Deep Agents, Root Cause Analysis" },
+  { name: "Platforms", keywords: "Kubernetes, OpenShift, HyperShift, Docker, VMware vSphere" },
+  { name: "Automation & IaC", keywords: "Ansible, Terraform, Bash, GitLab CI, GitHub Actions" },
+  { name: "Cloud & Infrastructure", keywords: "AWS, GCP, OpenStack, Linux, VMware" },
+];
+
+export const languages: Language[] = [
+  { name: "Français", level: "Langue maternelle" },
+  { name: "Anglais", level: "Courant" },
+];
+
+export const languagesEn: Language[] = [
+  { name: "English", level: "Fluent" },
+  { name: "French", level: "Native language" },
 ];
