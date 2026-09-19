@@ -1,10 +1,20 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const root = process.cwd();
 const siteData = readFileSync(join(root, "src/data/site.ts"), "utf8");
 const dossierPage = readFileSync(join(root, "src/components/DossierPage.astro"), "utf8");
+const experiencesFr = siteData.slice(siteData.indexOf("export const experiences:"), siteData.indexOf("export const experiencesEn:"));
+const experiencesEn = siteData.slice(siteData.indexOf("export const experiencesEn:"), siteData.indexOf("export const education:"));
+
+execFileSync("npm", ["run", "build"], { cwd: root, stdio: "inherit" });
+
+const renderedHomeFr = readFileSync(join(root, "dist/index.html"), "utf8");
+const renderedHomeEn = readFileSync(join(root, "dist/en/index.html"), "utf8");
+const renderedDossierFr = readFileSync(join(root, "dist/dossier/index.html"), "utf8");
+const renderedDossierEn = readFileSync(join(root, "dist/en/dossier/index.html"), "utf8");
 
 for (const pdf of [
   "public/downloads/AmineAmanzouCVFR092026.pdf",
@@ -47,6 +57,12 @@ for (const expected of [
 }
 
 assert(!siteData.includes('company: "Ylio"'), "Ylio must not appear in current CV experience data");
+assert(experiencesFr.includes('company: "KeyIA",\n    location: "Paris, France"'), "French KeyIA experience must use Paris, France");
+assert(experiencesEn.includes('company: "KeyIA",\n    location: "Paris, France"'), "English KeyIA experience must use Paris, France");
+assert(renderedHomeFr.includes("Mai 2026 - Aujourd&#39;hui · Paris, France"), "French home must render the KeyIA location");
+assert(renderedDossierFr.includes("Mai 2026 - Aujourd&#39;hui · Paris, France"), "French dossier must render the KeyIA location");
+assert(renderedHomeEn.includes("May 2026 - Present · Paris, France"), "English home must render the KeyIA location");
+assert(renderedDossierEn.includes("May 2026 - Present · Paris, France"), "English dossier must render the KeyIA location");
 assert(dossierPage.includes("experience.environment"), "Dossier must display technical environments");
 assert(dossierPage.includes("pageSkills"), "Dossier must display the localized CV skills");
 assert(dossierPage.includes("pageLanguages"), "Dossier must display the localized CV languages");

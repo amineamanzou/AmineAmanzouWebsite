@@ -29,6 +29,7 @@ export type Expertise = {
 export type Experience = {
   role: string;
   company: string;
+  location?: string;
   period: string;
   summary: string;
   environment: string;
@@ -402,6 +403,7 @@ export const experiences: Experience[] = [
   {
     role: "Consultant Observabilité & Agentic SRE",
     company: "KeyIA",
+    location: "Paris, France",
     period: "Mai 2026 - Aujourd'hui",
     summary:
       "Architecture de pipelines OpenTelemetry et développement d’un agent SRE d’investigation pour une banque de financement et d’investissement.",
@@ -438,7 +440,7 @@ export const experiences: Experience[] = [
   {
     role: "Expert Observabilité",
     company: "ENEDIS",
-    period: "Mars 2024 - Déc 2025",
+    period: "Mars 2024 - Nov 2025",
     summary:
       "Pilotage de l’évaluation technique et de la stratégie cible de la future plateforme d’observabilité d’ENEDIS, au service de plus de 400 projets.",
     highlights: [
@@ -533,6 +535,7 @@ export const experiencesEn: Experience[] = [
   {
     role: "Observability & Agentic SRE Consultant",
     company: "KeyIA",
+    location: "Paris, France",
     period: "May 2026 - Present",
     summary:
       "OpenTelemetry pipeline architecture and SRE investigation agent development for a corporate and investment bank.",
@@ -569,7 +572,7 @@ export const experiencesEn: Experience[] = [
   {
     role: "Observability Expert",
     company: "ENEDIS",
-    period: "Mar 2024 - Dec 2025",
+    period: "Mar 2024 - Nov 2025",
     summary:
       "Led the technical evaluation and target strategy for ENEDIS’s future observability platform serving 400+ projects.",
     highlights: [
@@ -663,7 +666,7 @@ export const experiencesEn: Experience[] = [
 export const education: Education[] = [
   {
     title: "ClickHouse Observability Professional",
-    period: "2026",
+    period: "2025",
     issuer: "ClickHouse",
     icon: "/images/certifications/clickhouse.svg",
     href: "https://credly.com/badges/f69b7ad4-4c1f-40db-9401-69f8b159fd89/public_url",
@@ -698,7 +701,7 @@ export const education: Education[] = [
 export const educationEn: Education[] = [
   {
     title: "ClickHouse Observability Professional",
-    period: "2026",
+    period: "2025",
     issuer: "ClickHouse",
     icon: "/images/certifications/clickhouse.svg",
     href: "https://credly.com/badges/f69b7ad4-4c1f-40db-9401-69f8b159fd89/public_url",

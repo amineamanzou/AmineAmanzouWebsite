@@ -85,7 +85,7 @@ const pageLanguages = locale === "fr" ? languages : languagesEn;
         {pageExperiences.map((experience, index) => (
           <article class="timeline-entry" data-reveal style={`--i: ${index}`}>
             <div class="timeline-meta">
-              <span>{experience.period}</span>
+              <span>{experience.period}{experience.location ? ` · ${experience.location}` : ""}</span>
               <strong>{experience.company}</strong>
             </div>
             <div class="timeline-content">
