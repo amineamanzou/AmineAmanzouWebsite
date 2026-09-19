@@ -111,7 +111,7 @@ const homeCopy = locale === "fr" ? {
 
     <section class="section-shell work-preview" id="missions">
       <div class="section-heading" data-reveal><p class="section-kicker">{homeCopy.casesKicker}</p><h2>{homeCopy.casesTitle}</h2><p>{homeCopy.casesBody}</p></div>
-      <div class="preview-timeline">{selectedExperiences.map((experience, index) => <article data-reveal style={`--i: ${index}`}><span>{experience.period}</span><h3>{experience.role}</h3><strong>{experience.company}</strong><p>{experience.summary}</p></article>)}</div>
+      <div class="preview-timeline">{selectedExperiences.map((experience, index) => <article data-reveal style={`--i: ${index}`}><span>{experience.period}{experience.location ? ` · ${experience.location}` : ""}</span><h3>{experience.role}</h3><strong>{experience.company}</strong><p>{experience.summary}</p></article>)}</div>
       <div class="center-actions"><a class="button button-primary" href={dossierPath} data-analytics-event="site.cta_click" data-analytics-cta-id="view_full_dossier" data-analytics-placement="work_preview">{copy.workPreview.cta}</a></div>
     </section>
 
