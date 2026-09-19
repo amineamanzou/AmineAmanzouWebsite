@@ -2,7 +2,7 @@
 
 Statut : `in_production`
 
-Ce lot insère le retour d’expérience `k3s-opensearch-poc` au début du calendrier. Les quatre sujets suivants sont décalés d’une semaine. Le sujet « Observabilité métier d’un tunnel de vente » passe en octobre avec le reste du calendrier.
+Ce lot insère le retour d’expérience `clf-viaq-opentelemetry-opensearch-lab` au début du calendrier. Les quatre sujets suivants sont décalés d’une semaine. Le sujet « Observabilité métier d’un tunnel de vente » passe en octobre avec le reste du calendrier.
 
 ## Calendrier retenu
 

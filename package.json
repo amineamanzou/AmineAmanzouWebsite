@@ -18,6 +18,7 @@
     "check:otel-core": "node scripts/checks/opentelemetry-core-version.mjs",
     "check:product-analytics": "node scripts/checks/product-analytics.mjs",
     "review:site": "node scripts/qa/review-site.mjs",
+    "review:cv": "node scripts/qa/cv-sync-smoke.mjs",
     "review:commercial": "node scripts/qa/commercial-pages-smoke.mjs",
     "review:product-analytics": "node scripts/qa/product-analytics-smoke.mjs",
     "review:observability": "node scripts/qa/browser-observability-actions-smoke.mjs"

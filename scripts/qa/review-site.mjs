@@ -30,8 +30,8 @@ const requiredFiles = [
   "articles/index.html",
   "robots.txt",
   "sitemap.xml",
-  "downloads/amine-amanzou-dossier-competence-fr.pdf",
-  "downloads/amine-amanzou-resume-en.pdf",
+  "downloads/AmineAmanzouCVFR092026.pdf",
+  "downloads/AmineAmanzouCVEN092026.pdf",
   "images/amine-amanzou-profile.jpeg",
 ];
 
@@ -39,19 +39,21 @@ const requiredHomeText = [
   "Consultant Observabilité",
   "Enedis",
   "Odigo",
-  "Ylio",
+  "KeyIA",
   "Orange",
   "Réserver un échange de cadrage",
   "OpenTelemetry &amp; Reliability Sprint",
   "Agentic SRE",
-  "Télécharger le dossier de compétence",
+  "Télécharger le CV en français",
 ];
 
 const requiredDossierText = [
-  "Dossier de compétence freelance",
+  "De la télémétrie au diagnostic.",
+  "Trois domaines d’intervention",
   "Missions et expériences",
-  "Expert Observabilité",
-  "Lead SRE Data",
+  "Consultant Observabilité &amp; Agentic SRE",
+  "Deep Agents",
+  "Compétences et langues",
   "Formation et certifications",
 ];
 
@@ -64,7 +66,7 @@ const requiredContactText = [
 
 const requiredEnglishText = [
   "Observability Consultant",
-  "Download the capability statement",
+  "Download the English resume",
   "Missions and experience",
   "Clickable email address",
 ];

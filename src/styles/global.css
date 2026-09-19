@@ -1454,6 +1454,11 @@ h3 {
   color: var(--ink-soft);
 }
 
+.timeline-content > .technical-environment {
+  margin: 18px 0 0;
+  font-size: 0.92rem;
+}
+
 .highlight-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1513,6 +1518,36 @@ h3 {
 }
 
 .education-grid strong {
+  color: var(--ink-soft);
+}
+
+.skills-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.skills-grid .education-card:last-child {
+  grid-column: 1 / -1;
+}
+
+.language-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.language-list p {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.language-list span {
   color: var(--ink-soft);
 }
 
@@ -1706,6 +1741,7 @@ h3 {
   .preview-timeline,
   .highlight-grid,
   .education-grid,
+  .language-list,
   .article-source {
     grid-template-columns: 1fr;
   }
