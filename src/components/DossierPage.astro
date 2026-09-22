@@ -1,4 +1,5 @@
 ---
+import { missionBookingUrl } from "../data/bookings";
 import SiteFooter from "./SiteFooter.astro";
 import Topbar from "./Topbar.astro";
 import {
@@ -28,6 +29,9 @@ const pageExperiences = locale === "fr" ? experiences : experiencesEn;
 const pageEducation = locale === "fr" ? education : educationEn;
 const pageSkills = locale === "fr" ? skills : skillsEn;
 const pageLanguages = locale === "fr" ? languages : languagesEn;
+const missionBooking = locale === "fr"
+  ? { label: "Échanger sur une mission", detail: "Premier échange de 30 minutes · SRE, observabilité ou DevOps" }
+  : { label: "Discuss an engagement", detail: "30-minute introductory call · SRE, observability or DevOps" };
 ---
 
 <BaseLayout
@@ -52,6 +56,10 @@ const pageLanguages = locale === "fr" ? languages : languagesEn;
         <p>{copy.dossier.intro}</p>
       </div>
       <div class="download-actions compact" data-reveal>
+        <a class="download-link" href={missionBookingUrl} target="_blank" rel="noreferrer" data-analytics-event="site.cta_click" data-analytics-cta-id="contact_mission" data-analytics-placement="dossier_page">
+          <strong>{missionBooking.label}</strong>
+          <span>{missionBooking.detail}</span>
+        </a>
         {pageDownloads.map((download) => (
           <a class="download-link" href={download.href} target="_blank" rel="noreferrer" data-analytics-event="site.asset_download" data-analytics-asset-id={download.href.includes("CVFR") ? "dossier_fr_pdf" : "dossier_en_pdf"} data-analytics-placement="dossier_page">
             <strong>{download.label}</strong>
