@@ -25,3 +25,13 @@ backups
 *.tar
 *.tar.gz
 *.tgz
+
+# Private planning and agent working material.
+/docs/
+/content/
+/prototypes/
+/.superpowers/
+/.agents/
+/.codex/
+/.claude/
+/src/data/editorial-calendar.json

@@ -68,7 +68,7 @@ jobs:
       - name: Astro check
         run: npm run check
 
-      - name: Validate content inventory and publication calendar
+      - name: Validate content inventory and bilingual publication dates
         run: npm run check:content
 
       - name: Build static site
