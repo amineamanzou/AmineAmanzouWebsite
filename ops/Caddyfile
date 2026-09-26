@@ -7,8 +7,19 @@
   root * /srv
   encode zstd gzip
 
-  redir /articles /
-  redir /articles/ /
+  route {
+    @retiredOtelDemo host otel.amineamanzou.fr
+    redir @retiredOtelDemo https://amineamanzou.fr/consultant-opentelemetry/ 301
+
+    redir /cv https://amineamanzou.fr/dossier/ 301
+    redir /cv/ https://amineamanzou.fr/dossier/ 301
+    redir /en/cv https://amineamanzou.fr/en/dossier/ 301
+    redir /en/cv/ https://amineamanzou.fr/en/dossier/ 301
+    redir /wp-content/uploads/2026/01/AmineAmanzouFR-ExpertObservabilite.pdf https://amineamanzou.fr/downloads/amine-amanzou-dossier-competence-fr.pdf 301
+
+    redir /articles /
+    redir /articles/ /
+  }
 
   respond /healthz 200
   file_server
