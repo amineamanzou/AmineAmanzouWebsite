@@ -50,6 +50,7 @@ const proofCopy = {
   locale={locale}
   ogType="article"
   ogImage={article.data.heroImage ?? "/images/amine-amanzou-profile.jpeg"}
+  ogImageAlt={article.data.heroImageAlt}
   publishedAt={article.data.publishedAt}
   modifiedAt={article.data.modifiedAt ?? article.data.publishedAt}
   jsonLd={articleJsonLd({ article, path: pagePath, image: article.data.heroImage, site: Astro.site })}
@@ -62,7 +63,7 @@ const proofCopy = {
       <header class="article-header" data-reveal>
         <nav class="breadcrumb" aria-label={locale === "fr" ? "Fil d’Ariane" : "Breadcrumb"}><a href={blogPath}>Blog</a><span aria-hidden="true">/</span><span>{article.data.label}</span></nav>
         <p class="role-line">{article.data.label}</p><h1>{article.data.title}</h1><p>{article.data.excerpt}</p>
-        <div class="article-meta"><span>{locale === "fr" ? "Publié le" : "Published"} {formatArticleDate(article.data.publishedAt, locale)}</span>{article.data.modifiedAt && <span>{locale === "fr" ? "Mis à jour le" : "Updated"} {formatArticleDate(article.data.modifiedAt, locale)}</span>}<span>{article.data.readTime}</span></div>
+        <div class="article-meta"><a rel="author" href={locale === "fr" ? "/" : "/en/"}>Amine Amanzou</a><span>{locale === "fr" ? "Publié le" : "Published"} <time datetime={article.data.publishedAt}>{formatArticleDate(article.data.publishedAt, locale)}</time></span>{article.data.modifiedAt && <span>{locale === "fr" ? "Mis à jour le" : "Updated"} <time datetime={article.data.modifiedAt}>{formatArticleDate(article.data.modifiedAt, locale)}</time></span>}<span>{article.data.readTime}</span></div>
       </header>
 
       {article.data.heroImage && <img class="article-hero-image" src={article.data.heroImage} alt={article.data.heroImageAlt} loading="eager" decoding="async" data-reveal />}

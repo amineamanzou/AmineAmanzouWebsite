@@ -13,7 +13,7 @@ Une page d’article ne doit entrer dans `src/content/articles` qu’après rech
 ## Cadence
 
 - Brief et sources préparés quatorze jours avant la publication française.
-- Publication française le mardi, adaptation anglaise le jeudi.
+- Publication française et anglaise le même mardi, à partir du 26 septembre 2026.
 - Un artefact concret et un seul CTA vers l’offre déclarée dans `relatedOffer`.
 - Les contenus de décembre sont recherchés, validés et programmés avant les congés.
 
@@ -24,7 +24,7 @@ Les fichiers bilingues peuvent être ajoutés à `src/content/articles` et fusio
 - avant cette date, l’article n’est présent ni dans les index, ni dans le sitemap, ni dans les routes statiques ;
 - le jour prévu, le workflow `Deploy Production` reconstruit le site à `05:17 UTC` et publie les articles devenus éligibles ;
 - la comparaison utilise la date civile `Europe/Paris` ; le modèle actuel programme un jour, pas une heure précise ;
-- les deux langues peuvent avoir des dates différentes. Entre le mardi français et le jeudi anglais, seule la version française est indexée.
+- les deux langues ont la même date de publication et deviennent visibles dans le même build ; les dates historiques des articles déjà publiés restent inchangées.
 
 Pour prévisualiser localement une publication future sans modifier son frontmatter :
 
