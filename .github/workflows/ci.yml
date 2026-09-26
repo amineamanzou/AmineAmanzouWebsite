@@ -146,7 +146,7 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
-          load: false
+          load: true
           push: false
           tags: amineamanzou-website:ci
           build-args: |
@@ -156,3 +156,23 @@ jobs:
             PUBLIC_BROWSER_OBSERVABILITY_ENABLED=false
             PUBLIC_DEPLOYMENT_ENVIRONMENT=production
             PUBLIC_PRODUCT_ANALYTICS_ENABLED=false
+
+      - name: Exercise Caddy redirect contract
+        run: |
+          set -euo pipefail
+          docker run --detach --rm \
+            --name amineamanzou-redirect-smoke \
+            --publish 127.0.0.1:18080:8080 \
+            amineamanzou-website:ci
+          trap 'docker stop amineamanzou-redirect-smoke >/dev/null 2>&1 || true' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:18080/healthz >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              docker logs amineamanzou-redirect-smoke
+              exit 1
+            fi
+            sleep 1
+          done
+          npm run review:redirects -- --url=http://127.0.0.1:18080
