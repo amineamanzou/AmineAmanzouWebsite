@@ -9,7 +9,14 @@ const tags = (html, name) => [...html.matchAll(new RegExp(`<${name}\\b([^>]*)>`,
   Object.fromEntries([...match[1].matchAll(/([^\s=/>]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)]
     .map((attribute) => [attribute[1], decode(attribute[2] ?? attribute[3])])),
 );
-const text = (html) => decode(html.replace(/<[^>]*>/g, "")).trim();
+const text = (html) => {
+  let previous;
+  do {
+    previous = html;
+    html = html.replace(/<[^>]*>/g, "");
+  } while (html !== previous);
+  return decode(html).trim();
+};
 const flatten = (node) => Array.isArray(node) ? node.flatMap(flatten) : node?.["@graph"] ? node["@graph"].flatMap(flatten) : [node];
 const dist = path.resolve("dist");
 const articles = (await readdir(dist, { recursive: true })).filter((file) => /^(?:en\/)?blog\/[^/]+\/index\.html$/.test(file));
