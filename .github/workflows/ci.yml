@@ -56,6 +56,9 @@ jobs:
       - name: Build static site
         run: npm run build
 
+      - name: Verify generated SEO metadata
+        run: npm run check:seo
+
       - name: Verify browser observability is off by default
         run: npm run check:browser-observability -- --mode=off
 

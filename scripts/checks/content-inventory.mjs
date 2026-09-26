@@ -1,3 +1,4 @@
+import { publicationPairErrors, simultaneousPublicationFrom } from "./publication-policy.mjs";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
@@ -24,6 +25,7 @@ for (const file of files) {
   const article = {
     file,
     locale: field(frontmatter, "locale"),
+    publishedAt: field(frontmatter, "publishedAt"),
     slug: field(frontmatter, "articleSlug"),
     translationKey: field(frontmatter, "translationKey"),
     heroImage: field(frontmatter, "heroImage"),
@@ -44,6 +46,7 @@ for (const article of articles) {
 
 const translations = Map.groupBy(articles, (article) => article.translationKey);
 for (const [key, entries] of translations) {
+  for (const error of publicationPairErrors(entries)) failures.push(`translationKey ${key}: ${error}`);
   const locales = entries.map((entry) => entry.locale).sort().join(",");
   if (entries.length !== 2 || locales !== "en,fr") failures.push(`translationKey ${key} must have one fr and one en article; found ${locales || "none"}`);
 }
@@ -52,7 +55,9 @@ if (calendar.topics.length !== 31) failures.push(`editorial calendar must contai
 for (const [index, topic] of calendar.topics.entries()) {
   if (topic.id !== index + 1) failures.push(`editorial calendar topic at index ${index} must have id ${index + 1}`);
   if (new Date(`${topic.frDate}T00:00:00Z`).getUTCDay() !== 2) failures.push(`topic ${topic.id}: frDate must be a Tuesday`);
-  if (new Date(`${topic.enDate}T00:00:00Z`).getUTCDay() !== 4) failures.push(`topic ${topic.id}: enDate must be a Thursday`);
+  if (topic.frDate >= simultaneousPublicationFrom || topic.enDate >= simultaneousPublicationFrom) {
+    if (topic.enDate !== topic.frDate) failures.push(`topic ${topic.id}: French and English dates must match`);
+  }
   if (!knownOffers.has(topic.relatedOffer)) failures.push(`topic ${topic.id}: unknown relatedOffer ${topic.relatedOffer}`);
   if (!topic.artifact?.trim()) failures.push(`topic ${topic.id}: artifact is required`);
 }
