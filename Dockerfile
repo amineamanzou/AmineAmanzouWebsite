@@ -16,7 +16,7 @@ ARG PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
 ARG PUBLIC_ANALYTICS_SITE_NAME=amineamanzou.fr
 
 COPY package.json package-lock.json* ./
-RUN npm ci && npm audit --omit=dev --audit-level=high
+RUN npm ci && npm audit --audit-level=moderate
 
 COPY astro.config.mjs tsconfig.json ./
 COPY public ./public

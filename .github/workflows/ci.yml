@@ -44,8 +44,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Reject high or critical production dependency vulnerabilities
-        run: npm audit --omit=dev --audit-level=high
+      - name: Reject moderate or higher dependency vulnerabilities
+        run: npm audit --audit-level=moderate
 
       - name: Astro check
         run: npm run check
