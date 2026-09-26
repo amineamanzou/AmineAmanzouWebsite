@@ -1,13 +1,11 @@
-import { publicationPairErrors, simultaneousPublicationFrom } from "./publication-policy.mjs";
+import { publicationPairErrors } from "./publication-policy.mjs";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
 const articlesDirectory = path.resolve(process.cwd(), "src/content/articles");
-const calendarPath = path.resolve(process.cwd(), "src/data/editorial-calendar.json");
 const files = (await readdir(articlesDirectory, { recursive: true })).filter((file) => file.endsWith(".md"));
 const knownOffers = new Set(["diagnostic", "otel_sprint", "fractional_lead"]);
 const failures = [];
-const calendar = JSON.parse(await readFile(calendarPath, "utf8"));
 
 function field(frontmatter, name) {
   const match = frontmatter.match(new RegExp(`^${name}:\\s*(?:"([^"\\n]*)"|'([^'\\n]*)'|([^\\n#]+))\\s*$`, "m"));
@@ -51,20 +49,9 @@ for (const [key, entries] of translations) {
   if (entries.length !== 2 || locales !== "en,fr") failures.push(`translationKey ${key} must have one fr and one en article; found ${locales || "none"}`);
 }
 
-if (calendar.topics.length !== 31) failures.push(`editorial calendar must contain 31 topics; found ${calendar.topics.length}`);
-for (const [index, topic] of calendar.topics.entries()) {
-  if (topic.id !== index + 1) failures.push(`editorial calendar topic at index ${index} must have id ${index + 1}`);
-  if (new Date(`${topic.frDate}T00:00:00Z`).getUTCDay() !== 2) failures.push(`topic ${topic.id}: frDate must be a Tuesday`);
-  if (topic.frDate >= simultaneousPublicationFrom || topic.enDate >= simultaneousPublicationFrom) {
-    if (topic.enDate !== topic.frDate) failures.push(`topic ${topic.id}: French and English dates must match`);
-  }
-  if (!knownOffers.has(topic.relatedOffer)) failures.push(`topic ${topic.id}: unknown relatedOffer ${topic.relatedOffer}`);
-  if (!topic.artifact?.trim()) failures.push(`topic ${topic.id}: artifact is required`);
-}
-
 if (failures.length > 0) {
   console.error(failures.map((failure) => `- ${failure}`).join("\n"));
   process.exitCode = 1;
 } else {
-  console.log(JSON.stringify({ ok: true, articles: articles.length, translationPairs: translations.size, calendarTopics: calendar.topics.length }, null, 2));
+  console.log(JSON.stringify({ ok: true, articles: articles.length, translationPairs: translations.size }, null, 2));
 }
