@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@hyperdx/browser": "0.26.0",
-    "posthog-js": "1.434.12"
+    "posthog-js": "1.435.5"
   },
   "overrides": {
     "@hyperdx/otel-web-session-recorder": {
