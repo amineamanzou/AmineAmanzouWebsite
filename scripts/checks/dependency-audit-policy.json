@@ -1,0 +1,11 @@
+{
+  "package": "http-cache-semantics",
+  "version": "4.2.0",
+  "advisory": "https://github.com/advisories/GHSA-ch52-4w7c-c8xp",
+  "expiresAt": "2026-10-17T22:00:00.000Z",
+  "context": {
+    "config": "2ebece831284fb190fd1a16e44e0055b096d48a14dadb15e2c621ff0dc14254d",
+    "runtime": "46c4c124bede790a4c3d0f0217f90a259d7b7ca17259ed515c077efba4aa64e3",
+    "remoteImages": "f373fa76e3112446db327c79b34e2bbb1ef1dcad41affb60788adf30edc9588e"
+  }
+}

@@ -16,7 +16,10 @@ ARG PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
 ARG PUBLIC_ANALYTICS_SITE_NAME=amineamanzou.fr
 
 COPY package.json package-lock.json* ./
-RUN npm ci && npm audit --audit-level=moderate
+COPY scripts/checks/dependency-audit* ./scripts/checks/
+COPY astro.config.mjs Dockerfile ./
+COPY ops/Caddyfile ./ops/Caddyfile
+RUN npm ci && npm run audit:dependencies
 
 COPY astro.config.mjs tsconfig.json ./
 COPY public ./public

@@ -22,7 +22,8 @@
     "review:cv": "node scripts/qa/cv-sync-smoke.mjs",
     "review:commercial": "node scripts/qa/commercial-pages-smoke.mjs",
     "review:product-analytics": "node scripts/qa/product-analytics-smoke.mjs",
-    "review:observability": "node scripts/qa/browser-observability-actions-smoke.mjs"
+    "review:observability": "node scripts/qa/browser-observability-actions-smoke.mjs",
+    "audit:dependencies": "node scripts/checks/dependency-audit.mjs"
   },
   "dependencies": {
     "@hyperdx/browser": "0.26.0",
