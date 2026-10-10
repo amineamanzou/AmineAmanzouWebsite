@@ -28,7 +28,8 @@ export function evaluateAudit({ report, policy, lock, context, now = new Date() 
       && finding.via[0].severity === "high" && finding.via[0].url === policy.advisory
       && installed?.version === policy.version && installed.dev === true
       && now.getTime() < Date.parse(policy.expiresAt)
-      && record(context) && Object.keys(policy.context).every((key) => context[key] === policy.context[key]);
+      && record(context) && ["config", "runtime", "remoteImages"].every((key) =>
+        typeof policy.context?.[key] === "string" && policy.context[key].length > 0 && context[key] === policy.context[key]);
     if (scoped) accepted.push(`${name}@${policy.version}: ${policy.advisory}; expires ${policy.expiresAt}`);
     else blockers.push(`${name}: ${finding.severity} (not covered by the temporary exception)`);
   }

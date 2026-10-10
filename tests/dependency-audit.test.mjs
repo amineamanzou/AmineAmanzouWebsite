@@ -62,3 +62,10 @@ test("reports low findings without blocking them", () => {
   const low = { name: "dompurify", severity: "low", nodes: ["node_modules/dompurify"], via: [{ severity: "low", url: "https://github.com/advisories/GHSA-low" }] };
   assert.equal(run(report({ "http-cache-semantics": finding, dompurify: low })).ok, true);
 });
+
+test("rejects an incomplete exception policy instead of accepting an empty fingerprint set", () => {
+  for (const invalid of [{ ...policy, context: {} }, { ...policy, context: { config: context.config } },
+    { ...policy, context: { ...context, runtime: "" } }]) {
+    assert.equal(run(report(), { policy: invalid }).ok, false);
+  }
+});
