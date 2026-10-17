@@ -151,7 +151,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
-          # Re-run the date-sensitive audit in the Node build stage.
+          # Query current advisories in the Node build stage on every image build.
           no-cache-filters: build
           context: .
           load: true

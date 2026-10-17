@@ -1,32 +1,18 @@
 # Dependency audit policy
 
 CI, production image publication and Docker builds use `npm run audit:dependencies`.
-The full npm audit report remains visible. Every moderate, high or critical finding
-blocks the build unless it satisfies the exact temporary exception below. Registry
-errors, malformed reports and missing review context fail closed.
+The command audits both production and development dependencies and preserves the
+full npm audit report in the build log. Every moderate, high or critical finding
+blocks the build. Info and low findings remain visible without blocking it.
+There are no package or advisory exceptions.
 
-## Temporary build-only acceptance
+Registry errors, malformed reports and audit process failures fail closed. Tests
+cover severity enforcement, invalid reports and the command's exit behavior.
 
-- Advisory: https://github.com/advisories/GHSA-ch52-4w7c-c8xp (CVE-2026-93748).
-- Package: `http-cache-semantics`, exactly `4.2.0`, at
-  `node_modules/http-cache-semantics`, marked as a development dependency.
-- Accepted severity: high; no other advisory on this package is exempted.
-- Reviewed use: Astro 7.3.5 remote-image cache during static site generation.
-  The production image runs Caddy and copies only the generated site from the
-  Node build stage. It does not run this package or expose its HTTP cache to visitors.
-- The static Astro configuration, final Docker stage/Caddy configuration and
-  installed Astro remote-image implementation are fingerprinted. Changes invalidate
-  the exception and require a new exposure review; production dependency use is rejected.
-- Residual risk: the dependency remains flagged during builds. This is a temporary
-  risk acceptance, not a claim that the upstream vulnerability is fixed.
-- Expires at **2026-10-18 00:00 Europe/Paris** (`2026-10-17T22:00:00Z`), after
-  the October 17 review day. If the advisory remains, the gate then fails automatically.
-  No automatic renewal is permitted. If the finding is fixed or withdrawn, the normal
-  gate can pass without using the exception.
+Image workflows disable caching for the Node build stage so each image build
+queries the current advisory database. Local image verification must also use
+`docker build --no-cache`.
 
-The exception is recorded in `scripts/checks/dependency-audit-policy.json` and
-regression-tested for expiration, scope changes and unrelated vulnerabilities.
-October 17 is a review date, not an announced upstream release date.
-
-Image workflows disable caching for the Node build stage so a cached audit cannot
-outlive its acceptance. Local image verification must also use `docker build --no-cache`.
+A clean npm report means the resolved versions are outside the affected ranges
+currently reported by npm. It does not by itself prove that a particular advisory
+has been fixed or officially withdrawn; verify that separately with upstream sources.
