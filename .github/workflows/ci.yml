@@ -184,3 +184,12 @@ jobs:
             sleep 1
           done
           npm run review:redirects -- --url=http://127.0.0.1:18080
+
+      - name: Scan the final image with the production vulnerability policy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: amineamanzou-website:ci
+          format: table
+          severity: CRITICAL
+          vuln-type: os,library
+          exit-code: "1"
