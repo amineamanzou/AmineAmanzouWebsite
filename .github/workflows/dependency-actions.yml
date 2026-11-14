@@ -1,0 +1,99 @@
+name: Dependency Actions validation
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/**
+
+permissions:
+  contents: read
+
+jobs:
+  actions-smoke:
+    name: Dependency Actions isolated smoke
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          submodules: false
+
+      - name: Prepare a disposable authenticated registry
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/dependency-registry" "$RUNNER_TEMP/dependency-fixture"
+          command -v htpasswd >/dev/null || sudo apt-get install -y apache2-utils
+          FIXTURE_PASSWORD="$(openssl rand -hex 24)"
+          printf '::add-mask::%s\n' "$FIXTURE_PASSWORD"
+          printf 'FIXTURE_PASSWORD=%s\n' "$FIXTURE_PASSWORD" >> "$GITHUB_ENV"
+          htpasswd -Bbn fixture "$FIXTURE_PASSWORD" > "$RUNNER_TEMP/dependency-registry/htpasswd"
+          docker run --detach --name dependency-registry --publish 127.0.0.1:5000:5000 \
+            --volume "$RUNNER_TEMP/dependency-registry:/auth:ro" \
+            --env REGISTRY_AUTH=htpasswd \
+            --env REGISTRY_AUTH_HTPASSWD_REALM=Fixture \
+            --env REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
+            docker.io/library/registry@sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373
+          printf 'FROM scratch\nCOPY proof.txt /proof.txt\n' > "$RUNNER_TEMP/dependency-fixture/Dockerfile"
+          printf 'synthetic dependency validation\n' > "$RUNNER_TEMP/dependency-fixture/proof.txt"
+          curl --fail --silent --show-error --retry 10 --retry-connrefused \
+            --user "fixture:$FIXTURE_PASSWORD" http://127.0.0.1:5000/v2/
+
+      - name: Authenticate to the disposable registry
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550
+        with:
+          registry: localhost:5000
+          username: fixture
+          password: ${{ env.FIXTURE_PASSWORD }}
+
+      - name: Push a synthetic image
+        id: fixture
+        run: |
+          set -euo pipefail
+          docker build --tag localhost:5000/dependency-smoke:fixture "$RUNNER_TEMP/dependency-fixture"
+          docker push localhost:5000/dependency-smoke:fixture
+          digest="$(docker inspect --format '{{index .RepoDigests 0}}' localhost:5000/dependency-smoke:fixture)"
+          [[ "$digest" =~ ^localhost:5000/dependency-smoke@sha256:[a-f0-9]{64}$ ]]
+          printf 'image=%s\n' "$digest" >> "$GITHUB_OUTPUT"
+          docker pull "$digest"
+
+      - name: Install the proposed Cosign release
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532
+        with:
+          cosign-release: v3.1.4
+
+      - name: Sign and verify the synthetic image
+        env:
+          COSIGN_PASSWORD: ""
+          IMAGE_REF: ${{ steps.fixture.outputs.image }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/dependency-fixture"
+          cosign generate-key-pair
+          cosign signing-config create --out signing-config.json
+          cosign sign --yes --key cosign.key --signing-config signing-config.json --allow-insecure-registry "$IMAGE_REF"
+          cosign verify --key cosign.pub --insecure-ignore-tlog --allow-insecure-registry "$IMAGE_REF" > signature.json
+          jq --exit-status 'length > 0' signature.json
+          node -e 'require("node:fs").writeFileSync(process.env.RUNNER_TEMP + "/dependency-smoke.sarif", JSON.stringify({version:"2.1.0", runs:[{tool:{driver:{name:"dependency-action-smoke",version:"1.0.0"}},results:[]}]}))'
+
+      - name: Upload the synthetic SARIF
+        id: sarif
+        uses: github/codeql-action/upload-sarif@0911ee96d2d6c8def97122c36c5cadd93829a4b4
+        with:
+          sarif_file: ${{ runner.temp }}/dependency-smoke.sarif
+          category: dependency-action-smoke
+          wait-for-processing: true
+
+      - name: Confirm SARIF processing
+        env:
+          SARIF_ID: ${{ steps.sarif.outputs.sarif-id }}
+        run: test -n "$SARIF_ID"
+
+      - name: Stop the disposable registry
+        if: always()
+        run: docker rm --force dependency-registry >/dev/null 2>&1 || true
