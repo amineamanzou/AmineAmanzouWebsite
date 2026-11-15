@@ -17,7 +17,7 @@ function flag(value, fallback) { if (value===undefined || value==='') return fal
 function origin(value) { const url=new URL(value); if(url.protocol!=='https:'||url.username||url.password) throw new Error('Expected public HTTPS origin'); return url.origin; }
 export function productionConfiguration(input={}) {
   const rum=flag(input.browserObservability,false), analytics=flag(input.productAnalytics,true);
-  return {siteUrl:'https://amineamanzou.fr',basePath:'/',deploymentEnvironment:'production',browserObservabilityEnabled:rum,productAnalyticsEnabled:analytics,browserObservabilityOrigin:rum?origin(input.browserObservabilityUrl):'',browserPublicKeySha256:sha256(rum?'browser-public':''),posthogOrigin:'https://eu.i.posthog.com',posthogPublicKeySha256:sha256(analytics?(input.posthogKey??''):'')};
+  return {siteUrl:'https://amineamanzou.fr',basePath:'/',deploymentEnvironment:'production',browserObservabilityEnabled:rum,productAnalyticsEnabled:analytics,browserObservabilityOrigin:rum?origin(input.browserObservabilityUrl):'',browserEndpointSha256:sha256(rum?input.browserObservabilityUrl:''),browserPublicKeySha256:sha256(rum?'browser-public':''),posthogOrigin:'https://eu.i.posthog.com',posthogPublicKeySha256:sha256(analytics?(input.posthogKey??''):'')};
 }
 export function configurationHash(configuration) {return sha256(JSON.stringify(configuration));}
 export function releaseMetadata(env, directory='dist') {

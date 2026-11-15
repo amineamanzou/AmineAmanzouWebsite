@@ -135,3 +135,16 @@ for (const field of ['taskId','candidateId']) {
     assert.throws(()=>verify(envelope(p)),/identity/i);
   });
 }
+
+test('RUM configuration identity binds the full endpoint without publishing its URL',()=>{
+  const endpoint='https://otel.example.test/collect?route=private-value';
+  const config=url=>candidate.productionConfiguration({browserObservability:true,browserObservabilityUrl:url});
+  const original=config(endpoint);
+  assert.equal(original.browserEndpointSha256,candidate.sha256(endpoint));
+  assert.ok(!JSON.stringify(original).includes('private-value'));
+  for(const changed of ['https://otel.example.test/other?route=private-value','https://otel.example.test/collect?route=changed']) {
+    assert.equal(config(changed).browserObservabilityOrigin,original.browserObservabilityOrigin);
+    assert.notEqual(candidate.configurationHash(config(changed)),candidate.configurationHash(original));
+  }
+  assert.equal(candidate.configurationHash(candidate.productionConfiguration({browserObservability:false,browserObservabilityUrl:endpoint})),candidate.configurationHash(candidate.productionConfiguration({browserObservability:false,browserObservabilityUrl:'https://otel.example.test/other'})));
+});
