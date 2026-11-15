@@ -64,8 +64,9 @@ async function browserChecks(config) {
     for (const width of [390, 1440]) {
       const context = await browser.newContext({ serviceWorkers: 'block', viewport: { width, height: 900 },
         extraHTTPHeaders: { 'X-Staging-Session': config.sessionId, 'Cache-Control': 'no-cache' } });
+      const guardedRequests = new Set();
       try {
-        await context.route('**/*', async route => {
+        const guardRequest = async route => {
           const request = route.request();
           if (!permitBrowserRequest(config.origin, request.url(), request.method())) {
             forbidden.push(`${request.method()} ${new URL(request.url()).origin}`);
@@ -85,6 +86,11 @@ async function browserChecks(config) {
             errors.push(`Guarded request failed: ${new URL(request.url()).pathname}`);
             await route.abort();
           } finally { await upstream?.dispose(); }
+        };
+        await context.route('**/*', route => {
+          const pending = guardRequest(route);
+          guardedRequests.add(pending);
+          return pending.finally(() => guardedRequests.delete(pending));
         });
         await context.routeWebSocket('**/*', socket => { forbidden.push('websocket'); socket.close(); });
         const page = await context.newPage();
@@ -115,7 +121,22 @@ async function browserChecks(config) {
         await page.waitForURL(`${config.origin}/en/`);
         assert.equal(await page.locator('html').getAttribute('lang'), 'en', 'Locale navigation failed');
         assert.equal(await page.evaluate(() => navigator.serviceWorker.controller), null, 'Service worker controls the session');
-      } finally { await context.close(); }
+      } finally {
+        let drainTimeout;
+        try {
+          // Navigation load can finish while a guarded favicon fetch is still active.
+          // Keep the guard installed until all active handlers finish, including
+          // response validation and disposal, before closing their request context.
+          await Promise.race([
+            (async () => {
+              while (guardedRequests.size) await Promise.all([...guardedRequests]);
+            })(),
+            new Promise((_, reject) => {
+              drainTimeout = setTimeout(() => reject(new Error('Timed out draining guarded browser requests')), 25_000);
+            }),
+          ]);
+        } finally { clearTimeout(drainTimeout); await context.close(); }
+      }
     }
     assert.ok(assets.size > 0, 'No browser assets checked');
     assert.deepEqual(forbidden, [], 'Privacy boundary: external or mutating browser request');

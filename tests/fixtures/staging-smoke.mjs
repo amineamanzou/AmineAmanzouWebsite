@@ -9,7 +9,8 @@ import { stagingConfig, runStagingSmoke, requiredChecks } from '../../scripts/qa
 const fixtureRoot = await mkdtemp(join(tmpdir(), 'website-staging-fixture-'));
 await cp(resolve('dist'), fixtureRoot, { recursive: true });
 const sessionId = 'c'.repeat(32), sourceSha = 'a'.repeat(40), releaseDigest = 'b'.repeat(64);
-let failure = '', authenticated = 0, identityReads = 0;
+let failure = 'delayed-favicon', authenticated = 0, identityReads = 0;
+let delayedFaviconsStarted = 0, delayedFaviconsCompleted = 0;
 const externalRequests = [];
 const external = createServer((req, res) => {
   externalRequests.push({ url: req.url, headers: req.headers });
@@ -37,6 +38,12 @@ const server = createServer(async (req, res) => {
     res.end(JSON.stringify(value)); return;
   }
   if (path === '/redirected.js') { res.writeHead(302, { Location: externalUrl }); res.end(); return; }
+  if (path === '/favicon.ico' && req.url.includes('locale-navigation')) {
+    delayedFaviconsStarted++;
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    if (!res.destroyed) delayedFaviconsCompleted++;
+    if (failure === 'favicon') { res.writeHead(404); res.end('Synthetic missing favicon'); return; }
+  }
   const file = resolve(fixtureRoot, `.${path}${path.endsWith('/') ? 'index.html' : ''}`);
   try {
     assert.ok(file.startsWith(fixtureRoot + '/'));
@@ -48,6 +55,12 @@ const server = createServer(async (req, res) => {
     if (failure === 'websocket' && type === 'text/html') content = Buffer.from(content.toString().replace('</head>', `<script>new WebSocket('${externalUrl.replace('http:', 'ws:')}')</script></head>`));
     if (failure === 'redirect' && type === 'text/html') content = Buffer.from(content.toString().replace('</head>', '<script src="/redirected.js"></script></head>'));
     if (failure === 'external' && type === 'text/html') content = Buffer.from(content.toString().replace('</head>', '<script src="https://external.example.test/private.js"></script></head>'));
+    // Only the final locale click carries the home-page referrer. Keep its request
+    // active beyond load so closing the context early cancels a healthy response.
+    if (['delayed-favicon', 'favicon'].includes(failure) && path === '/en/' &&
+        req.headers.referer === `http://127.0.0.1:${server.address().port}/`) {
+      content = Buffer.from(content.toString().replace('</head>', '<script>fetch("/favicon.ico?locale-navigation=1")</script></head>'));
+    }
     res.end(content);
   } catch { res.writeHead(404); res.end('not found'); }
 });
@@ -61,7 +74,10 @@ try {
   assert.deepEqual(good.counts, { passed: requiredChecks.length, failed: 0, skipped: 0 });
   assert.deepEqual(good.identityAfter, good.identity);
   assert.ok(authenticated > 30);
-  const cases = process.env.STAGING_FIXTURE_CASES?.split(',') || ['identity', 'browser', 'external', 'redirect', 'websocket', 'config-drift', 'dataset-drift'];
+  assert.equal(delayedFaviconsStarted, 2, 'Each viewport must exercise a delayed final-navigation favicon');
+  assert.equal(delayedFaviconsCompleted, 2, 'Healthy favicon responses must finish before context teardown');
+  console.log('Fixture delayed-favicon: accepted after both pending responses completed');
+  const cases = process.env.STAGING_FIXTURE_CASES?.split(',') || ['identity', 'browser', 'external', 'redirect', 'websocket', 'config-drift', 'dataset-drift', 'favicon'];
   for (failure of cases) {
     identityReads = 0; externalRequests.length = 0;
     const bad = await runStagingSmoke({ ...config, reportPath: config.reportPath.replace('.json', `-${failure}.json`) });
@@ -75,6 +91,7 @@ try {
     }
     if (['redirect', 'websocket'].includes(failure)) assert.match(bad.error, /Privacy boundary/);
     if (failure === 'identity') assert.match(bad.error, /identity mismatch/);
+    if (failure === 'favicon') assert.match(bad.error, /HTTP 404: \/favicon\.ico/);
     if (failure === 'browser') assert.match(bad.error, /Browser JavaScript/);
     if (failure === 'external') assert.match(bad.error, /Privacy boundary/);
     console.log(`Fixture ${failure}: rejected, no external requests, no skips`);
