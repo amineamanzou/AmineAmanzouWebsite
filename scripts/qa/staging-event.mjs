@@ -16,7 +16,7 @@ if (metadata && (metadata.schemaVersion !== 1 || metadata.sourceSha !== GITHUB_S
 const payload = metadata ? {variant:metadata.variant,publicationDate:metadata.publicationDate,treeSha:metadata.treeSha,configurationSha256:metadata.configurationSha256,configuration:metadata.configuration,releaseMetadata:metadata,buildAttempt:metadata.buildAttempt} : undefined;
 const timestamp = new Date().toISOString();
 process.stdout.write(JSON.stringify({
-  schemaVersion: '2.0', payload, eventType: 'staging-deploy', environment: 'staging',
+  schemaVersion: '2.0', ...payload, eventType: 'staging-deploy', environment: 'staging',
   repository: GITHUB_REPOSITORY, workflow: 'Build and Deploy Staging', job: 'release',
   runId: GITHUB_RUN_ID, sourceRunId: GITHUB_RUN_ID, runAttempt: GITHUB_RUN_ATTEMPT,
   version: JSON.parse(readFileSync(new URL('../../package.json', import.meta.url))).version,

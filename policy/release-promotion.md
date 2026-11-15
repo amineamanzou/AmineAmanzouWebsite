@@ -10,7 +10,10 @@ A qualification is an Ed25519 envelope with schema version 1. The signature
 covers the decoded payload bytes without reserialization. The pinned public
 verification key is `promotion-qualification-public.pem`; private signing
 material is never stored in this repository. Qualification tags contain only
-`qualification.json`. They expire within two hours and cannot authorize a
+`qualification.json`. Task and candidate IDs are exactly 32 lowercase hex
+characters. Signed timestamps use valid UTC calendar dates in the canonical
+second-precision form `YYYY-MM-DDTHH:MM:SSZ`; fractional seconds and alternate
+offsets are rejected. They expire within two hours and cannot authorize a
 release on another Paris calendar date.
 
 The main publisher verifies the signature, test and performance budgets,
@@ -26,3 +29,12 @@ pushes and manual runs without `qualification_ref` produce a
 `factory-promotion-request` artifact. Requests retain the requested analytics
 and observability flags. Defaults are analytics enabled and observability
 disabled. Only a valid qualification can publish the resulting release.
+
+CI/CD artifact metadata fields are at the raw event's top level. Candidate events
+include `variant`, `publicationDate`, `treeSha`, `configurationSha256`,
+`configuration`, `releaseMetadata` and `buildAttempt`. Production events include
+`factoryPromotion`; their top-level `runId` and `runAttempt` identify the main
+publication, while `factoryPromotion.buildRunId` and
+`factoryPromotion.buildAttempt` identify the
+original candidate build. Consumers can wrap the entire raw event as their
+normalized payload without introducing another nested payload layer.

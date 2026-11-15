@@ -15,16 +15,16 @@ export function verifyQualification(envelope,{publicKey,now=new Date(),configura
   requireValue(signature.length===64&&verify(null,bytes,publicKey,signature),'Invalid qualification signature');
   const q=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
   exactKeys(q,['kind','repository','taskId','candidateId','mode','devSha','baseSha','candidateSha','treeSha','imageRef','buildRunId','buildAttempt','sourceRef','publicationDate','configurationSha256','recipeSha256','evidenceSha256','issuedAt','expiresAt','e2e','perf','staging','review'],'qualification');
-  requireValue(q.kind==='factory.website.qualification.v1'&&q.repository===REPOSITORY&&typeof q.taskId==='string'&&/^[a-zA-Z0-9_-]{1,128}$/.test(q.taskId)&&id.test(q.candidateId)&&['code','dated'].includes(q.mode),'Invalid qualification identity');
+  requireValue(q.kind==='factory.website.qualification.v1'&&q.repository===REPOSITORY&&id.test(q.taskId)&&id.test(q.candidateId)&&['code','dated'].includes(q.mode),'Invalid qualification identity');
   for(const field of ['devSha','baseSha','candidateSha','treeSha'])requireValue(sha.test(q[field]),`Invalid ${field}`);
   for(const field of ['configurationSha256','recipeSha256','evidenceSha256'])requireValue(hash.test(q[field]),`Invalid ${field}`);
   requireValue(q.imageRef.startsWith(`${IMAGE_NAME}@sha256:`)&&hash.test(q.imageRef.slice(`${IMAGE_NAME}@sha256:`.length)),'Invalid image subject');
   requireValue(typeof q.buildRunId==='string'&&run.test(q.buildRunId)&&Number.isSafeInteger(q.buildAttempt)&&q.buildAttempt>0,'Invalid build run/attempt');
   requireValue(q.sourceRef===`refs/heads/codex/factory-promotion/${q.candidateId}`,'Invalid candidate source ref');
   if(qualificationRef!==undefined)requireValue(qualificationRef===`factory-qualification/${q.candidateId}`,'Qualification tag mismatch');
-  const time=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
+  const canonicalUtc = value => typeof value==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(value)&&Number.isFinite(Date.parse(value))&&new Date(value).toISOString()===value.slice(0,-1)+'.000Z';
   const issued=Date.parse(q.issuedAt),expires=Date.parse(q.expiresAt);
-  requireValue(time.test(q.issuedAt)&&time.test(q.expiresAt)&&Number.isFinite(issued)&&Number.isFinite(expires)&&issued<=now.getTime()&&expires>issued&&expires-issued<=7200000,'Invalid qualification validity interval');
+  requireValue(canonicalUtc(q.issuedAt)&&canonicalUtc(q.expiresAt)&&Number.isFinite(issued)&&Number.isFinite(expires)&&issued<=now.getTime()&&expires>issued&&expires-issued<=7200000,'Invalid qualification validity interval');
   requireValue(now.getTime()<expires,'Qualification expired');
   requireValue(q.publicationDate===parisDate(now)&&q.publicationDate===parisDate(new Date(issued)),'Qualification publication date mismatch');
   if(configurationSha256!==undefined)requireValue(q.configurationSha256===configurationSha256,'Qualification configuration mismatch');
@@ -55,6 +55,14 @@ export function verifyBuildProvenance(results,q) {
     return s?.predicateType==='https://slsa.dev/provenance/v1'&&s.subject?.some(s=>s.name===IMAGE_NAME&&s.digest?.sha256===q.imageRef.split('sha256:')[1])&&w?.repository===`https://github.com/${REPOSITORY}`&&w?.path==='.github/workflows/build-staging.yml'&&w?.ref===q.sourceRef&&b?.resolvedDependencies?.some(d=>d.uri===`git+https://github.com/${REPOSITORY}@${q.sourceRef}`&&d.digest?.gitCommit===q.candidateSha)&&p?.runDetails?.metadata?.invocationId===`https://github.com/${REPOSITORY}/actions/runs/${q.buildRunId}/attempts/${q.buildAttempt}`;
   }); requireValue(ok,'Original candidate provenance subject/ref/source/run/attempt mismatch');
 }
+export function verifyBuildEvent(event,q) {
+  const metadata=event.releaseMetadata;
+  requireValue(event.repository===REPOSITORY&&event.sha===q.candidateSha&&event.ref===q.sourceRef&&event.runId===q.buildRunId&&Number(event.runAttempt)===q.buildAttempt&&event.imageRef===q.imageRef&&event.conclusion==='success','Original build event identity mismatch');
+  requireValue(event.variant==='production'&&event.publicationDate===q.publicationDate&&event.treeSha===q.treeSha&&event.configurationSha256===q.configurationSha256&&event.buildAttempt===q.buildAttempt,'Original build event configuration mismatch');
+  requireValue(metadata?.schemaVersion===1&&metadata.variant==='production'&&metadata.sourceSha===q.candidateSha&&metadata.treeSha===q.treeSha&&metadata.buildRunId===q.buildRunId&&metadata.buildAttempt===q.buildAttempt&&metadata.publicationDate===q.publicationDate&&metadata.configurationSha256===q.configurationSha256,'Original image metadata mismatch');
+  requireValue(configurationHash(event.configuration)===q.configurationSha256&&configurationHash(metadata.configuration)===q.configurationSha256,'Original build configuration hash mismatch');
+  return metadata;
+}
 export function promotionPredicate(envelope, qualification, {releaseSha,releaseRunId,releaseAttempt}) {
   requireValue(sha.test(releaseSha)&&typeof releaseRunId==='string'&&run.test(releaseRunId)&&Number.isSafeInteger(releaseAttempt)&&releaseAttempt>0,'Invalid main publication identity');
   requireValue(qualification.imageRef.startsWith(`${IMAGE_NAME}@sha256:`),'Invalid promotion subject');
@@ -81,8 +89,7 @@ function runCli(command){
     const preliminary=verifyQualification(envelope,{publicKey:readFileSync('policy/promotion-qualification-public.pem'),qualificationRef:ref});
     if(command==='prepare')execFileSync('gh',['run','download',preliminary.buildRunId,'--repo',REPOSITORY,'--name','cicd-event-staging','--dir','original-build'],{stdio:'pipe'});
     const event=JSON.parse(readFileSync('original-build/cicd-event-staging.json','utf8'));
-    const metadata=event.payload?.releaseMetadata;
-    requireValue(event.repository===REPOSITORY&&event.sha===preliminary.candidateSha&&event.ref===preliminary.sourceRef&&event.runId===preliminary.buildRunId&&Number(event.runAttempt)===preliminary.buildAttempt&&event.imageRef===preliminary.imageRef&&event.conclusion==='success'&&metadata?.variant==='production'&&metadata.sourceSha===preliminary.candidateSha&&metadata.treeSha===preliminary.treeSha&&metadata.buildRunId===preliminary.buildRunId&&metadata.buildAttempt===preliminary.buildAttempt&&metadata.publicationDate===preliminary.publicationDate,'Original build event/metadata mismatch');
+    const metadata=verifyBuildEvent(event,preliminary);
     const config=productionConfiguration({browserObservability:metadata.configuration.browserObservabilityEnabled,productAnalytics:metadata.configuration.productAnalyticsEnabled,browserObservabilityUrl:process.env.PUBLIC_BROWSER_OBSERVABILITY_URL,posthogKey:process.env.PUBLIC_POSTHOG_KEY});
     requireValue(configurationHash(metadata.configuration)===configurationHash(config)&&metadata.configurationSha256===preliminary.configurationSha256,'Current configuration drift');
     const q=verifyQualification(envelope,{publicKey:readFileSync('policy/promotion-qualification-public.pem'),qualificationRef:ref,configurationSha256:configurationHash(config)});

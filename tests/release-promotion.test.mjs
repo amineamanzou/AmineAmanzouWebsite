@@ -11,7 +11,7 @@ const { publicKey, privateKey } = generateKeyPairSync('ed25519');
 const sha = n => String(n).repeat(40);
 const hash = 'a'.repeat(64);
 const now = new Date('2026-11-15T12:00:00Z');
-function payload() { return { kind: 'factory.website.qualification.v1', repository: 'amineamanzou/AmineAmanzouWebsite', taskId: 'task-1', candidateId: 'b'.repeat(32), mode: 'code', devSha: sha(1), baseSha: sha(2), candidateSha: sha(3), treeSha: sha(4), imageRef: `ghcr.io/amineamanzou/amineamanzou-website@sha256:${hash}`, buildRunId: '1234', buildAttempt: 2, sourceRef: `refs/heads/codex/factory-promotion/${'b'.repeat(32)}`, publicationDate: '2026-11-15', configurationSha256: hash, recipeSha256: hash, evidenceSha256: hash, issuedAt: '2026-11-15T11:00:00Z', expiresAt: '2026-11-15T13:00:00Z', e2e: {passed:14,failed:0,skipped:0}, perf:{requests:120,errors:0,p95Ms:115,lcpMaxMs:1000,clsMax:0,payloadMaxBytes:100000}, staging:{released:true,idle:true}, review:{model:'gpt-6.1-sol',effort:'high',verdict:'approved',headSha:sha(3)} }; }
+function payload() { return { kind: 'factory.website.qualification.v1', repository: 'amineamanzou/AmineAmanzouWebsite', taskId: 'c'.repeat(32), candidateId: 'b'.repeat(32), mode: 'code', devSha: sha(1), baseSha: sha(2), candidateSha: sha(3), treeSha: sha(4), imageRef: `ghcr.io/amineamanzou/amineamanzou-website@sha256:${hash}`, buildRunId: '1234', buildAttempt: 2, sourceRef: `refs/heads/codex/factory-promotion/${'b'.repeat(32)}`, publicationDate: '2026-11-15', configurationSha256: hash, recipeSha256: hash, evidenceSha256: hash, issuedAt: '2026-11-15T11:00:00Z', expiresAt: '2026-11-15T13:00:00Z', e2e: {passed:14,failed:0,skipped:0}, perf:{requests:120,errors:0,p95Ms:115,lcpMaxMs:1000,clsMax:0,payloadMaxBytes:100000}, staging:{released:true,idle:true}, review:{model:'gpt-6.1-sol',effort:'high',verdict:'approved',headSha:sha(3)} }; }
 function envelope(p = payload()) { const bytes = Buffer.from(JSON.stringify(p)); return {schemaVersion:1,payload:bytes.toString('base64'),signature:sign(null,bytes,privateKey).toString('base64')}; }
 function verify(e, options={}) { return qualification.verifyQualification(e,{publicKey, now, ...options}); }
 test('production configuration defaults preserve analytics and freeze a validated date', () => {
@@ -94,4 +94,38 @@ test('signed promotion predicate preserves original build identity and digest',(
   const e=envelope(),q=verify(e);const result=qualification.promotionPredicate(e,q,{releaseSha:sha(5),releaseRunId:'5678',releaseAttempt:3});
   assert.deepEqual(result,{qualification:e,releaseSha:sha(5),releaseRunId:'5678',releaseAttempt:3});
   assert.equal(verify(result.qualification).imageRef,q.imageRef);assert.equal(verify(result.qualification).buildRunId,'1234');
+});
+
+test('qualification requires hex task IDs and valid canonical second-precision UTC timestamps',()=>{
+  for(const patch of [{taskId:'task-1'},{taskId:'C'.repeat(32)},{issuedAt:'2026-11-15T11:00:00.000Z'},{expiresAt:'2026-11-15T13:00:00+00:00'}])assert.throws(()=>verify(envelope({...payload(),...patch})));
+  assert.throws(()=>verify(envelope({...payload(),publicationDate:'2026-12-01',issuedAt:'2026-11-31T12:00:00Z',expiresAt:'2026-12-01T13:00:00Z'}),{now:new Date('2026-12-01T12:30:00Z')}));
+});
+test('qualification cannot cross Paris midnight even while its time interval remains valid',()=>{
+  assert.throws(()=>verify(envelope({...payload(),issuedAt:'2026-11-15T22:30:00Z',expiresAt:'2026-11-16T00:30:00Z'}),{now:new Date('2026-11-15T23:01:00Z')}),/date/i);
+});
+test('main route has explicit pull-request read permission without publishing capabilities',()=>{
+  const workflow=JSON.parse(execFileSync('ruby',['-ryaml','-rjson','-e','puts JSON.generate(YAML.load_file(ARGV[0]))','.github/workflows/deploy-production.yml'],{encoding:'utf8'}));
+  assert.deepEqual(workflow.jobs.route.permissions,{contents:'read','pull-requests':'read'});
+});
+test('production event and qualification requests retain extra contract fields at raw top level',()=>{
+  const dir=mkdtempSync(join(tmpdir(),'raw-release-event-'));
+  try {
+    const out=join(dir,'event.json'),extra=join(dir,'extra.json');
+    for(const [kind,details] of [['production-deploy',{factoryPromotion:{qualificationRef:`factory-qualification/${'b'.repeat(32)}`,candidateSha:sha(3),buildRunId:'1234',buildAttempt:2,treeSha:sha(4),configurationSha256:hash,publicationDate:'2026-11-15'}}],['factory-promotion-request',{publicationDate:'2026-11-15',browserObservability:false,productAnalytics:true}]]) {
+      writeFileSync(extra,JSON.stringify(details));execFileSync(process.execPath,['scripts/qa/emit-cicd-event.mjs','--kind',kind,'--payload-file',extra,'--out',out]);const event=JSON.parse(readFileSync(out));
+      assert.equal(event.payload,undefined);for(const [key,value]of Object.entries(details))assert.deepEqual(event[key],value);
+    }
+    writeFileSync(extra,JSON.stringify({sha:sha(9)}));assert.throws(()=>execFileSync(process.execPath,['scripts/qa/emit-cicd-event.mjs','--kind','production-deploy','--payload-file',extra,'--out',out],{stdio:'pipe'}));
+  }finally{rmSync(dir,{recursive:true,force:true});}
+});
+test('candidate raw event and publisher reader agree on top-level release metadata',()=>{
+  assert.equal(typeof qualification.verifyBuildEvent,'function');const dir=mkdtempSync(join(tmpdir(),'candidate-event-'));
+  try {
+    writeFileSync(join(dir,'index.html'),'fixture');const configuration=candidate.productionConfiguration({});
+    const m=candidate.releaseMetadata({VCS_REF:sha(3),TREE_SHA:sha(4),BUILD_RUN_ID:'1234',BUILD_ATTEMPT:'2',PUBLICATION_DATE:'2026-11-15',RELEASE_VARIANT:'production',RELEASE_CONFIGURATION:JSON.stringify(configuration)},dir);
+    const event=JSON.parse(execFileSync(process.execPath,['scripts/qa/staging-event.mjs'],{encoding:'utf8',env:{...process.env,GITHUB_REPOSITORY:payload().repository,GITHUB_REF:payload().sourceRef,GITHUB_SHA:sha(3),GITHUB_RUN_ID:'1234',GITHUB_RUN_ATTEMPT:'2',GITHUB_EVENT_NAME:'workflow_dispatch',IMAGE_REF:payload().imageRef,RELEASE_METADATA_PATH:join(dir,'.well-known/release.json')}}));
+    assert.equal(event.payload,undefined);assert.deepEqual(event.releaseMetadata,m);assert.equal(event.buildAttempt,2);assert.equal(event.treeSha,m.treeSha);
+    const q={...payload(),configurationSha256:m.configurationSha256};assert.deepEqual(qualification.verifyBuildEvent(event,q),m);
+    for(const patch of [{buildAttempt:3},{treeSha:sha(9)},{publicationDate:'2026-11-16'},{configurationSha256:hash},{releaseMetadata:{...m,sourceSha:sha(9)}}])assert.throws(()=>qualification.verifyBuildEvent({...event,...patch},q));
+  }finally{rmSync(dir,{recursive:true,force:true});}
 });

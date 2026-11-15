@@ -70,7 +70,15 @@ const imageName = readOption("image-name");
 const imageDigest = readOption("image-digest");
 const imageRef = readOption("image-ref", imageName && imageDigest ? `${imageName}@${imageDigest}` : "");
 
+const details = readOption("payload-file") ? JSON.parse(readFileSync(readOption("payload-file"), "utf8")) : {};
+const detailKeys = eventType === "production-deploy" ? ["factoryPromotion"] :
+  eventType === "factory-promotion-request" ? ["publicationDate", "browserObservability", "productAnalytics"] : [];
+if (!details || typeof details !== "object" || Array.isArray(details) ||
+    Object.keys(details).some((key) => !detailKeys.includes(key))) {
+  throw new Error("Invalid additional event fields; release identity cannot be overridden");
+}
 const event = cleanEmpty({
+  ...details,
   schemaVersion: "2.0",
   version: JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8")).version,
   eventType,
@@ -90,7 +98,6 @@ const event = cleanEmpty({
   imageName,
   imageDigest,
   imageRef,
-  payload: readOption("payload-file") ? JSON.parse(readFileSync(readOption("payload-file"), "utf8")) : undefined,
   checks: {
     plumber: "not_applicable",
     trivy: "not_applicable",
