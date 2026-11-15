@@ -37,7 +37,7 @@ test('staging event refuses untrusted or incomplete publication identity', () =>
   }
 });
 
-test('staging workflow separates PR validation from dev-only publication and preserves exact gates', () => {
+test('staging workflow separates PR validation from dev and reserved production publication and preserves exact gates', () => {
   const workflow = readFileSync('.github/workflows/build-staging.yml', 'utf8');
   assert.match(workflow, /branches: \[dev\]/);
   assert.match(workflow, /github\.ref == 'refs\/heads\/dev' && \(github\.event_name == 'push' \|\| github\.event_name == 'workflow_dispatch'\)/);
@@ -46,13 +46,15 @@ test('staging workflow separates PR validation from dev-only publication and pre
   assert.match(workflow, /staging-\$\{\{ github.sha \}\}-\$\{\{ github.run_id \}\}-\$\{\{ github.run_attempt \}\}/);
   assert.doesNotMatch(workflow, /:main|:latest|refs\/heads\/main|imagetools create|schedule:|continue-on-error:/);
   assert.match(workflow, /SITE_URL=https:\/\/amineamanzou.fr/);
-  assert.match(workflow, /PUBLIC_BROWSER_OBSERVABILITY_ENABLED=false/);
-  assert.match(workflow, /PUBLIC_PRODUCT_ANALYTICS_ENABLED=false/);
+  assert.match(workflow, /inputs.profile == 'production'/);
+  assert.match(workflow, /refs\/heads\/codex\/factory-promotion\//);
+  assert.match(workflow, /PUBLIC_BROWSER_OBSERVABILITY_ENABLED=\$\{\{ env.BROWSER_OBSERVABILITY_ENABLED \}\}/);
+  assert.match(workflow, /PUBLIC_PRODUCT_ANALYTICS_ENABLED=\$\{\{ env.PRODUCT_ANALYTICS_ENABLED \}\}/);
   for (const gate of ['trivy_pushed_digest', 'cosign_verify', 'verify_attestation']) assert.match(workflow, new RegExp(`id: ${gate}`));
   const emitAt = workflow.indexOf('node scripts/qa/staging-event.mjs');
   assert.ok(emitAt > workflow.indexOf('id: verify_attestation'));
   assert.doesNotMatch(workflow.slice(workflow.lastIndexOf('- name:', emitAt), emitAt), /always\(\)/);
-  assert.match(workflow, /--source-ref "refs\/heads\/dev"/);
+  assert.match(workflow, /--source-ref "\$\{\{ github.ref \}\}"/);
   assert.match(workflow, /--source-digest "\$\{\{ github.sha \}\}"/);
   assert.match(workflow, /name: cicd-event-staging/);
   assert.match(workflow, /node --test tests\/\*\.test.mjs/);
@@ -85,6 +87,5 @@ test('staging release gates scan and verify the exact digest before publishing e
   }
   assert.equal(steps[eventAt].if, undefined);
   assert.equal(steps[eventAt].env.IMAGE_REF, image);
-  const production = readFileSync('.github/workflows/deploy-production.yml', 'utf8');
-  for (const value of steps.filter(value => value.uses)) assert.ok(production.includes(value.uses), `Unapproved action reference: ${value.uses}`);
+  for (const value of steps.filter(value => value.uses)) assert.match(value.uses, /@[a-f0-9]{40}$/, `Unpinned action reference: ${value.uses}`);
 });

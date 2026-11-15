@@ -6,6 +6,26 @@ on:
   push:
     branches: [dev]
   workflow_dispatch:
+    inputs:
+      profile:
+        description: Build configuration
+        type: choice
+        options: [staging, production]
+        default: staging
+      publication_date:
+        description: Frozen Europe/Paris publication date (YYYY-MM-DD)
+        type: string
+      candidate_id:
+        description: Reserved production candidate ID
+        type: string
+      browser_observability:
+        description: Enable consent-gated browser observability
+        type: boolean
+        default: false
+      product_analytics:
+        description: Enable consent-gated product analytics
+        type: boolean
+        default: true
 
 concurrency:
   group: staging-build-amineamanzou-website-${{ github.ref }}
@@ -39,7 +59,7 @@ jobs:
       - run: npm run check:product-analytics -- --mode=off
       - run: npm run review:site
   release:
-    if: github.repository == 'amineamanzou/AmineAmanzouWebsite' && github.ref == 'refs/heads/dev' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: github.repository == 'amineamanzou/AmineAmanzouWebsite' && ((github.ref == 'refs/heads/dev' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')) || (github.event_name == 'workflow_dispatch' && inputs.profile == 'production' && startsWith(github.ref, 'refs/heads/codex/factory-promotion/')))
     needs: quality
     runs-on: ubuntu-latest
     permissions:
@@ -51,6 +71,22 @@ jobs:
       artifact-metadata: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 22.23.4
+      - name: Freeze build configuration and publication date
+        env:
+          INPUT_PROFILE: ${{ inputs.profile }}
+          INPUT_PUBLICATION_DATE: ${{ inputs.publication_date }}
+          INPUT_CANDIDATE_ID: ${{ inputs.candidate_id }}
+          INPUT_BROWSER_OBSERVABILITY: ${{ inputs.browser_observability }}
+          INPUT_PRODUCT_ANALYTICS: ${{ inputs.product_analytics }}
+          PUBLIC_BROWSER_OBSERVABILITY_URL: ${{ vars.PUBLIC_BROWSER_OBSERVABILITY_URL }}
+          PUBLIC_POSTHOG_KEY: ${{ vars.PUBLIC_POSTHOG_KEY }}
+        run: |
+          node scripts/qa/release-candidate.mjs prepare
+          echo "TREE_SHA=$(git rev-parse HEAD^{tree})" >> "$GITHUB_ENV"
+
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
@@ -89,9 +125,19 @@ jobs:
             SITE_URL=https://amineamanzou.fr
             BASE_PATH=/
             VCS_REF=${{ github.sha }}
-            PUBLIC_BROWSER_OBSERVABILITY_ENABLED=false
-            PUBLIC_PRODUCT_ANALYTICS_ENABLED=false
-            PUBLIC_DEPLOYMENT_ENVIRONMENT=staging
+            TREE_SHA=${{ env.TREE_SHA }}
+            BUILD_RUN_ID=${{ github.run_id }}
+            BUILD_ATTEMPT=${{ github.run_attempt }}
+            PUBLICATION_DATE=${{ env.PUBLICATION_DATE }}
+            RELEASE_VARIANT=${{ env.RELEASE_VARIANT }}
+            RELEASE_CONFIGURATION=${{ env.RELEASE_CONFIGURATION }}
+            PUBLIC_BROWSER_OBSERVABILITY_ENABLED=${{ env.BROWSER_OBSERVABILITY_ENABLED }}
+            PUBLIC_BROWSER_OBSERVABILITY_URL=${{ vars.PUBLIC_BROWSER_OBSERVABILITY_URL }}
+            PUBLIC_BROWSER_OBSERVABILITY_API_KEY=browser-public
+            PUBLIC_PRODUCT_ANALYTICS_ENABLED=${{ env.PRODUCT_ANALYTICS_ENABLED }}
+            PUBLIC_POSTHOG_KEY=${{ vars.PUBLIC_POSTHOG_KEY }}
+            PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
+            PUBLIC_DEPLOYMENT_ENVIRONMENT=${{ env.DEPLOYMENT_ENVIRONMENT }}
 
       - name: Gate the exact pushed digest on critical vulnerabilities
         id: trivy_pushed_digest
@@ -170,7 +216,7 @@ jobs:
         run: |
           cosign verify "$IMAGE_REF" \
             --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
-            --certificate-identity-regexp="^https://github.com/${{ github.repository }}/\\.github/workflows/build-staging\\.yml@refs/heads/dev$"
+            --certificate-identity="https://github.com/${{ github.repository }}/.github/workflows/build-staging.yml@${{ github.ref }}"
 
       - name: Attest image provenance
         id: attest_provenance
@@ -198,18 +244,29 @@ jobs:
           gh attestation verify "oci://${IMAGE_REF}" \
             --repo "${{ github.repository }}" \
             --signer-workflow "${{ github.repository }}/.github/workflows/build-staging.yml" \
-            --source-ref "refs/heads/dev" \
+            --source-ref "${{ github.ref }}" \
             --source-digest "${{ github.sha }}" \
             --predicate-type "https://slsa.dev/provenance/v1"
+
+      - name: Extract exact image release metadata
+        env:
+          IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+        run: |
+          docker pull "$IMAGE_REF"
+          container=$(docker create "$IMAGE_REF")
+          trap 'docker rm "$container" >/dev/null' EXIT
+          docker cp "$container:/srv/.well-known/release.json" release-metadata.json
 
       - name: Emit verified staging event
         env:
           IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
+          RELEASE_METADATA_PATH: release-metadata.json
         run: node scripts/qa/staging-event.mjs > cicd-event-staging.json
 
       - name: Upload verified staging event
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: cicd-event-staging
+          overwrite: true
           path: cicd-event-staging.json
           if-no-files-found: error

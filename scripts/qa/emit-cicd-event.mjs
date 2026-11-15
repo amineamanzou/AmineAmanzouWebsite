@@ -25,7 +25,7 @@ const readRepeatedOption = (name) => {
 
 const now = new Date().toISOString();
 const eventType = readOption("kind", readOption("event-type"));
-const allowedEventTypes = new Set(["security", "production-deploy"]);
+const allowedEventTypes = new Set(["security", "production-deploy", "factory-promotion-request"]);
 
 if (!allowedEventTypes.has(eventType)) {
   console.error(`Invalid --kind value: ${eventType || "<empty>"}`);
@@ -90,6 +90,7 @@ const event = cleanEmpty({
   imageName,
   imageDigest,
   imageRef,
+  payload: readOption("payload-file") ? JSON.parse(readFileSync(readOption("payload-file"), "utf8")) : undefined,
   checks: {
     plumber: "not_applicable",
     trivy: "not_applicable",
