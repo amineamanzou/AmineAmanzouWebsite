@@ -42,11 +42,16 @@ export async function sessionRequest(config, path, sessionId = config.sessionId,
   return response;
 }
 
-async function verifyIdentity(config) {
-  const identity = await (await sessionRequest(config, '/.well-known/staging-session')).json();
+function validateIdentity(config, identity) {
   for (const [key, value] of Object.entries({ application: 'amineamanzou-website', session_id: config.sessionId,
-    source_sha: config.sourceSha, release_digest: config.releaseDigest })) assert.equal(identity[key], value, `Session identity mismatch: ${key}`);
-  return identity;
+    source_sha: config.sourceSha, release_digest: config.releaseDigest, dataset: 'empty-v1' })) {
+    assert.equal(identity[key], value, `Session identity mismatch: ${key}`);
+  }
+  assert.match(identity.config_sha256 ?? '', /^[a-f0-9]{64}$/, 'Session identity mismatch: config_sha256');
+}
+
+async function readIdentity(config) {
+  return (await sessionRequest(config, '/.well-known/staging-session')).json();
 }
 
 async function browserChecks(config) {
@@ -66,7 +71,20 @@ async function browserChecks(config) {
             forbidden.push(`${request.method()} ${new URL(request.url()).origin}`);
             await route.abort(); return;
           }
-          await route.continue();
+          let upstream;
+          try {
+            // The browser must never see a redirect: route handlers do not guard redirect hops.
+            upstream = await route.fetch({ maxRedirects: 0, timeout: 20_000,
+              headers: { ...request.headers(), 'x-staging-session': config.sessionId, 'cache-control': 'no-cache' } });
+            if (upstream.status() >= 300 && upstream.status() < 400) {
+              forbidden.push(`redirect ${new URL(request.url()).pathname}`);
+              await route.abort(); return;
+            }
+            await route.fulfill({ response: upstream });
+          } catch {
+            errors.push(`Guarded request failed: ${new URL(request.url()).pathname}`);
+            await route.abort();
+          } finally { await upstream?.dispose(); }
         });
         await context.routeWebSocket('**/*', socket => { forbidden.push('websocket'); socket.close(); });
         const page = await context.newPage();
@@ -113,7 +131,8 @@ export async function runStagingSmoke(config) {
     startedAt: new Date().toISOString(), exitCode: 1 };
   const check = async (name, run) => { await run(); report.checks[name] = 'success'; };
   try {
-    report.identity = await verifyIdentity(config);
+    report.identity = await readIdentity(config);
+    validateIdentity(config, report.identity);
     report.checks.session_identity = 'success';
     for (const [name, sid] of [['session_missing_rejected', null],
       ['session_stale_rejected', `${config.sessionId[0] === '0' ? '1' : '0'}${config.sessionId.slice(1)}`]]) {
@@ -129,7 +148,11 @@ export async function runStagingSmoke(config) {
     });
     report.browser = await browserChecks(config);
     for (const name of ['browser_routes', 'browser_assets', 'browser_javascript', 'browser_navigation', 'browser_overflow', 'privacy_boundary']) report.checks[name] = 'success';
-    await check('session_identity_after', () => verifyIdentity(config));
+    await check('session_identity_after', async () => {
+      report.identityAfter = await readIdentity(config);
+      validateIdentity(config, report.identityAfter);
+      assert.deepEqual(report.identityAfter, report.identity, 'Session edge identity changed during smoke');
+    });
     report.exitCode = 0;
   } catch (error) {
     report.error = error.message;

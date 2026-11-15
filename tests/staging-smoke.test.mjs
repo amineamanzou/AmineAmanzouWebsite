@@ -46,3 +46,31 @@ test('browser request policy only permits same-origin read-only HTTP with sessio
     assert.equal(permitBrowserRequest(origin, url, method), false);
   }
 });
+
+test('edge identity refuses an invalid configuration digest or nonempty fixture dataset before browser checks', async () => {
+  const { stagingConfig, runStagingSmoke } = await import('../scripts/qa/staging-smoke.mjs');
+  const { mkdtemp, rm } = await import('node:fs/promises');
+  const output = await mkdtemp('/tmp/staging-identity-contract-');
+  let patch = {}, requestCount = 0;
+  const identity = { application: 'amineamanzou-website', session_id: 'c'.repeat(32), source_sha: 'a'.repeat(40),
+    release_digest: 'b'.repeat(64), config_sha256: 'd'.repeat(64), dataset: 'empty-v1' };
+  const server = createServer((_req, res) => {
+    requestCount++;
+    res.setHeader('X-Staging-Session', identity.session_id);
+    res.end(JSON.stringify({ ...identity, ...patch }));
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  try {
+    const config = stagingConfig({ STAGING_BASE_URL: `http://127.0.0.1:${server.address().port}`,
+      STAGING_SESSION_ID: identity.session_id, STAGING_SOURCE_SHA: identity.source_sha,
+      STAGING_RELEASE_DIGEST: identity.release_digest, STAGING_TEST_REPORT: `${output}/report.json` });
+    for (patch of [{ config_sha256: '' }, { config_sha256: 'invalid' }, { dataset: 'live-data' }, { dataset: '' }]) {
+      requestCount = 0;
+      const report = await runStagingSmoke(config);
+      assert.equal(report.exitCode, 1);
+      assert.equal(report.checks.session_identity, 'failure', JSON.stringify(patch));
+      assert.equal(requestCount, 1, 'Invalid initial identity must stop before other session checks');
+      assert.equal(report.counts.skipped, 0);
+    }
+  } finally { await new Promise(resolve => server.close(resolve)); await rm(output, { recursive: true, force: true }); }
+});

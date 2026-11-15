@@ -106,10 +106,13 @@ npm run review:staging
 ```
 
 The runner uses fresh browser contexts, blocks service workers and external or
-mutating requests, and authenticates every positive HTTP request with
+mutating requests, rejects redirects before contacting their destination, and
+authenticates every positive HTTP request with
 `X-Staging-Session`. It checks session identity before and after the bilingual
 routes, assets, JavaScript, responsive layout and locale navigation. Missing and
-stale session headers must receive HTTP 409. The JSON report records every
+stale session headers must receive HTTP 409. Identity requires the `empty-v1`
+dataset and a valid configuration digest. The final observed edge identity is
+retained and must match the initial identity. The JSON report records every
 required check with no skipped passes and exits nonzero on any failure. It does
 not submit contact forms, follow external links, or exercise production. Store
 session reports outside the repository.
