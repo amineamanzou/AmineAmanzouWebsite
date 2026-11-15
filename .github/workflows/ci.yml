@@ -148,6 +148,11 @@ jobs:
           done
           npm run review:product-analytics
 
+      - name: Freeze image fixture build identity
+        run: |
+          node --input-type=module -e 'import {appendFileSync} from "node:fs"; import {parisDate,productionConfiguration} from "./scripts/qa/release-candidate.mjs"; appendFileSync(process.env.GITHUB_ENV,"PUBLICATION_DATE="+parisDate()+"\nRELEASE_CONFIGURATION="+JSON.stringify(productionConfiguration({productAnalytics:false}))+"\n");'
+          echo "TREE_SHA=$(git rev-parse HEAD^{tree})" >> "$GITHUB_ENV"
+
       - name: Build image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
@@ -161,6 +166,12 @@ jobs:
             SITE_URL=https://amineamanzou.fr
             BASE_PATH=/
             VCS_REF=${{ github.sha }}
+            TREE_SHA=${{ env.TREE_SHA }}
+            BUILD_RUN_ID=${{ github.run_id }}
+            BUILD_ATTEMPT=${{ github.run_attempt }}
+            PUBLICATION_DATE=${{ env.PUBLICATION_DATE }}
+            RELEASE_VARIANT=staging
+            RELEASE_CONFIGURATION=${{ env.RELEASE_CONFIGURATION }}
             PUBLIC_BROWSER_OBSERVABILITY_ENABLED=false
             PUBLIC_DEPLOYMENT_ENVIRONMENT=production
             PUBLIC_PRODUCT_ANALYTICS_ENABLED=false
