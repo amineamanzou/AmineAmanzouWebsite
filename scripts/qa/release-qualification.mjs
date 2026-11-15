@@ -15,7 +15,7 @@ export function verifyQualification(envelope,{publicKey,now=new Date(),configura
   requireValue(signature.length===64&&verify(null,bytes,publicKey,signature),'Invalid qualification signature');
   const q=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
   exactKeys(q,['kind','repository','taskId','candidateId','mode','devSha','baseSha','candidateSha','treeSha','imageRef','buildRunId','buildAttempt','sourceRef','publicationDate','configurationSha256','recipeSha256','evidenceSha256','issuedAt','expiresAt','e2e','perf','staging','review'],'qualification');
-  requireValue(q.kind==='factory.website.qualification.v1'&&q.repository===REPOSITORY&&id.test(q.taskId)&&id.test(q.candidateId)&&['code','dated'].includes(q.mode),'Invalid qualification identity');
+  requireValue(q.kind==='factory.website.qualification.v1'&&q.repository===REPOSITORY&&typeof q.taskId==='string'&&id.test(q.taskId)&&typeof q.candidateId==='string'&&id.test(q.candidateId)&&['code','dated'].includes(q.mode),'Invalid qualification identity');
   for(const field of ['devSha','baseSha','candidateSha','treeSha'])requireValue(sha.test(q[field]),`Invalid ${field}`);
   for(const field of ['configurationSha256','recipeSha256','evidenceSha256'])requireValue(hash.test(q[field]),`Invalid ${field}`);
   requireValue(q.imageRef.startsWith(`${IMAGE_NAME}@sha256:`)&&hash.test(q.imageRef.slice(`${IMAGE_NAME}@sha256:`.length)),'Invalid image subject');

@@ -129,3 +129,9 @@ test('candidate raw event and publisher reader agree on top-level release metada
     for(const patch of [{buildAttempt:3},{treeSha:sha(9)},{publicationDate:'2026-11-16'},{configurationSha256:hash},{releaseMetadata:{...m,sourceSha:sha(9)}}])assert.throws(()=>qualification.verifyBuildEvent({...event,...patch},q));
   }finally{rmSync(dir,{recursive:true,force:true});}
 });
+for (const field of ['taskId','candidateId']) {
+  test(`qualification rejects array coercion for signed ${field}`,()=>{
+    const p=payload();p[field]=[p[field]];
+    assert.throws(()=>verify(envelope(p)),/identity/i);
+  });
+}
