@@ -84,3 +84,36 @@ The production and security workflows also publish neutral JSON CI/CD event
 artifacts (`cicd-event-production` and `cicd-event-security`). These artifacts
 describe the public delivery contract, such as commit, workflow run, image
 digest and check conclusions, without embedding private runtime topology.
+
+## Staging validation
+
+The staging workflow validates pull requests to `dev`. Pushes and manual runs on
+`dev` publish a separately tagged image, gated on the same critical vulnerability
+policy, digest signature and source-bound provenance as production. Its
+`cicd-event-staging` artifact identifies the exact commit, run, attempt and digest.
+Staging publication never updates production tags. Analytics and browser RUM are
+disabled in staging builds; canonical public URLs remain unchanged.
+
+Run the HTTP and browser smoke locally with a reserved staging session. Supply
+`STAGING_BASE_URL`, `STAGING_SESSION_ID` (32 hexadecimal characters),
+`STAGING_SOURCE_SHA` (40 hexadecimal characters), `STAGING_RELEASE_DIGEST` (64
+hexadecimal characters, without the `sha256:` prefix), and an absolute
+`STAGING_TEST_REPORT` output path. Set `CHROME_PATH` if Playwright's browser is
+not installed, then run:
+
+```bash
+npm run review:staging
+```
+
+The runner uses fresh browser contexts, blocks service workers and external or
+mutating requests, and authenticates every positive HTTP request with
+`X-Staging-Session`. It checks session identity before and after the bilingual
+routes, assets, JavaScript, responsive layout and locale navigation. Missing and
+stale session headers must receive HTTP 409. The JSON report records every
+required check with no skipped passes and exits nonzero on any failure. It does
+not submit contact forms, follow external links, or exercise production. Store
+session reports outside the repository.
+
+After `npm run build`, run `npm run test:staging:fixture` to validate the runner
+against a local synthetic session gate and the generated site. This smoke is
+functional evidence; it does not qualify performance or production promotion.
