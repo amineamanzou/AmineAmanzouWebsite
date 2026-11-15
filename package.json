@@ -23,11 +23,13 @@
     "review:commercial": "node scripts/qa/commercial-pages-smoke.mjs",
     "review:product-analytics": "node scripts/qa/product-analytics-smoke.mjs",
     "review:observability": "node scripts/qa/browser-observability-actions-smoke.mjs",
-    "audit:dependencies": "node scripts/checks/dependency-audit.mjs"
+    "audit:dependencies": "node scripts/checks/dependency-audit.mjs",
+    "review:staging": "node scripts/qa/staging-smoke.mjs",
+    "test:staging:fixture": "node tests/fixtures/staging-smoke.mjs"
   },
   "dependencies": {
     "@hyperdx/browser": "0.26.0",
-    "posthog-js": "1.441.2"
+    "posthog-js": "1.447.12"
   },
   "overrides": {
     "@hyperdx/otel-web-session-recorder": {
@@ -36,8 +38,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
-    "astro": "^7.4.4",
-    "playwright-core": "^1.64.1",
+    "astro": "^7.4.11",
+    "playwright-core": "^1.65.0",
     "typescript": "^6.0.3"
   }
 }
