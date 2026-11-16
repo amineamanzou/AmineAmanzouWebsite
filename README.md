@@ -35,11 +35,26 @@ Start a local dev server:
 npm run dev
 ```
 
-Build the release image:
+Build an unsigned local staging fixture from a clean, committed checkout:
 
 ```bash
-docker build -t ghcr.io/amineamanzou/amineamanzou-website:local .
+publication_date="$(node --input-type=module -e "import { parisDate } from './scripts/qa/release-candidate.mjs'; console.log(parisDate())")"
+release_configuration="$(node --input-type=module -e "import { productionConfiguration } from './scripts/qa/release-candidate.mjs'; console.log(JSON.stringify({...productionConfiguration({productAnalytics:false}),deploymentEnvironment:'staging'}))")"
+docker build -t ghcr.io/amineamanzou/amineamanzou-website:local \
+  --build-arg VCS_REF="$(git rev-parse HEAD)" \
+  --build-arg TREE_SHA="$(git rev-parse 'HEAD^{tree}')" \
+  --build-arg BUILD_RUN_ID=1 \
+  --build-arg BUILD_ATTEMPT=1 \
+  --build-arg PUBLICATION_DATE="$publication_date" \
+  --build-arg RELEASE_VARIANT=staging \
+  --build-arg RELEASE_CONFIGURATION="$release_configuration" \
+  --build-arg PUBLIC_DEPLOYMENT_ENVIRONMENT=staging .
 ```
+
+The numeric run and attempt values above are synthetic fixture identifiers,
+not GitHub Actions evidence. Both telemetry clients remain disabled. This image
+cannot qualify for promotion: releases require the workflow's actual run and
+attempt, verified provenance, staging qualification and signed receipt.
 
 ## Browser observability canary
 
