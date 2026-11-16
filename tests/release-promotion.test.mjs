@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, sign } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 const candidate = await import('../scripts/qa/release-candidate.mjs').catch(() => ({}));
@@ -73,6 +73,19 @@ test('schedule and ordinary pushes request qualification; owned merged PR select
 test('release metadata enumerates built published paths and binds configuration',()=>{
   assert.equal(typeof candidate.releaseMetadata,'function');const dir=mkdtempSync(join(tmpdir(),'release-metadata-'));
   try {writeFileSync(join(dir,'index.html'),'hello');const config=candidate.productionConfiguration({});const metadata=candidate.releaseMetadata({VCS_REF:sha(3),TREE_SHA:sha(4),BUILD_RUN_ID:'1234',BUILD_ATTEMPT:'2',PUBLICATION_DATE:'2026-11-15',RELEASE_VARIANT:'production',RELEASE_CONFIGURATION:JSON.stringify(config)},dir);assert.deepEqual(metadata.publishedPaths,['/']);assert.equal(metadata.configurationSha256,candidate.configurationHash(config));assert.equal(metadata.buildAttempt,2);assert.deepEqual(JSON.parse(readFileSync(join(dir,'.well-known/release.json'))),metadata);}finally{rmSync(dir,{recursive:true,force:true});}
+});
+test('release metadata lists content index pages while preserving verification resources',()=>{
+  const dir=mkdtempSync(join(tmpdir(),'release-content-pages-'));
+  try {
+    mkdirSync(join(dir,'en','blog','article'),{recursive:true});
+    writeFileSync(join(dir,'index.html'),'<h1>Home</h1>');
+    writeFileSync(join(dir,'en','blog','article','index.html'),'<h1>Article</h1>');
+    const verification='google-site-verification: googlecd92c6ca003ea477.html';
+    writeFileSync(join(dir,'googlecd92c6ca003ea477.html'),verification);
+    const metadata=candidate.releaseMetadata({VCS_REF:sha(3),TREE_SHA:sha(4),BUILD_RUN_ID:'1234',BUILD_ATTEMPT:'2',PUBLICATION_DATE:'2026-11-16',RELEASE_VARIANT:'production',RELEASE_CONFIGURATION:JSON.stringify(candidate.productionConfiguration({}))},dir);
+    assert.deepEqual(metadata.publishedPaths,['/','/en/blog/article/']);
+    assert.equal(readFileSync(join(dir,'googlecd92c6ca003ea477.html'),'utf8'),verification);
+  } finally {rmSync(dir,{recursive:true,force:true});}
 });
 test('publisher has no rebuild or fabricated main SLSA and tags the qualified digest only',()=>{
   const workflow=readFileSync('.github/workflows/deploy-production.yml','utf8');

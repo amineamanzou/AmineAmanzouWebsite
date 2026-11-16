@@ -24,7 +24,7 @@ export function releaseMetadata(env, directory='dist') {
   const configuration=JSON.parse(env.RELEASE_CONFIGURATION);
   if(!/^[a-f0-9]{40}$/.test(env.VCS_REF??'')||!/^[a-f0-9]{40}$/.test(env.TREE_SHA??'')||!/^[1-9][0-9]*$/.test(env.BUILD_RUN_ID??'')||!/^[1-9][0-9]*$/.test(env.BUILD_ATTEMPT??'')||!['production','staging'].includes(env.RELEASE_VARIANT)) throw new Error('Invalid release build identity');
   const publishedPaths=[];
-  function walk(dir) {for(const entry of readdirSync(dir,{withFileTypes:true})) {const name=join(dir,entry.name);if(entry.isDirectory())walk(name);else if(entry.isFile()&&entry.name.endsWith('.html')) {const path='/'+relative(directory,name).split('\\').join('/');publishedPaths.push(path.endsWith('/index.html')?path.slice(0,-10):path);}}}
+  function walk(dir) {for(const entry of readdirSync(dir,{withFileTypes:true})) {const name=join(dir,entry.name);if(entry.isDirectory())walk(name);else if(entry.isFile()&&entry.name==='index.html') {const path='/'+relative(directory,name).split('\\').join('/');publishedPaths.push(path.slice(0,-10));}}}
   walk(directory);
   const metadata={schemaVersion:1,sourceSha:env.VCS_REF,treeSha:env.TREE_SHA,buildRunId:env.BUILD_RUN_ID,buildAttempt:Number(env.BUILD_ATTEMPT),publicationDate:publicationDate(env.PUBLICATION_DATE),variant:env.RELEASE_VARIANT,configurationSha256:configurationHash(configuration),configuration,publishedPaths:publishedPaths.sort()};
   mkdirSync(join(directory,'.well-known'),{recursive:true});writeFileSync(join(directory,'.well-known/release.json'),JSON.stringify(metadata)+'\n');return metadata;
