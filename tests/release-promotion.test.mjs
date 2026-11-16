@@ -87,6 +87,20 @@ test('release metadata lists content index pages while preserving verification r
     assert.equal(readFileSync(join(dir,'googlecd92c6ca003ea477.html'),'utf8'),verification);
   } finally {rmSync(dir,{recursive:true,force:true});}
 });
+test('release metadata excludes historical redirect documents from content pages without deleting them',()=>{
+  const dir=mkdtempSync(join(tmpdir(),'release-redirect-pages-'));
+  try {
+    writeFileSync(join(dir,'index.html'),'<h1>Home</h1>');
+    for(const route of ['articles','cv','en/cv']) {
+      mkdirSync(join(dir,route),{recursive:true});
+      writeFileSync(join(dir,route,'index.html'),'<main>Legacy redirect</main>');
+    }
+    mkdirSync(join(dir,'en'),{recursive:true});writeFileSync(join(dir,'en','index.html'),'<h1>Home</h1>');
+    const metadata=candidate.releaseMetadata({VCS_REF:sha(3),TREE_SHA:sha(4),BUILD_RUN_ID:'1234',BUILD_ATTEMPT:'2',PUBLICATION_DATE:'2026-11-16',RELEASE_VARIANT:'production',RELEASE_CONFIGURATION:JSON.stringify(candidate.productionConfiguration({}))},dir);
+    assert.deepEqual(metadata.publishedPaths,['/','/en/']);
+    for(const route of ['articles','cv','en/cv']) assert.equal(readFileSync(join(dir,route,'index.html'),'utf8'),'<main>Legacy redirect</main>');
+  } finally {rmSync(dir,{recursive:true,force:true});}
+});
 test('publisher has no rebuild or fabricated main SLSA and tags the qualified digest only',()=>{
   const workflow=readFileSync('.github/workflows/deploy-production.yml','utf8');
   assert.doesNotMatch(workflow,/docker\/build-push-action|npm run build|id: attest_provenance/);
