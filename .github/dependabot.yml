@@ -1,6 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: npm
+    target-branch: "dev"
     directory: /
     schedule:
       interval: weekly
@@ -17,6 +18,7 @@ updates:
           - version-update:semver-major
 
   - package-ecosystem: github-actions
+    target-branch: "dev"
     directory: /
     schedule:
       interval: weekly
@@ -29,6 +31,7 @@ updates:
           - "*"
 
   - package-ecosystem: docker
+    target-branch: "dev"
     directory: /
     schedule:
       interval: weekly
