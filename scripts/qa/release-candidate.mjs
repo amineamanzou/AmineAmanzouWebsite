@@ -20,6 +20,13 @@ export function productionConfiguration(input={}) {
   return {siteUrl:'https://amineamanzou.fr',basePath:'/',deploymentEnvironment:'production',browserObservabilityEnabled:rum,productAnalyticsEnabled:analytics,browserObservabilityOrigin:rum?origin(input.browserObservabilityUrl):'',browserEndpointSha256:sha256(rum?input.browserObservabilityUrl:''),browserPublicKeySha256:sha256(rum?'browser-public':''),posthogOrigin:'https://eu.i.posthog.com',posthogPublicKeySha256:sha256(analytics?(input.posthogKey??''):'')};
 }
 export function configurationHash(configuration) {return sha256(JSON.stringify(configuration));}
+function productVersion() {
+  const { version } = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
+  if (typeof version !== 'string' || !/^(?:0|[1-9][0-9]*)(?:\.(?:0|[1-9][0-9]*)){2}$/.test(version)) {
+    throw new Error('package.json version must be a stable SemVer (MAJOR.MINOR.PATCH)');
+  }
+  return version;
+}
 export function releaseMetadata(env, directory='dist') {
   const configuration=JSON.parse(env.RELEASE_CONFIGURATION);
   if(!/^[a-f0-9]{40}$/.test(env.VCS_REF??'')||!/^[a-f0-9]{40}$/.test(env.TREE_SHA??'')||!/^[1-9][0-9]*$/.test(env.BUILD_RUN_ID??'')||!/^[1-9][0-9]*$/.test(env.BUILD_ATTEMPT??'')||!['production','staging'].includes(env.RELEASE_VARIANT)) throw new Error('Invalid release build identity');
@@ -27,7 +34,7 @@ export function releaseMetadata(env, directory='dist') {
   const redirectPaths=new Set(['/articles/','/cv/','/en/cv/']);
   function walk(dir) {for(const entry of readdirSync(dir,{withFileTypes:true})) {const name=join(dir,entry.name);if(entry.isDirectory())walk(name);else if(entry.isFile()&&entry.name==='index.html') {const path=('/'+relative(directory,name).split('\\').join('/')).slice(0,-10);if(!redirectPaths.has(path))publishedPaths.push(path);}}}
   walk(directory);
-  const metadata={schemaVersion:1,sourceSha:env.VCS_REF,treeSha:env.TREE_SHA,buildRunId:env.BUILD_RUN_ID,buildAttempt:Number(env.BUILD_ATTEMPT),publicationDate:publicationDate(env.PUBLICATION_DATE),variant:env.RELEASE_VARIANT,configurationSha256:configurationHash(configuration),configuration,publishedPaths:publishedPaths.sort()};
+  const metadata={schemaVersion:1,productVersion:productVersion(),sourceSha:env.VCS_REF,treeSha:env.TREE_SHA,buildRunId:env.BUILD_RUN_ID,buildAttempt:Number(env.BUILD_ATTEMPT),publicationDate:publicationDate(env.PUBLICATION_DATE),variant:env.RELEASE_VARIANT,configurationSha256:configurationHash(configuration),configuration,publishedPaths:publishedPaths.sort()};
   mkdirSync(join(directory,'.well-known'),{recursive:true});writeFileSync(join(directory,'.well-known/release.json'),JSON.stringify(metadata)+'\n');return metadata;
 }
 export function prepareCandidate(env=process.env) {
@@ -37,7 +44,7 @@ export function prepareCandidate(env=process.env) {
   const config=production?productionConfiguration({browserObservability:env.INPUT_BROWSER_OBSERVABILITY,productAnalytics:env.INPUT_PRODUCT_ANALYTICS,browserObservabilityUrl:env.PUBLIC_BROWSER_OBSERVABILITY_URL,posthogKey:env.PUBLIC_POSTHOG_KEY}):{...productionConfiguration({productAnalytics:false}),deploymentEnvironment:'staging'};
   const date=publicationDate(production?env.INPUT_PUBLICATION_DATE:parisDate());
   if(production&&date!==parisDate())throw new Error('Candidate date must be the current Paris date');
-  return {PUBLICATION_DATE:date,RELEASE_VARIANT:production?'production':'staging',RELEASE_CONFIGURATION:JSON.stringify(config),BROWSER_OBSERVABILITY_ENABLED:String(config.browserObservabilityEnabled),PRODUCT_ANALYTICS_ENABLED:String(config.productAnalyticsEnabled),DEPLOYMENT_ENVIRONMENT:config.deploymentEnvironment};
+  return {PRODUCT_VERSION:productVersion(),PUBLICATION_DATE:date,RELEASE_VARIANT:production?'production':'staging',RELEASE_CONFIGURATION:JSON.stringify(config),BROWSER_OBSERVABILITY_ENABLED:String(config.browserObservabilityEnabled),PRODUCT_ANALYTICS_ENABLED:String(config.productAnalyticsEnabled),DEPLOYMENT_ENVIRONMENT:config.deploymentEnvironment};
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
   if(process.argv[2]==='metadata')releaseMetadata(process.env,process.argv[3]??'dist');

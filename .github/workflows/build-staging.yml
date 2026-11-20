@@ -101,6 +101,7 @@ jobs:
             org.opencontainers.image.description=Static Astro portfolio for amineamanzou.fr
             org.opencontainers.image.url=https://amineamanzou.fr
             org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ env.PRODUCT_VERSION }}
 
       - name: Login to GHCR
         uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
