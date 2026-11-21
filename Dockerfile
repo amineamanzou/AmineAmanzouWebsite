@@ -1,4 +1,4 @@
-FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS build
+FROM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS build
 WORKDIR /app
 
 ARG SITE_URL=https://amineamanzou.fr
@@ -62,7 +62,7 @@ RUN PUBLICATION_DATE="${PUBLICATION_DATE}" \
     RELEASE_VARIANT="${RELEASE_VARIANT}" RELEASE_CONFIGURATION="${RELEASE_CONFIGURATION}" \
     node scripts/qa/release-candidate.mjs metadata
 
-FROM golang:1.27.3-alpine@sha256:fa3d596898d9f126af7c01d14ee7597bab3f39cccf392ef36b69fe77cd681f18 AS caddy-build
+FROM golang:1.27.4-alpine@sha256:70bd7ddea8b6cbe5d6943cde279d6b67feb10cc924fb9100d1d8757c1575b280 AS caddy-build
 WORKDIR /src
 
 RUN apk add --no-cache ca-certificates git
