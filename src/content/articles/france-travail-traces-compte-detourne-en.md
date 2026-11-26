@@ -3,7 +3,7 @@ title: "France Travail’s data breach: which traces could help detect an accoun
 locale: "en"
 articleSlug: "france-travail-traces-compte-detourne"
 translationKey: "france-travail-traces-compte-detourne"
-publishedAt: "2026-12-17"
+publishedAt: "2026-12-24"
 label: "Observability / Engineering"
 readTime: "3 min"
 excerpt: "Use the CNIL’s public findings to examine access events, correlation and the limits of detection."

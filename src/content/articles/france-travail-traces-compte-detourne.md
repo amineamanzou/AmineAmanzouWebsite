@@ -3,7 +3,7 @@ title: "Fuite de données chez France Travail : quelles traces pour repérer un 
 locale: "fr"
 articleSlug: "france-travail-traces-compte-detourne"
 translationKey: "france-travail-traces-compte-detourne"
-publishedAt: "2026-12-17"
+publishedAt: "2026-12-24"
 label: "Observability / Engineering"
 readTime: "3 min"
 excerpt: "Partir des constats publics de la CNIL pour examiner les événements d’accès, leur corrélation et les limites de la détection."
