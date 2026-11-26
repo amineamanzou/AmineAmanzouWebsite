@@ -3,7 +3,7 @@ title: "ClickHouse, Dash0, Tsuga : ce que je regarderais pour conseiller un clie
 locale: "fr"
 articleSlug: "clickhouse-dash0-tsuga-conseil"
 translationKey: "clickhouse-dash0-tsuga-conseil"
-publishedAt: "2026-12-10"
+publishedAt: "2026-12-17"
 label: "Observability / Engineering"
 readTime: "3 min"
 excerpt: "Trois pistes d’observabilité à examiner selon l’équipe, le périmètre des données et la responsabilité d’exploitation."
