@@ -1,45 +1,69 @@
 ---
-title: "OpenTelemetry dans une petite équipe : ce que je simplifierais en premier"
+title: "OpenTelemetry dans une petite équipe : par quoi je commence"
 locale: "fr"
 articleSlug: "opentelemetry-petite-equipe-perimetre"
 translationKey: "opentelemetry-petite-equipe-perimetre"
 publishedAt: "2026-12-31"
 label: "Observability / Engineering"
-readTime: "3 min"
-excerpt: "Commencer par un parcours à expliquer, puis ajouter seulement les signaux et la collecte nécessaires pour vérifier une hypothèse."
-heroImageAlt: "Illustration du diagnostic et des décisions d’observabilité"
+readTime: "5 min"
+excerpt: "L’ordre dans lequel je mets en place OpenTelemetry dans une petite équipe, ce qu’on construit trop tôt, l’erreur que j’ai faite sur les métriques et la pile minimale pour démarrer."
+heroImage: "/blog/opentelemetry-petite-equipe-perimetre/cover.webp"
+heroImageAlt: "L’Ingénieur Peu Fiable montre du doigt trois cases numérotées : des logs et un signal de santé, une cascade de traces, puis une fenêtre de navigateur"
 pillar: "opentelemetry"
 intent: "informational"
 primaryQuery: "opentelemetry petite equipe perimetre"
 relatedOffer: "diagnostic"
-seoTitle: "OpenTelemetry dans une petite équipe : ce que je simplifierais en premier"
-seoDescription: "Commencer par un parcours à expliquer, puis ajouter seulement les signaux et la collecte nécessaires pour vérifier une hypothèse."
+seoTitle: "OpenTelemetry dans une petite équipe : par quoi je commence"
+seoDescription: "L’ordre dans lequel je mets en place OpenTelemetry dans une petite équipe, ce qu’on construit trop tôt, l’erreur que j’ai faite sur les métriques et la pile minimale pour démarrer."
 keywords: ["opentelemetry", "OpenTelemetry", "opentelemetry petite equipe perimetre"]
-proofLevel: "hypothesis"
+proofLevel: "experience"
 ---
 
-Imaginez une petite équipe qui doit comprendre pourquoi une opération échoue, avec une application, une base de données et un service externe. C’est un scénario de travail pour cet article, pas une mission client que je raconterais après coup.
+J’ai accompagné comme cloud engineer une startup portugaise qui fait de l’e-commerce dans le frais. Il fallait déployer leur SaaS sur GCP, une architecture trois tiers, le conteneuriser et le poser sur des machines pour mettre leur solution à l’épreuve. Avec leur lead dev, j’ai mis en place une base OpenTelemetry pour l’observabilité.
 
-Je commencerais par cette opération. Si la première étape du chantier devient la conception d’une plateforme capable de servir tous les futurs projets, l’équipe risque d’attendre longtemps avant de diagnostiquer son premier problème.
+L’autre petite équipe que je connais bien, c’est moi, sur ma propre infrastructure. Dans les deux cas, je m’y prends dans le même ordre.
 
-## Garder un trajet que l’on sait expliquer
+## L’ordre que je suis
 
-OpenTelemetry fournit des outils pour générer, collecter et exporter la télémétrie ; il faut encore choisir où l’explorer. Cette séparation permet de distinguer l’instrumentation du choix du backend. [Présentation OpenTelemetry](https://opentelemetry.io/docs/what-is-opentelemetry/).
+Il faut commencer par les basiques. Déployer OpenTelemetry, activer la surveillance de la santé des collecteurs, puis configurer le transfert des logs et celui des métriques.
 
-Dans notre scénario, je voudrais reconnaître le service, l’environnement et la version de l’application. Ensuite, suivre une requête autorisée jusqu’à ses appels utiles. Si un log signale une erreur, je veux retrouver le même travail dans la trace plutôt que chercher une phrase ressemblante dans dix fenêtres.
+Vient ensuite le tracing. On ajoute l’auto-instrumentation, puis on identifie les enjeux métier sur lesquels un incident fait mal, et on s’assure que le tracing est bien fait à cet endroit précis.
 
-Je laisserais l’instrumentation existante faire ce qu’elle couvre déjà avant d’ajouter des spans manuels partout. Les premiers ajouts devraient expliquer une étape que la télémétrie actuelle ne sait pas nommer. En revanche, je vérifierais vite la propagation du contexte : de beaux segments isolés peuvent rester difficiles à relier.
+Prenons une boutique en ligne comme la leur. Elle doit surveiller l’état des paniers, le nombre d’abandons et la latence du service de paiement, parce que c’est un fournisseur externe comme Stripe. On a commencé par l’auto-instrumentation, très bien. Mais sur ces segments-là, il faut absolument ajouter de l’instrumentation manuelle pour obtenir quelque chose d’adapté aux enjeux du client.
 
-## Chaque intermédiaire doit avoir une raison
+En dernier arrive ce qui se passe côté utilisateur : le RUM, les statistiques de visite, le comportement de quelqu’un qui vient de rencontrer un bug. Ça vient dans un second temps.
 
-Un Collector peut servir à centraliser une politique ou une sortie. Il introduit aussi un composant dont il faut connaître l’état. Le déploiement direct ou par passerelle dépend du besoin ; la documentation présente plusieurs modèles, pas un passage obligé identique pour toutes les équipes. [Modèles de déploiement du Collector](https://opentelemetry.io/docs/collector/deployment/).
+<figure>
+  <img src="/blog/opentelemetry-petite-equipe-perimetre/setup-order-fr.svg" alt="Schéma en trois étapes : les basiques avec les logs et les métriques, puis le tracing avec de l’instrumentation manuelle sur les parcours métier, puis le côté utilisateur ; les dashboards ne viennent pas au début" loading="lazy" />
+  <figcaption>Les trois étapes, dans l’ordre.</figcaption>
+</figure>
 
-Pour cette petite équipe, j’éviterais d’empiler des relais par anticipation. À chaque étape, je demanderais qui surveille la sortie, ce qui arrive si elle est indisponible et comment la perte devient visible. Une architecture courte que l’on sait diagnostiquer donne une base plus utile qu’un schéma rempli de boîtes inexpliquées.
+## Ce qu’on construit trop tôt
 
-L’échantillonnage mérite le même raisonnement. Une stratégie doit être testée sur les cas que l’on cherche à conserver, en tenant compte du volume. Je n’en déduirais pas un taux universel. Une erreur devenue introuvable après filtrage coûte aussi du temps à l’équipe.
+Les dashboards. Toutes les équipes commencent par là, et j’ai déjà écrit qu’il vaut mieux [définir ses SLO d’abord](/blog/slo-avant-dashboards/).
 
-## Vérifier le résultat avec une erreur volontaire
+Aujourd’hui, à l’époque des agents, on n’a plus forcément besoin d’un dashboard figé qui restreint la vision. On peut créer un dashboard à la demande en interrogeant l’IA, et ne garder que ceux qui sont revenus plusieurs fois.
 
-Je provoquerais une erreur synthétique dans un environnement isolé, puis je demanderais à quelqu’un de la retrouver sans connaître à l’avance le service responsable. On noterait les informations manquantes et les gestes inutiles.
+Une petite équipe a mieux à faire : des alertes actionnables, un budget maîtrisé et [moins de bruit](/blog/reduire-fatigue-alerte/). Moins on est nombreux, plus le bruit pèse sur chacun.
 
-Le prochain ajout d’instrumentation aurait alors une raison observable. Il aiderait à répondre à une question qui vient réellement de bloquer l’enquête, plutôt qu’à remplir une case supplémentaire dans le déploiement.
+## L’erreur que j’ai faite sur les métriques
+
+Ce que j’ai surconstruit, ce sont les métriques. On veut bien faire, on veut tout garder, et on se retrouve à relever des millions de métriques sans regarder leur cardinalité. Souvent, les indicateurs RED suffisent pour connaître la santé d’un service : le débit, les erreurs et la durée.
+
+Ça m’est arrivé sur mon infrastructure perso. J’ai fait plusieurs cycles de nettoyage. J’ai demandé à un agent de relire mes dernières investigations d’incident et de repérer les métriques qui n’étaient que du bruit, celles qui n’apportaient de réponse ni à une investigation ni à une action. Puis on a épuré.
+
+## La pile minimale
+
+Si je démarrais aujourd’hui, je prendrais un simple Prometheus avec Grafana pour les métriques. C’est le moyen le plus simple et le plus rapide.
+
+Le jour où j’ai des clients en production et que je dois suivre de plus près ce qui se passe, je migre vers une solution tout-en-un qui couvre tous les signaux, comme [Dash0 ou ClickHouse](/blog/clickhouse-dash0-tsuga-conseil/).
+
+## OpenTelemetry n’est pas trop compliqué
+
+Ce n’est pas un agent haut de gamme où tout est pris en charge sans rien configurer, je suis d’accord. Mais le projet est mûr, et la documentation est abondante.
+
+Une petite équipe peut même aller plus loin que la plupart des PME et des entreprises de la tech, en construisant sa propre distribution du [Collector](https://opentelemetry.io/docs/collector/) avec les receivers et les exporters qu’il lui faut. Avec l’IA, quelques personnes ont aujourd’hui la productivité pour le faire.
+
+S’occuper d’OpenTelemetry n’est pas le plus difficile. Le plus difficile, c’est ce qui arrive dans le backend : contrôler le budget de ce qu’on observe par rapport à ce que ça rapporte, ou à ce dont ça protège.
+
+On rend l’observabilité compliquée en parlant sans cesse de nouveaux signaux. Dans une startup, ce n’est pas ce qu’on attaque au départ. Le mantra, c’est « keep it simple, stupid ». Quand on le suit, les configurations OpenTelemetry restent très basiques, et il n’y a pas besoin de transformations ultra complexes pour arriver à ses fins.

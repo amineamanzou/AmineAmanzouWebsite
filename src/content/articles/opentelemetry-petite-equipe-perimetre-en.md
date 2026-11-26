@@ -1,45 +1,69 @@
 ---
-title: "OpenTelemetry in a small team: what I would simplify first"
+title: "OpenTelemetry in a small team: where I start"
 locale: "en"
 articleSlug: "opentelemetry-petite-equipe-perimetre"
 translationKey: "opentelemetry-petite-equipe-perimetre"
 publishedAt: "2026-12-31"
 label: "Observability / Engineering"
-readTime: "3 min"
-excerpt: "Start with one journey to explain, then add the signals and collection needed to test a hypothesis."
-heroImageAlt: "Illustration of observability diagnosis and engineering decisions"
+readTime: "5 min"
+excerpt: "The order in which I set up OpenTelemetry in a small team, what gets built too early, the mistake I made with metrics and the minimal stack to start with."
+heroImage: "/blog/opentelemetry-petite-equipe-perimetre/cover.webp"
+heroImageAlt: "The Unreliable Engineer pointing at three numbered panels: logs with a health signal, a trace waterfall, then a browser window"
 pillar: "opentelemetry"
 intent: "informational"
 primaryQuery: "opentelemetry petite equipe perimetre"
 relatedOffer: "diagnostic"
-seoTitle: "OpenTelemetry in a small team: what I would simplify first"
-seoDescription: "Start with one journey to explain, then add the signals and collection needed to test a hypothesis."
+seoTitle: "OpenTelemetry in a small team: where I start"
+seoDescription: "The order in which I set up OpenTelemetry in a small team, what gets built too early, the mistake I made with metrics and the minimal stack to start with."
 keywords: ["opentelemetry", "OpenTelemetry", "opentelemetry petite equipe perimetre"]
-proofLevel: "hypothesis"
+proofLevel: "experience"
 ---
 
-Imagine a small team trying to understand a failing operation involving an application, a database and an external service. This is a working scenario for the article, rather than a customer engagement I am claiming to recount.
+I worked as a cloud engineer with a Portuguese startup that does e-commerce in fresh food. The job was to deploy their SaaS on GCP, a three-tier architecture, containerize it and put it on machines to put their solution to the test. With their lead developer, I set up an OpenTelemetry foundation for observability.
 
-I would start with that operation. If the first task becomes designing a platform for every future project, the team may wait a long time before diagnosing its first problem.
+The other small team I know well is me, on my own infrastructure. In both cases, I go about it in the same order.
 
-## Keep a path we can explain
+## The order I follow
 
-OpenTelemetry provides tools to generate, collect and export telemetry; a place to explore it still needs to be chosen. That distinction helps separate instrumentation from the backend decision. [OpenTelemetry overview](https://opentelemetry.io/docs/what-is-opentelemetry/).
+You have to start with the basics. Deploy OpenTelemetry, turn on health monitoring for the collectors, then configure the shipping of logs and of metrics.
 
-In our scenario, I would want to identify the service, environment and application version, then follow an authorized request through its useful calls. When a log records an error, I want to find the same work in a trace instead of hunting for similar wording across ten windows.
+Tracing comes next. You add auto-instrumentation, then you identify the business areas where an incident hurts, and you make sure tracing is done well at that precise spot.
 
-I would let existing instrumentation cover what it already understands before adding manual spans everywhere. Early additions should explain a step the current telemetry cannot name. Context propagation deserves an early check: attractive but disconnected spans can still be difficult to investigate.
+Take an online store like theirs. It has to watch the state of the carts, the number of abandoned carts and the latency of the payment service, because that is an external provider like Stripe. You started with auto-instrumentation, fine. But on those segments, you absolutely need to add manual instrumentation to get something that fits what matters to the client.
 
-## Every intermediary needs a reason
+Last comes what happens on the user side: RUM, visit statistics, the behavior of someone who just hit a bug. That comes in a second phase.
 
-A Collector can centralize policy or an export destination. It also introduces a component whose state someone must understand. Direct export and gateway patterns depend on the need; the documentation describes deployment options rather than one mandatory path for every team. [Collector deployment models](https://opentelemetry.io/docs/collector/deployment/).
+<figure>
+  <img src="/blog/opentelemetry-petite-equipe-perimetre/setup-order-en.svg" alt="Three-step diagram: the basics with logs and metrics, then tracing with manual instrumentation on business journeys, then the user side; dashboards do not come first" loading="lazy" />
+  <figcaption>The three steps, in order.</figcaption>
+</figure>
 
-For this team, I would avoid adding relays for hypothetical future needs. At each stage I would ask who watches the output, what happens if it becomes unavailable and how loss becomes visible. A short architecture that can be diagnosed provides a useful foundation.
+## What gets built too early
 
-Sampling needs the same reasoning. Its strategy should be tested against cases we need to retain, accounting for volume. I would not prescribe a universal rate. An error that becomes impossible to find after filtering also costs the team time.
+Dashboards. Every team starts there, and I have already written that it is better to [define your SLOs first](/en/blog/define-slos-before-dashboards/).
 
-## Check the result with an intentional error
+Today, in the age of agents, you no longer necessarily need a fixed dashboard that narrows your view. You can create a dashboard on demand by asking the AI, and keep only the ones that came back several times.
 
-I would trigger a synthetic failure in an isolated environment and ask someone to locate it without knowing the responsible service beforehand. We would record missing information and unnecessary steps.
+A small team has better things to do: actionable alerts, a controlled budget and [less noise](/en/blog/reduce-alert-fatigue/). The fewer people you are, the more the noise weighs on each of you.
 
-The next instrumentation change would then have an observable purpose: answering a question that actually blocked the investigation.
+## The mistake I made with metrics
+
+What I overbuilt is metrics. You want to do things properly, you want to keep everything, and you end up collecting millions of metrics without looking at their cardinality. Often, the RED indicators are enough to know the health of a service: rate, errors and duration.
+
+It happened to me on my personal infrastructure. I went through several cleanup cycles. I asked an agent to reread my latest incident investigations and spot the metrics that were only noise, the ones that brought no answer to an investigation or to an action. Then we pruned.
+
+## The minimal stack
+
+If I were starting today, I would take a simple Prometheus with Grafana for metrics. It is the simplest and fastest way.
+
+The day I have clients in production and need to follow more closely what is going on, I migrate to an all-in-one solution that covers every signal, such as [Dash0 or ClickHouse](/en/blog/clickhouse-dash0-tsuga-conseil/).
+
+## OpenTelemetry is not too complicated
+
+It is not a top-tier agent where everything is handled without configuring anything, I agree. But the project is mature, and the documentation is plentiful.
+
+A small team can even go further than most small businesses and tech companies, by building its own distribution of the [Collector](https://opentelemetry.io/docs/collector/) with the receivers and exporters it needs. With AI, a few people now have the productivity to do it.
+
+Taking care of OpenTelemetry is not the hardest part. The hardest part is what lands in the backend: controlling the budget of what you observe against what it brings you, or what it protects you from.
+
+We make observability complicated by constantly talking about new signals. In a startup, that is not what you tackle at the beginning. The mantra is “keep it simple, stupid”. When you follow it, OpenTelemetry configurations stay very basic, and you don’t need ultra-complex transformations to get where you want.
