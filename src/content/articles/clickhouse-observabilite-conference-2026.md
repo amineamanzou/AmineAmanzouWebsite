@@ -43,7 +43,7 @@ J’avais déjà vu Qonto en février, à un meetup ClickHouse, avec un discours
   <figcaption>Valentin Levier, SRE chez Qonto, pendant son retour d’expérience.</figcaption>
 </figure>
 
-Presque tous leurs services sont instrumentés, et ils trouvaient dommage de n’ouvrir cette base que pendant les incidents. Ils ont donc branché de l’automatisation dessus. L’exemple que je retiens, c’est le déploiement canary. Pendant qu’Argo Rollouts fait monter la nouvelle version, un service interne interroge les traces dans ClickHouse pour vérifier la santé du service. Sa réponse tranche : la version part en production, ou elle est annulée. Valentin l’a résumé comme ça : « C’est le check qui va décider si le déploiement est bon ou non. »
+Presque tous leurs services sont instrumentés, et ils trouvaient dommage de n’ouvrir cette base que pendant les incidents. Ils ont donc branché de l’automatisation dessus. L’exemple que je retiens, c’est le déploiement canary. Pendant que leur outil de déploiement progressif fait monter la nouvelle version, un service interne interroge les traces dans ClickHouse pour vérifier la santé du service. Sa réponse tranche : la version part en production, ou elle est annulée. Valentin l’a résumé comme ça : « C’est le check qui va décider si le déploiement est bon ou non. »
 
 ## Ringover : ClickHouse sur leurs propres serveurs
 
