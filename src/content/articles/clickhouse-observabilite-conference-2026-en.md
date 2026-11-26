@@ -43,7 +43,7 @@ I had already seen Qonto in February, at a ClickHouse meetup, with a talk leanin
   <figcaption>Valentin Levier, SRE at Qonto, during his talk.</figcaption>
 </figure>
 
-Almost all of their services are instrumented, and they thought it was a waste to open that database only during incidents. So they wired automation into it. The example I’m keeping is the canary deployment. While their progressive delivery tool shifts traffic to the new version, an internal service queries the traces in ClickHouse to check the health of the service. Its answer settles it: the version goes to production, or it is rolled back. Valentin put it this way: “It’s the check that decides whether the deployment is good or not.”
+Almost all of their services are instrumented, and they thought it was a waste to open that database only during incidents. So they wired automation into it. The example I’m keeping is the canary deployment. While Argo Rollouts shifts traffic to the new version, an internal service queries the traces in ClickHouse to check the health of the service. Its answer settles it: the version goes to production, or it is rolled back. Valentin put it this way: “It’s the check that decides whether the deployment is good or not.”
 
 ## Ringover: ClickHouse on their own servers
 
