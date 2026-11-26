@@ -3,11 +3,12 @@ title: "ClickHouse pour l’observabilité : ce que j’ai vu à Paris, ce qui m
 locale: "fr"
 articleSlug: "clickhouse-observabilite-conference-2026"
 translationKey: "clickhouse-observabilite-conference-2026"
-publishedAt: "2026-11-19"
+publishedAt: "2026-11-26"
 label: "Observability / Engineering"
 readTime: "5 min"
 excerpt: "J’ai passé la matinée du 17 novembre à la conférence observabilité de ClickHouse à Paris. Les retours de Qonto et Ringover, mon avis sur le produit et ce qui lui manque encore."
-heroImageAlt: "Illustration du diagnostic et des décisions d’observabilité"
+heroImage: "/blog/clickhouse-observabilite-conference-2026/cover.webp"
+heroImageAlt: "L’Ingénieur Peu Fiable, appareil photo en main, devant trois cases montrant les présentations de ClickHouse, Qonto et Ringover"
 pillar: "observability"
 intent: "informational"
 primaryQuery: "clickhouse observabilite conference 2026"
@@ -26,11 +27,21 @@ Huit jours plus tôt, ClickHouse avait [ouvert en bêta publique son offre d’o
 
 Oussama Chakri a ouvert en prenant le sujet par la donnée. Volume, cardinalité, rétention : pour lui, ce sont d’abord des problèmes de moteur. Côté interface, ils ont montré AI Notebooks et la Service Map dans HyperDX, l’interface de ClickStack. On sent qu’ils s’alignent sur ce qui se fait ailleurs, avec de la détection d’anomalies, la représentation des dérives et le regroupement des logs par patterns.
 
+<figure>
+  <img src="/blog/clickhouse-observabilite-conference-2026/oussama-chakri-clickhouse.jpg" alt="Oussama Chakri présente la slide « L’observabilité est un problème de données » à la Matinée de l’Observabilité de ClickHouse" loading="lazy" />
+  <figcaption>Oussama Chakri (ClickHouse) ouvre la matinée. Photo prise sur place, le 17 novembre.</figcaption>
+</figure>
+
 On l’a vu pendant l’atelier, animé par Vincent Jolivet. On donne une plage horaire, et l’outil classe ce qui se répète dans les logs : ce jour-là, il a sorti sept anomalies, dont une erreur de paiement qu’on pouvait relier aux autres. Franchement, c’est bien fait. Créer ses équipes, brancher son endpoint OpenTelemetry et commencer à envoyer, tout ça se fait directement, et cette expérience évolue dans le bon sens.
 
 ## Qonto : les traces décident si un déploiement continue
 
 J’avais déjà vu Qonto en février, à un meetup ClickHouse, avec un discours très tourné vers l’investigation par des agents. Cette fois, c’était plus terre à terre. Valentin Levier, SRE chez Qonto, a expliqué qu’ils ne stockent que leurs traces dans ClickHouse Cloud : 60 jours de rétention, environ 600 To avant compression, 22 To après.
+
+<figure>
+  <img src="/blog/clickhouse-observabilite-conference-2026/valentin-levier-qonto.jpg" alt="Valentin Levier devant la slide « Observability at Qonto with ClickHouse »" loading="lazy" />
+  <figcaption>Valentin Levier, SRE chez Qonto, pendant son retour d’expérience.</figcaption>
+</figure>
 
 Presque tous leurs services sont instrumentés, et ils trouvaient dommage de n’ouvrir cette base que pendant les incidents. Ils ont donc branché de l’automatisation dessus. L’exemple que je retiens, c’est le déploiement canary. Pendant qu’Argo Rollouts fait monter la nouvelle version, un service interne interroge les traces dans ClickHouse pour vérifier la santé du service. Sa réponse tranche : la version part en production, ou elle est annulée. Valentin l’a résumé comme ça : « C’est le check qui va décider si le déploiement est bon ou non. »
 
@@ -39,6 +50,11 @@ Presque tous leurs services sont instrumentés, et ils trouvaient dommage de n�
 J’ai bien aimé aussi le retour de Martial Salgues, qui s’occupe de l’observabilité chez Ringover depuis quatre ans. Ringover est un opérateur télécom pour les entreprises, et ils font tout en on-premise : leurs propres serveurs, dans quatre datacenters en France et trois aux États-Unis. ClickHouse tourne donc chez eux, en version open source, géré par l’équipe. Les modèles de prix des éditeurs, au nombre de nœuds ou de vCPU, ne collaient pas à leur taille.
 
 Les chiffres donnent l’échelle. Plus de 500 nœuds physiques, 13 To écrits par jour avant compression, près de 10 milliards de lignes quotidiennes dont 80 % de logs, et une compression d’au moins 16 fois. Le cluster tient sur trois machines de 112 cœurs et 1 To de RAM, autour de 10 000 € pièce.
+
+<figure>
+  <img src="/blog/clickhouse-observabilite-conference-2026/martial-salgues-ringover.jpg" alt="Martial Salgues devant une slide de chiffres : plus de 500 nœuds physiques, 13,1 TiB écrits par jour, 9,84 milliards de lignes par jour, compression ×16" loading="lazy" />
+  <figcaption>Martial Salgues (Ringover) et les chiffres de leur plateforme auto-hébergée.</figcaption>
+</figure>
 
 Ce que j’ai apprécié, c’est qu’il n’a pas caché les difficultés. Début octobre, un développeur a lancé une requête sur six mois de données, pour un service en production depuis quelques jours. ClickHouse est allé vérifier tous les index du stockage S3, et la requête a mis plus de 439 secondes rien qu’à être planifiée. Elle ne s’est jamais exécutée, mais elle a saturé le cluster. Sa conclusion : quand on héberge soi-même, il faut aussi expliquer aux développeurs comment écrire leurs requêtes.
 
