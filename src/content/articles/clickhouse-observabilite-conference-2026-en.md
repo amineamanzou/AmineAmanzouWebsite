@@ -1,41 +1,69 @@
 ---
-title: "ClickHouse for observability: questions to take into the field"
+title: "ClickHouse for observability: what I saw in Paris, and what is still missing"
 locale: "en"
 articleSlug: "clickhouse-observabilite-conference-2026"
 translationKey: "clickhouse-observabilite-conference-2026"
 publishedAt: "2026-11-19"
 label: "Observability / Engineering"
-readTime: "3 min"
-excerpt: "Before choosing ClickHouse for observability, separate the database, the product and the work the team still owns."
+readTime: "5 min"
+excerpt: "I spent the morning of November 17 at ClickHouse’s observability conference in Paris. What Qonto and Ringover shared, my take on the product and what it still lacks."
 heroImageAlt: "Illustration of observability diagnosis and engineering decisions"
 pillar: "observability"
 intent: "informational"
 primaryQuery: "clickhouse observabilite conference 2026"
 relatedOffer: "diagnostic"
-seoTitle: "ClickHouse for observability: questions to take into the field"
-seoDescription: "Before choosing ClickHouse for observability, separate the database, the product and the work the team still owns."
+seoTitle: "ClickHouse for observability: what I saw in Paris, and what is still missing"
+seoDescription: "I spent the morning of November 17 at ClickHouse’s observability conference in Paris. What Qonto and Ringover shared, my take on the product and what it still lacks."
 keywords: ["observability", "OpenTelemetry", "clickhouse observabilite conference 2026"]
-proofLevel: "documentation"
+proofLevel: "experience"
 ---
 
-On November 9, 2026, ClickHouse announced a managed observability offering in public beta, built on ClickHouse Cloud and ClickStack. That raises a useful question: which parts does a team want to operate itself? [ClickHouse announcement](https://clickhouse.com/blog/announcing-clickhouse-observability).
+On November 17, I spent the morning at a ClickHouse conference on observability, in one of those spaces near Opéra in Paris where startups come to work. For once, this wasn’t an after-work meetup where everyone shows up tired from their day. It was a full morning set aside for the topic, and you could feel it in the room. ClickHouse is moving fast. I recommend it today to some organizations, as long as they know where the gaps still are.
 
-I am preparing this article around the November 17 conference. This version was written before the event. The questions below are things I want to examine there, rather than a report of demonstrations I have already watched.
+Eight days earlier, ClickHouse had [opened its managed observability offering in public beta](https://clickhouse.com/blog/announcing-clickhouse-observability). The idea: you send your OpenTelemetry data to an endpoint and they run the rest, billed per gigabyte ingested. So the timing was good. [The agenda](https://clickhouse.com/fr/company/events/202611-EMEA-France-Paris-Matinee-de-lObservabilite) had an introduction to ClickHouse and ClickStack by Oussama Chakri, two production stories from French companies, Qonto and Ringover, then a workshop where everyone opened their laptop.
 
-## The database is only part of an on-call engineer’s day
+## What they showed on the product side
 
-A team may need to retain detailed events and query them with SQL. It may also need to open a trace, find related logs and understand why a user is waiting. Those needs overlap, but building the path to each of them involves different work.
+Oussama Chakri opened by treating the subject as a data problem. Volume, cardinality, retention: to him, these are engine problems first. On the interface side, they showed AI Notebooks and the Service Map in HyperDX, the ClickStack UI. You can tell they are catching up with what exists elsewhere, with anomaly detection, drift visualization and log grouping by pattern.
 
-For a database, I would examine schemas, ingestion and changing query patterns. For an observability platform, I would also examine the investigation itself. How much work separates an alert from a testable explanation? Who maintains the views, links and access policies?
+We saw it during the workshop, led by Vincent Jolivet. You pick a time range, and the tool sorts out what keeps repeating in the logs. That day it surfaced seven anomalies, including a payment error we could tie to the others. Honestly, it is well done. Creating your teams, plugging in your OpenTelemetry endpoint and starting to send data all happens right away, and that experience is heading in the right direction.
 
-The documentation describes collecting telemetry through the OpenTelemetry Collector. That provides a starting point for moving signals, while attribute quality and consistent service identities remain things the team needs to verify. [OpenTelemetry integration](https://clickhouse.com/docs/observability/integrating-opentelemetry).
+## Qonto: traces decide whether a deployment continues
 
-## The demonstration I would like to see
+I had already seen Qonto in February, at a ClickHouse meetup, with a talk leaning heavily on agent-driven investigation. This time it was more down to earth. Valentin Levier, SRE at Qonto, explained that they store only their traces in ClickHouse Cloud: 60 days of retention, around 600 TB before compression, 22 TB after.
 
-I would start with an ordinary application failure: a request fails after calling a third-party service. I would look for the deployed version, the affected region and other requests with the same problem. Then I would change the time window and scope to check whether the explanation still holds.
+Almost all of their services are instrumented, and they thought it was a waste to open that database only during incidents. So they wired automation into it. The example I’m keeping is the canary deployment. While Argo Rollouts shifts traffic to the new version, an internal service queries the traces in ClickHouse to check the health of the service. Its answer settles it: the version goes to production, or it is rolled back. Valentin put it this way: “It’s the check that decides whether the deployment is good or not.”
 
-That investigation would expose the remaining responsibilities. Is missing data caused by instrumentation, filtering, transport or the query? When the team notices a gap, can it locate the stage where the data disappeared?
+## Ringover: ClickHouse on their own servers
 
-For cost, I would ask for a reproducible scenario using our volume and investigation habits. A vendor’s advertised price cannot predict our bill on its own. Useful evidence would include collection assumptions, retention and the queries actually run.
+I also liked the talk from Martial Salgues, who has been in charge of observability at Ringover for four years. Ringover is a telecom operator for businesses, and they run everything on-premise: their own servers, in four data centers in France and three in the United States. So ClickHouse runs on their hardware, in its open source version, operated by the team. Vendor pricing models, based on node or vCPU counts, did not fit their size.
 
-After the conference I want to keep those evidence levels separate. An announcement remains an announcement, and a demonstration remains a demonstration. Choosing the stack will still require a representative investigation performed under our own constraints.
+The numbers give the scale. More than 500 physical nodes, 13 TB written per day before compression, close to 10 billion rows a day of which 80% are logs, and compression of at least 16x. The cluster fits on three machines with 112 cores and 1 TB of RAM each, at around €10,000 apiece.
+
+What I appreciated is that he didn’t hide the hard parts. In early October, a developer ran a query over six months of data, for a service that had been in production for a few days. ClickHouse went through every index on the S3 storage, and the query took more than 439 seconds just to be planned. It never executed, but it saturated the cluster. His conclusion: when you host it yourself, you also have to teach developers how to write their queries.
+
+He also told the story of a recent incident on their US infrastructure. After an update, customers stopped receiving their calls for a few minutes. It took him five to ten minutes to figure out how to parse the telephony logs, which are raw text, then one SQL query to rebuild around 7,000 missed calls: who had tried to reach whom, how many times, and which number to call back. The file went to the customer success team, who could let the affected customers know.
+
+## Where it still falls short
+
+My view is that ClickHouse still has room to grow on integrations, and it is better to know that before committing.
+
+Performance testing comes first. Most observability platforms now ship their own built-in solution for it. ClickHouse doesn’t. For load tests and synthetic monitoring, you have to bring in k6 from Grafana, or another tool.
+
+User session tracking exists, but it will need to improve over time.
+
+And above all, there is access management. In a large organization, you want to plug in your own identity management and decide precisely who sees what, application by application: alerts, sessions, logs. Today I find it still too limited. I hope it gets there.
+
+## On AI, I don’t believe dashboards are going away
+
+Every vendor is moving fast on AI, and ClickStack is too. Its MCP server is a good fit for those uses and, apparently, the results are very good. Qonto already uses it to query its traces in French or in English.
+
+Still, I’m not convinced that our SREs and our dashboard-addicted managers will give up the interface in favor of AI. Especially in organizations running 80,000 or 100,000 machines. At that size, you would rather have the data in front of you, and call on the agent when you need it: to build something, to diagnose, to investigate.
+
+## Is it worth it?
+
+Absolutely. I had invited a few friends, they asked me to keep them posted, and I made [a video about it](https://www.youtube.com/watch?v=DxLE-Ls4huE) (in French).
+
+If the subject interests you, there is plenty to practice on. [The workshop from that morning](https://github.com/Ochakri-CHDB/clickhouse-observability-workshop) is open source on GitHub. A new ClickHouse Cloud account comes with [$300 of credits for 30 days](https://clickhouse.com/pricing). And ClickHouse offers an [observability training path](https://clickhouse.com/learn/observability) in three levels, with free live sessions for the first two.
+
+It is a skill that will be in growing demand. The engine itself is already proven: other observability products sold on the market run on it.
