@@ -1108,6 +1108,7 @@ h3 {
 .article-content {
   color: var(--ink-soft);
   font-size: 1.05rem;
+  overflow-wrap: anywhere;
 }
 
 .article-content h2,
