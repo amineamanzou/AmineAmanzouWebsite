@@ -3,7 +3,7 @@ title: "OpenTelemetry dans une petite équipe : ce que je simplifierais en premi
 locale: "fr"
 articleSlug: "opentelemetry-petite-equipe-perimetre"
 translationKey: "opentelemetry-petite-equipe-perimetre"
-publishedAt: "2026-12-24"
+publishedAt: "2026-12-31"
 label: "Observability / Engineering"
 readTime: "3 min"
 excerpt: "Commencer par un parcours à expliquer, puis ajouter seulement les signaux et la collecte nécessaires pour vérifier une hypothèse."
