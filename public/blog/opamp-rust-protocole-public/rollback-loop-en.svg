@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">The rollback loop between an OpAMP server and the supervisor</title>
+  <desc id="desc">The server offers an invalid configuration, the Collector fails to start, the supervisor returns to the previous version and reports it, then the server offers the invalid configuration again, roughly every five seconds.</desc>
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" rx="26" fill="#111"/>
+  <rect x="20" y="20" width="1560" height="860" rx="18" fill="url(#grid)" stroke="#f4efe5" stroke-width="4"/>
+  <rect x="72" y="64" width="360" height="48" rx="8" fill="#ffd447"/>
+  <text x="96" y="98" fill="#111" font-family="Space Grotesk, Arial, sans-serif" font-size="29" font-weight="800">THE ROLLBACK LOOP</text>
+  <text x="72" y="158" fill="#f4efe5" font-family="Epilogue, Arial, sans-serif" font-size="25">Both sides follow the protocol, and nobody cancels the intent.</text>
+
+  <rect x="90" y="270" width="420" height="300" rx="22" fill="#f4efe5"/>
+  <rect x="90" y="270" width="420" height="70" rx="22" fill="#111" stroke="#f4efe5" stroke-width="4"/>
+  <text x="300" y="316" fill="#fff" font-family="Space Grotesk, Arial, sans-serif" font-size="27" font-weight="800" text-anchor="middle">OpAMP SERVER</text>
+  <text x="300" y="412" fill="#111" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">Desired state</text>
+  <rect x="150" y="440" width="300" height="60" rx="30" fill="#e22b2b"/>
+  <text x="300" y="479" fill="#fff" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle">config v2 · invalid</text>
+
+  <rect x="1090" y="270" width="420" height="300" rx="22" fill="#f4efe5"/>
+  <rect x="1090" y="270" width="420" height="70" rx="22" fill="#111" stroke="#f4efe5" stroke-width="4"/>
+  <text x="1300" y="316" fill="#fff" font-family="Space Grotesk, Arial, sans-serif" font-size="24" font-weight="800" text-anchor="middle">SUPERVISOR + COLLECTOR</text>
+  <text x="1300" y="392" fill="#111" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="20" font-weight="700" text-anchor="middle">2. The Collector fails to start</text>
+  <text x="1300" y="428" fill="#111" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="20" font-weight="700" text-anchor="middle">3. Automatic return to v1</text>
+  <rect x="1150" y="460" width="300" height="60" rx="30" fill="#2faa67"/>
+  <text x="1300" y="499" fill="#fff" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle">config v1 · healthy</text>
+
+  <text x="800" y="318" fill="#f4efe5" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">1. The server offers config v2</text>
+  <path d="M530 345H1046" fill="none" stroke="#ffd447" stroke-width="9" stroke-linecap="round"/>
+  <path d="M1044 325L1078 345L1044 365Z" fill="#ffd447"/>
+  <path d="M1070 515H554" fill="none" stroke="#ffd447" stroke-width="9" stroke-linecap="round"/>
+  <path d="M556 495L522 515L556 535Z" fill="#ffd447"/>
+  <text x="800" y="560" fill="#f4efe5" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">4. It reports v1: the mismatch is still there</text>
+  <circle cx="800" cy="430" r="58" fill="#111" stroke="#ffd447" stroke-width="6"/>
+  <text x="800" y="443" fill="#ffd447" font-family="Space Grotesk, Arial, sans-serif" font-size="34" font-weight="800" text-anchor="middle">≈ 5 s</text>
+
+  <rect x="575" y="672" width="450" height="52" rx="8" fill="#ffd447"/>
+  <text x="800" y="708" fill="#111" font-family="Space Grotesk, Arial, sans-serif" font-size="28" font-weight="800" text-anchor="middle">WHO CANCELS THE INTENT?</text>
+  <text x="800" y="776" fill="#f4efe5" font-family="Epilogue, Arial, sans-serif" font-size="24" text-anchor="middle">The protocol does not say. The product around it has to decide.</text>
+</svg>
