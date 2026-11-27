@@ -23,12 +23,26 @@ jobs:
       - name: Public repository safety scan
         run: |
           set -euo pipefail
+          # Identifiers that only exist in the private infrastructure are
+          # forbidden everywhere, editorial content included.
           if git grep -I -nE \
-            '(10\.42\.|178\.104\.|37\.187\.|/opt/|/Users/|ops-gw|bastion|k3s|Argo|argo|kubectl|KUBECONFIG|ssh |known_hosts|SOPS|Kopia|WEB_PROD|GHCR_READ|MARIADB_ROOT_PASSWORD|DB_PASSWORD|preprod|prod[-_ ]?cluster|preprod[-_ ]?cluster|internal[-_ ]?cluster|cluster[-_ ]?(prod|preprod|internal)|gateway[-_ ]?(prod|preprod|internal)|CIDR|the-unreliable-deploy|TheUnreliableInfrastructure)' \
+            '(178\.104\.|37\.187\.|ops-gw|WEB_PROD|GHCR_READ|the-unreliable-deploy|TheUnreliableInfrastructure)' \
             -- . \
             ':!.github/workflows/ci.yml' \
             ':!package-lock.json'; then
-            echo "Private infrastructure marker found in public repository content" >&2
+            echo "Private infrastructure identifier found in the public repository" >&2
+            exit 1
+          fi
+          # Generic infrastructure vocabulary is legitimate in articles, so it is
+          # only checked in code, configuration and engineering documentation.
+          if git grep -I -nE \
+            '(10\.42\.|/opt/|/Users/|bastion|k3s|Argo|argo|kubectl|KUBECONFIG|ssh |known_hosts|SOPS|Kopia|MARIADB_ROOT_PASSWORD|DB_PASSWORD|preprod|prod[-_ ]?cluster|preprod[-_ ]?cluster|internal[-_ ]?cluster|cluster[-_ ]?(prod|preprod|internal)|gateway[-_ ]?(prod|preprod|internal)|CIDR)' \
+            -- . \
+            ':!.github/workflows/ci.yml' \
+            ':!package-lock.json' \
+            ':!src/content/' \
+            ':!public/blog/'; then
+            echo "Private infrastructure marker found outside editorial content" >&2
             exit 1
           fi
 
@@ -148,6 +162,11 @@ jobs:
           done
           npm run review:product-analytics
 
+      - name: Freeze image fixture build identity
+        run: |
+          node --input-type=module -e 'import {appendFileSync} from "node:fs"; import {parisDate,productionConfiguration} from "./scripts/qa/release-candidate.mjs"; appendFileSync(process.env.GITHUB_ENV,"PUBLICATION_DATE="+parisDate()+"\nRELEASE_CONFIGURATION="+JSON.stringify(productionConfiguration({productAnalytics:false}))+"\n");'
+          echo "TREE_SHA=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_ENV"
+
       - name: Build image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
@@ -161,6 +180,12 @@ jobs:
             SITE_URL=https://amineamanzou.fr
             BASE_PATH=/
             VCS_REF=${{ github.sha }}
+            TREE_SHA=${{ env.TREE_SHA }}
+            BUILD_RUN_ID=${{ github.run_id }}
+            BUILD_ATTEMPT=${{ github.run_attempt }}
+            PUBLICATION_DATE=${{ env.PUBLICATION_DATE }}
+            RELEASE_VARIANT=staging
+            RELEASE_CONFIGURATION=${{ env.RELEASE_CONFIGURATION }}
             PUBLIC_BROWSER_OBSERVABILITY_ENABLED=false
             PUBLIC_DEPLOYMENT_ENVIRONMENT=production
             PUBLIC_PRODUCT_ANALYTICS_ENABLED=false
@@ -184,3 +209,12 @@ jobs:
             sleep 1
           done
           npm run review:redirects -- --url=http://127.0.0.1:18080
+
+      - name: Scan the final image with the production vulnerability policy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: amineamanzou-website:ci
+          format: table
+          severity: CRITICAL
+          vuln-type: os,library
+          exit-code: "1"
